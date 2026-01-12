@@ -1,43 +1,34 @@
-import {useEffect, useState} from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import {useEffect} from 'react'
 import './App.css'
 import axios from 'axios'
+import type {TeamStatistics} from "./types/TeamStatistics.ts";
 
 function App() {
-  const [count, setCount] = useState(0)
 
-  const fetchAPI = async () => {
+  const fetchTestAPI = async () => {
       const response = await axios.get('http://localhost:8080/api/test')
       console.log(response.data)
   }
 
+  const fetchTeamStatisticsAPI = async () => {
+      const response = await axios.get('http://localhost:8080/api/teams/79/LAST_6_MONTHS')
+      console.log(response.data)
+
+      const data: TeamStatistics = response.data.data.teamStatistics;
+      console.log(data['game']['won'])
+  }
+
   useEffect(() => {
-      fetchAPI().then(r => console.log(r));
+      fetchTestAPI().then(r => console.log(r));
   }, [])
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+        <button onClick={() => fetchTeamStatisticsAPI()}>
+          Click to fetch team statistics (check the console log)
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
