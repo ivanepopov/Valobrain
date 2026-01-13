@@ -23,6 +23,60 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'Hello from the server!' });
 })
 
+/* Series State API */
+/**
+ * Fetch the state of a series
+ *
+ * @param seriesId The id of the series to fetch
+ */
+app.get('/api/series/:seriesId', (req, res) => {
+  const seriesId = req.params.seriesId;
+
+  const seriesQuery = `
+    query getSeriesStats {
+      seriesState(id: "${seriesId}") {
+        valid
+        format
+        teams {
+          name
+          won
+        }
+        games {
+          id
+          sequenceNumber
+          map {
+            name
+          }
+          teams {
+            name
+            won
+            players {
+              name
+              kills
+              deaths
+            }
+          }
+        }
+      }
+    }
+  `
+  axios.post(seriesStateAPI, {
+    query: seriesQuery
+  }, {
+    headers: {
+      'x-api-key': apiKey
+    }
+  })
+  .then(response => {
+    res.json(response.data);
+  })
+  .catch(error => {
+    console.error('Error fetching series state:', error);
+    res.status(500).json({ error: 'Failed to fetch series state' });
+  });
+});
+
+
 /* Statistics API */
 /**
  * Fetch team statistics for a given time frame
@@ -66,13 +120,13 @@ app.get('/api/teams/:teamId/:timeFrame', (req, res) => {
       'x-api-key': apiKey
     }
   })
-    .then(response => {
-      res.json(response.data);
-    })
-    .catch(error => {
-      console.error('Error fetching statistics:', error);
-      res.status(500).json({ error: 'Failed to fetch statistics' });
-    });
+  .then(response => {
+    res.json(response.data);
+  })
+  .catch(error => {
+    console.error('Error fetching statistics:', error);
+    res.status(500).json({ error: 'Failed to fetch statistics' });
+  });
 });
 
 app.listen(8080, () => console.log('Server listening on port 8080!'));
