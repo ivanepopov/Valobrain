@@ -2,12 +2,12 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
 }
 
 .navbar {
+  padding: 1rem;
+  border-bottom: 1px solid #ccc;
   margin-bottom: 2rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: space-evenly;
 }

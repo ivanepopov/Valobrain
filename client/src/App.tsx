@@ -17,7 +17,7 @@ function App() {
         <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/analytics" element={<AnalyticsBreakdown />} />
-            <Route path="/history" element={<MatchHistory />} />
+            <Route path="/history" element={<MatchHistory selectedTeam="Cloud9"/>} />
         </Routes>
     </BrowserRouter>
   )
