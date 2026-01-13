@@ -1,4 +1,4 @@
-export type PlayerStatistics = {
+export type PlayerStats = {
     id: string;
     aggregationSeriesIds: string[];
     series: {
