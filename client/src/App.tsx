@@ -1,10 +1,12 @@
 import { BrowserRouter, Link, Routes, Route } from 'react-router-dom'
 import './App.css'
+import { useState } from 'react'
 import Home from "./pages/Home.tsx";
 import AnalyticsBreakdown from "./pages/AnalyticsBreakdown.tsx";
 import MatchHistory from "./pages/MatchHistory.tsx";
 
 function App() {
+  const [teamName, setTeamName] = useState<string>("");
 
   return (
     <BrowserRouter>
@@ -15,9 +17,9 @@ function App() {
         </nav>
 
         <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/analytics" element={<AnalyticsBreakdown />} />
-            <Route path="/history" element={<MatchHistory selectedTeam="Cloud9"/>} />
+            <Route path="/" element={<Home teamName={teamName} setTeamName={setTeamName} />} />
+            <Route path="/analytics" element={<AnalyticsBreakdown teamName={teamName} />} />
+            <Route path="/history" element={<MatchHistory teamName={teamName} />} />
         </Routes>
     </BrowserRouter>
   )

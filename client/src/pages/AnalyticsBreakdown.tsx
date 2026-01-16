@@ -16,10 +16,14 @@
  * Sub-Feature #7: Player Statistics Tables (Overall)
  */
 
-const AnalyticsBreakdown = () => {
+type Props = {
+    teamName: string;
+}
+
+const AnalyticsBreakdown = ({ teamName }: Props) => {
     return (
         <h1>
-            Analytics Breakdown Page
+            Analytics Breakdown Page {teamName && `- ${teamName}`}
         </h1>
     );
 };
