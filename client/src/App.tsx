@@ -4,16 +4,9 @@ import { useState } from 'react'
 import Home from "./pages/Home.tsx";
 import AnalyticsBreakdown from "./pages/AnalyticsBreakdown.tsx";
 import MatchHistory from "./pages/MatchHistory.tsx";
-import SearchBar from "./components/SearchBar.tsx";
-import Series from "./components/Series.tsx";
 
 function App() {
-  const [searchedTeam, setSearchedTeam] = useState<string>("");
-
-  const handleSearch = (searchValue: string) => {
-    console.log("Searching for:", searchValue);
-    setSearchedTeam(searchValue);
-  };
+  const [teamName, setTeamName] = useState<string>("");
 
   return (
     <BrowserRouter>
@@ -23,12 +16,8 @@ function App() {
             <Link to="/history">Match History</Link>
         </nav>
 
-        <SearchBar onSearch={handleSearch} />
-
-        {searchedTeam && <Series seriesId="test" selectedTeam={searchedTeam} />}
-
         <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Home teamName={teamName} setTeamName={setTeamName} />} />
             <Route path="/analytics" element={<AnalyticsBreakdown />} />
             <Route path="/history" element={<MatchHistory selectedTeam="Cloud9"/>} />
         </Routes>
