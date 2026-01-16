@@ -12,12 +12,12 @@ import {type JSX, useEffect, useState} from "react";
 import Series from "../components/Series.tsx";
 
 type Props = {
-    selectedTeam: string;
+    teamName: string;
 }
 
-const MatchHistory = (props: Props) => {
+const MatchHistory = ({ teamName }: Props) => {
 
-    const selectedTeam = props.selectedTeam;
+    const selectedTeam = teamName;
     const teamId = "79";
     const timeFrame = "LAST_6_MONTHS";
 

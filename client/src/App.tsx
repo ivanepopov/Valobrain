@@ -18,8 +18,8 @@ function App() {
 
         <Routes>
             <Route path="/" element={<Home teamName={teamName} setTeamName={setTeamName} />} />
-            <Route path="/analytics" element={<AnalyticsBreakdown />} />
-            <Route path="/history" element={<MatchHistory selectedTeam="Cloud9"/>} />
+            <Route path="/analytics" element={<AnalyticsBreakdown teamName={teamName} />} />
+            <Route path="/history" element={<MatchHistory teamName={teamName} />} />
         </Routes>
     </BrowserRouter>
   )
