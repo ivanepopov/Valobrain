@@ -92,6 +92,40 @@ app.get('/api/teams/:contains', (req, res) => {
   });
 });
 
+/**
+ * Fetch a team's data matching their id
+ *
+ * @param id The id of the team to fetch
+ */
+app.get('/api/team/:id', (req, res) => {
+  const id = req.params.id;
+
+  const teamQuery = `
+      query GetTeam {
+        team(id: "${id}") {
+          id
+          name
+          colorPrimary
+          colorSecondary
+          logoUrl
+        }
+      }
+    `
+  axios.post(centralDataAPI, {
+    query: teamQuery
+  }, {
+    headers: {
+      'x-api-key': apiKey
+    }
+  })
+      .then(response => {
+        res.json(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching teams:', error);
+        res.status(500).json({ error: 'Failed to fetch teams' });
+      });
+});
 
 /* Series State API */
 /**
@@ -108,6 +142,7 @@ app.get('/api/series/:seriesId', (req, res) => {
         valid
         format
         teams {
+          id
           name
           won
         }
