@@ -52,6 +52,47 @@ app.get('/api/health', (req, res) => {
 app.use('/api/grid', gridRoutes);
 app.use('/api/advanced-stats', statsRoutes);
 
+/* Central Data API */
+/**
+ * Fetch a list of teams matching the given search query
+ *
+ * @param contains The search query to filter teams by
+ */
+app.get('/api/teams/:contains', (req, res) => {
+    const contains = req.params.contains;
+
+    const teamsQuery = `
+      query GetTeams {
+        teams(first: 5, filter:{ titleId:6, name: { contains: "${contains}"}}) {
+          edges {
+            node {
+                id
+                name
+                colorPrimary
+                colorSecondary
+                logoUrl
+            }
+          }
+        }
+      }
+    `
+  axios.post(centralDataAPI, {
+    query: teamsQuery
+  }, {
+    headers: {
+      'x-api-key': apiKey
+    }
+  })
+  .then(response => {
+    res.json(response.data);
+  })
+  .catch(error => {
+    console.error('Error fetching teams:', error);
+    res.status(500).json({ error: 'Failed to fetch teams' });
+  });
+});
+
+
 /* Series State API */
 /**
  * Fetch the state of a series

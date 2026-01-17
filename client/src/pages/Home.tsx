@@ -1,17 +1,18 @@
 import axios from "axios";
 import type {TeamStats} from "../types/TeamStats.ts";
 import {useEffect} from "react";
-import Series from "../components/Series.tsx";
+import type {Team} from "../types/Team.ts";
 
 type Props = {
-    teamName: string;
-    setTeamName: (name: string) => void;
+    team: Team | null;
 }
 
 /**
  * Home Page
  */
-const Home = ({ teamName, setTeamName }: Props) => {
+const Home = ({ team }: Props) => {
+
+    if (!team) return <div>Select a team</div>;
 
     const fetchTestAPI = async () => {
         const response = await axios.get('http://localhost:8080/api/test')
@@ -31,17 +32,10 @@ const Home = ({ teamName, setTeamName }: Props) => {
     }, [])
 
     return (
-        <div className="card">
-            <input
-                type="text"
-                value={teamName}
-                onChange={(e) => setTeamName(e.target.value)}
-                placeholder="Enter a team name..."
-            />
+        <div className="flex flex-col gap-4">
             <button onClick={() => fetchTeamStatisticsAPI()}>
                 Click to fetch team statistics (check the console log)
             </button>
-            {teamName && <Series seriesId="test" selectedTeam={teamName} />}
         </div>
     );
 };
