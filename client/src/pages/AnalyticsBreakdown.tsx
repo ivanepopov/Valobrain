@@ -15,15 +15,18 @@
  * Sub-Feature #6: Situational Performance Graphs
  * Sub-Feature #7: Player Statistics Tables (Overall)
  */
+import type {Team} from "../types/Team.ts";
 
 type Props = {
-    teamName: string;
+    team: Team | null;
 }
 
-const AnalyticsBreakdown = ({ teamName }: Props) => {
+const AnalyticsBreakdown = ({ team }: Props) => {
+    if (!team) return <div>Select a team</div>;
+
     return (
         <h1>
-            Analytics Breakdown Page {teamName && `- ${teamName}`}
+            Analytics Breakdown Page {team.name && `- ${team.name}`}
         </h1>
     );
 };
