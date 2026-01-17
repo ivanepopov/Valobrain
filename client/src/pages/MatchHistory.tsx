@@ -19,23 +19,28 @@ const MatchHistory = ({ team }: Props) => {
 
     if (!team) return <div>Select a team</div>;
 
-    const selectedTeam = team.name;
     const teamId = team.id;
     const timeFrame = "LAST_6_MONTHS";
 
-    const [seriesElements, setSeriesElements] = useState<JSX.Element[]>();
+    const [seriesElements, setSeriesElements] = useState<JSX.Element[] | null>(null);
+    const [noHistory, setNoHistory] = useState(false);
 
     useEffect(() => {
         async function fetchTeamStats() {
+            setNoHistory(false);
             await getTeamStats(teamId, timeFrame).then((stats) => {
-                if (!stats || stats.aggregationSeriesIds.length === 0) return;
+                if (!stats || stats.aggregationSeriesIds.length === 0) {
+                    setSeriesElements([]);
+                    setNoHistory(true);
+                    return;
+                }
                 console.log(stats.aggregationSeriesIds);
 
                 const elements = stats.aggregationSeriesIds.map((seriesId) => (
                     <Series
                         key={seriesId}
                         seriesId={seriesId}
-                        selectedTeam={selectedTeam}
+                        team={team}
                     />
                 ));
 
@@ -44,13 +49,19 @@ const MatchHistory = ({ team }: Props) => {
         }
 
         fetchTeamStats();
-    }, [teamId, timeFrame]);
+    }, [teamId, timeFrame, team]);
 
     // return match history for the selected team, and a Series component for each series in aggregateSeriesIds
     return (
         <div>
             <div className="flex flex-col gap-2">
-                {seriesElements}
+                {noHistory ? (
+                    <div className="text-gray-500 py-4">
+                        No match history available for this team within time frame
+                    </div>
+                ) : (
+                    seriesElements
+                )}
             </div>
         </div>
     );
