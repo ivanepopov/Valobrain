@@ -10,5 +10,5 @@ export type MatchStats = {
         name: string;
         won: boolean;
         players: MatchPlayerStats[];
-    };
+    }[];
 }
