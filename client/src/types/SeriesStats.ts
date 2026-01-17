@@ -5,6 +5,7 @@ export type SeriesStats = {
         valid: boolean;
         format: string;
         teams: {
+            id: string;
             name: string;
             won: boolean;
         }[];
