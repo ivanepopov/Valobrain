@@ -27,7 +27,7 @@ function Series({ seriesId, selectedTeam }: Props) {
     }, [seriesId]);
 
     if (loading) return <div className="w-full h-20 bg-gray-700 animate-pulse rounded" />;
-    if (!seriesStats) return null;
+    if (!seriesStats?.seriesState) return null;
 
     const teams = seriesStats.seriesState.teams;
     const userTeam = teams.find(t => t.name === selectedTeam);
