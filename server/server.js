@@ -1,7 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 require('dotenv/config');
+
+// Import routes
+const gridRoutes = require('./routes/grid');
+const statsRoutes = require('./routes/stats');
+
+// Import services
+const mapService = require('./services/map-service');
 
 /* Create Express Server */
 const app = express();
@@ -9,6 +18,17 @@ const corsOptions = {
   origin: 'http://localhost:5173',
 };
 app.use(cors(corsOptions));
+app.use(express.json());
+
+/* Initialize Map Service */
+const calloutPath = path.join(__dirname, 'data', 'callout_coords.xlsx');
+mapService.initialize(calloutPath);
+
+/* Ensure match_data directory exists */
+const matchDataDir = path.join(__dirname, 'match_data');
+if (!fs.existsSync(matchDataDir)) {
+  fs.mkdirSync(matchDataDir, { recursive: true });
+}
 
 /* API Endpoints */
 const centralDataAPI = 'https://api-op.grid.gg/central-data/graphql'
@@ -21,7 +41,16 @@ const apiKey = process.env.API_KEY;
 /* API Testing */
 app.get('/api/test', (req, res) => {
   res.json({ message: 'Hello from the server!' });
-})
+});
+
+// Health check endpoint (migrated from backend)
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'ValoScout AI Backend is running' });
+});
+
+/* Mount Routes (migrated from backend) */
+app.use('/api/grid', gridRoutes);
+app.use('/api/advanced-stats', statsRoutes);
 
 /* Series State API */
 /**
