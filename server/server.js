@@ -63,7 +63,7 @@ app.get('/api/teams/:contains', (req, res) => {
 
     const teamsQuery = `
       query GetTeams {
-        teams(first: 5, filter:{ titleId:6, name: { contains: "${contains}"}}) {
+        teams(first: 5, filter: { titleId: 6, name: { contains: "${contains}" } }) {
           edges {
             node {
                 id
@@ -92,6 +92,7 @@ app.get('/api/teams/:contains', (req, res) => {
   });
 });
 
+/* Central Data API */
 /**
  * Fetch a team's data matching their id
  *
@@ -127,6 +128,43 @@ app.get('/api/team/:id', (req, res) => {
       });
 });
 
+/**
+ * Fetch a team's roster
+ *
+ * @param teamId The id of the team to fetch a roster for
+ */
+  app.get('/api/team/:id/roster', (req, res) => {
+  const id = req.params.id;
+
+  const rosterQuery = `
+    query GetTeamRoster {
+      players(filter: {teamIdFilter: {id: "${id}"}}) {
+        edges {
+          node {
+              id
+              nickname
+          }
+        }
+      }
+    }
+  `
+
+  axios.post(centralDataAPI, {
+    query: rosterQuery
+  }, {
+    headers: {
+      'x-api-key': apiKey
+    }
+  })
+  .then(response => {
+    res.json(response.data);
+  })
+  .catch(error => {
+    console.error('Error fetching roster:', error);
+    res.status(500).json({ error: 'Failed to fetch roster' });
+  });
+});
+
 /* Series State API */
 /**
  * Fetch the state of a series
@@ -139,7 +177,6 @@ app.get('/api/series/:seriesId', (req, res) => {
   const seriesQuery = `
     query getSeriesStats {
       seriesState(id: "${seriesId}") {
-        valid
         format
         teams {
           id
@@ -149,6 +186,7 @@ app.get('/api/series/:seriesId', (req, res) => {
         games {
           id
           sequenceNumber
+          duration
           map {
             name
           }
@@ -157,8 +195,12 @@ app.get('/api/series/:seriesId', (req, res) => {
             won
             players {
               name
+              character {
+                name
+              }
               kills
               deaths
+              killAssistsGiven
             }
           }
         }
@@ -231,6 +273,75 @@ app.get('/api/teams/:teamId/:timeFrame', (req, res) => {
   .catch(error => {
     console.error('Error fetching statistics:', error);
     res.status(500).json({ error: 'Failed to fetch statistics' });
+  });
+});
+
+/**
+ * Fetch player statistics for a given time frame
+ *
+ * @param playerId The id of the player to fetch statistics for
+ * @param timeFrame The time frame to fetch statistics for
+ */
+app.get('/api/player/:playerId/:timeFrame', (req, res) => {
+  const playerId = req.params.playerId;
+  const timeFrame = req.params.timeFrame;
+
+  const playerQuery = `
+    query getPlayerStatisticsForTimeFrame {
+      playerStatistics(playerId: "${playerId}", filter: { timeWindow: ${timeFrame} }) {
+        id
+        game {
+          count
+          won {
+            value
+            count
+            percentage
+          }
+        }
+        segment {
+          type
+          count
+          kills {
+            sum
+            min
+            max
+            avg
+          }
+          deaths {
+            sum
+            min
+            max
+            avg
+          }
+          killAssistsGiven {
+            sum
+            min
+            max
+            avg
+          }
+          firstKill {
+            value
+            count
+            percentage
+          }
+        }
+      }
+    }
+  `
+
+  axios.post(statisticsAPI, {
+    query: playerQuery
+  }, {
+    headers: {
+      'x-api-key': apiKey
+    }
+  })
+  .then(response => {
+    res.json(response.data);
+  })
+  .catch(error => {
+    console.error('Error fetching player statistics:', error);
+    res.status(500).json({ error: 'Failed to fetch player statistics' });
   });
 });
 
