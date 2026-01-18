@@ -4,10 +4,6 @@ import { Search, Brain, BarChart3, FileText, ChevronLeft, ChevronRight } from 'l
 import { useNavigate } from 'react-router-dom';
 import getTeams from '../services/getTeams.ts';
 import type { Team } from '../types/Team.ts';
-import DSC01201 from '../assets/DSC01201.JPG';
-import DSC01331 from '../assets/DSC01331.JPG';
-import DSC01412 from '../assets/DSC01412.JPG';
-import DSC01465 from '../assets/DSC01465.JPG';
 
 interface Node {
   id: number;
@@ -100,10 +96,10 @@ const Home = () => {
   ];
 
   const matchImages = [
-    DSC01201,
-    DSC01331,
-    DSC01412,
-    DSC01465,
+    '/DSC01201.JPG',
+    '/DSC01331.JPG',
+    '/DSC01412.JPG',
+    '/DSC01465.JPG',
   ];
 
   // Auto-play carousel
