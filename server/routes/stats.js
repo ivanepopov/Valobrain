@@ -90,6 +90,8 @@ const updatePlayerStats = (players, player, teamName, mapName, eventType) => {
             kills: 0,
             deaths: 0,
             assists: 0,
+            firstKills: 0,    // NEW: First blood kills
+            firstDeaths: 0,   // NEW: First blood deaths
             lastCallout: 'Unknown'
         };
     }
@@ -111,6 +113,33 @@ const updatePlayerStats = (players, player, teamName, mapName, eventType) => {
     stats.kills = Math.max(stats.kills, player.kills || 0);
     stats.deaths = Math.max(stats.deaths, player.deaths || 0);
     stats.assists = Math.max(stats.assists, player.killAssistsGiven || 0);
+};
+
+// NEW: Extract player positions from team data
+const extractStartingPositions = (teams, mapName) => {
+    const positions = { attackers: [], defenders: [] };
+    
+    if (!teams) return positions;
+    
+    for (const team of teams) {
+        const side = team.side; // 'attacker' or 'defender'
+        const targetArray = side === 'attacker' ? positions.attackers : positions.defenders;
+        
+        for (const player of team.players || []) {
+            if (player.position?.x !== undefined && player.position?.y !== undefined) {
+                targetArray.push({
+                    playerId: player.id,
+                    playerName: player.name,
+                    team: team.name,
+                    x: player.position.x,
+                    y: player.position.y,
+                    callout: mapService.getCallout(mapName, player.position.x, player.position.y)
+                });
+            }
+        }
+    }
+    
+    return positions;
 };
 
 // Figure out how the round was won
@@ -138,6 +167,10 @@ const parseMatchFile = async (filename) => {
     let bombPlanted = false;
     let bombDetonated = false;
     let bombDefused = false;
+    
+    // NEW: First blood and position tracking per round
+    let firstBloodThisRound = null;  // { killer, victim, weapon, timestamp }
+    let startingPositions = null;     // { attackers: [], defenders: [] }
 
     for await (const line of rl) {
         if (!line.trim()) continue;
@@ -167,14 +200,44 @@ const parseMatchFile = async (filename) => {
             if (type === 'player-killed-player') {
                 trackZoneKill(zoneStats, mapName, event.actor?.state?.game?.position, 'kills');
                 trackZoneKill(zoneStats, mapName, event.target?.state?.game?.position, 'deaths');
+                
+                // NEW: Track first blood
+                if (!firstBloodThisRound) {
+                    const killerId = event.actor?.id;
+                    const victimId = event.target?.id;
+                    const weapon = event.actor?.state?.game?.weapon?.id || 'Unknown';
+                    
+                    firstBloodThisRound = {
+                        killerId,
+                        killerName: event.actor?.state?.name || 'Unknown',
+                        victimId,
+                        victimName: event.target?.state?.name || 'Unknown',
+                        weapon,
+                        killerPosition: event.actor?.state?.game?.position,
+                        victimPosition: event.target?.state?.game?.position
+                    };
+                    
+                    // Update player FK/FD stats
+                    if (killerId && players[killerId]) {
+                        players[killerId].firstKills++;
+                    }
+                    if (victimId && players[victimId]) {
+                        players[victimId].firstDeaths++;
+                    }
+                }
             }
 
-            // Reset bomb state at start of each round
+            // Reset state at start of each round
             if (type === 'game-started-round') {
                 currentRound = event.target?.state?.sequenceNumber || currentRound + 1;
                 bombPlanted = false;
                 bombDetonated = false;
                 bombDefused = false;
+                firstBloodThisRound = null;  // Reset first blood
+                
+                // NEW: Capture starting positions for default detection
+                const roundTeams = event.target?.state?.teams;
+                startingPositions = extractStartingPositions(roundTeams, mapName);
             }
 
             // Track bomb events
@@ -191,7 +254,10 @@ const parseMatchFile = async (filename) => {
                         roundNumber: currentRound || rounds.length + 1,
                         winner: winner.name,
                         winType: getWinType(bombPlanted, bombDetonated, bombDefused, winner.side),
-                        side: winner.side
+                        side: winner.side,
+                        // NEW: Include first blood and starting positions
+                        firstBlood: firstBloodThisRound,
+                        startingPositions: startingPositions
                     });
                 }
             }
@@ -249,6 +315,64 @@ const generateAnalysis = (players, rounds) => {
             title: `The Carry: ${mvp.name}`,
             description: `${mvp.name} dealt ${mvp.damageDealt.toLocaleString()} damage.`
         });
+    }
+
+    // --- NEW: First Blood Analysis ---
+    
+    // Opening Duel King (highest FK)
+    const fkLeader = [...players].sort((a, b) => b.firstKills - a.firstKills)[0];
+    if (fkLeader && fkLeader.firstKills > 0) {
+        const fkFdDiff = fkLeader.firstKills - fkLeader.firstDeaths;
+        insights.push({
+            category: 'Opening Duels',
+            title: `Opening Duel King: ${fkLeader.name}`,
+            description: `${fkLeader.name} secured ${fkLeader.firstKills} first bloods (FK/FD: ${fkFdDiff >= 0 ? '+' : ''}${fkFdDiff}).`
+        });
+    }
+    
+    // Weak Link Target (highest FD - exploitable player)
+    const fdLeader = [...players].sort((a, b) => b.firstDeaths - a.firstDeaths)[0];
+    if (fdLeader && fdLeader.firstDeaths > 0 && fdLeader.name !== fkLeader?.name) {
+        const fkFdDiff = fdLeader.firstKills - fdLeader.firstDeaths;
+        insights.push({
+            category: 'Target Priority',
+            title: `Weak Link: ${fdLeader.name}`,
+            description: `${fdLeader.name} died first ${fdLeader.firstDeaths} times (FK/FD: ${fkFdDiff >= 0 ? '+' : ''}${fkFdDiff}). Exploit this player.`
+        });
+    }
+    
+    // First Blood Dependency Analysis (Team Tendency from Strategies.md)
+    const roundsWithFB = rounds.filter(r => r.firstBlood);
+    if (roundsWithFB.length > 0) {
+        // Group rounds by team that got first blood & if they won
+        const fbStats = {};
+        roundsWithFB.forEach(round => {
+            const fbPlayer = players.find(p => 
+                p.name === round.firstBlood?.killerName || 
+                (round.firstBlood?.killerId && p.id === round.firstBlood.killerId)
+            );
+            if (fbPlayer) {
+                const team = fbPlayer.teamName;
+                if (!fbStats[team]) fbStats[team] = { gotFB: 0, wonAfterFB: 0 };
+                fbStats[team].gotFB++;
+                if (round.winner === team) fbStats[team].wonAfterFB++;
+            }
+        });
+        
+        // Find most FB-dependent team
+        const teams = Object.entries(fbStats);
+        if (teams.length > 0) {
+            const [bestTeam, stats] = teams.sort((a, b) => b[1].gotFB - a[1].gotFB)[0];
+            const winRate = stats.gotFB > 0 ? Math.round((stats.wonAfterFB / stats.gotFB) * 100) : 0;
+            
+            if (stats.gotFB >= 3) {
+                insights.push({
+                    category: 'Team Tendency',
+                    title: winRate >= 70 ? 'First Blood Dependent' : 'Struggles to Convert FBs',
+                    description: `${bestTeam} got ${stats.gotFB} first bloods and won ${winRate}% of those rounds.`
+                });
+            }
+        }
     }
 
     // How close was the match?

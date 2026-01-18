@@ -27,3 +27,6 @@ dist-ssr
 # Cached match data (too large for git)
 server/match_data/
 match_data/
+
+# Private planning docs
+Context Plan/
