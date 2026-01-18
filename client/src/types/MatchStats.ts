@@ -3,6 +3,7 @@ import type {MatchPlayerStats} from "./MatchPlayerStats";
 export type MatchStats = {
     id: string;
     sequenceNumber: number;
+    duration: string;
     map: {
         name: string;
     };
