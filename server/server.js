@@ -190,6 +190,12 @@ app.get('/api/series/:seriesId', (req, res) => {
           map {
             name
           }
+          segments {
+            id
+            teams {
+              ...segmentTeamState
+            }
+          }
           teams {
             name
             won
@@ -205,6 +211,22 @@ app.get('/api/series/:seriesId', (req, res) => {
           }
         }
       }
+    }
+    fragment segmentTeamState on SegmentTeamStateValorant {
+      name
+      won
+      side
+      objectives {
+        id
+      }
+      players {
+        ...playerState    
+      }
+    }
+    
+    fragment playerState on SegmentPlayerStateValorant {
+      name
+      damageDealt
     }
   `
   axios.post(seriesStateAPI, {

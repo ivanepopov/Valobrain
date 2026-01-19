@@ -1,4 +1,5 @@
 import type {MatchPlayerStats} from "./MatchPlayerStats";
+import type {SegmentStats} from "./SegmentStats.ts";
 
 export type MatchStats = {
     id: string;
@@ -7,6 +8,7 @@ export type MatchStats = {
     map: {
         name: string;
     };
+    segments: SegmentStats[];
     teams: {
         name: string;
         won: boolean;
