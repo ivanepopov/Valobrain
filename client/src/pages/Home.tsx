@@ -98,9 +98,9 @@ const Home = () => {
 
   const matchImages = [
     '/DSC01465.JPG',
-    '/DSC01201.JPG',
     '/DSC01331.JPG',
     '/DSC01412.JPG',
+    '/DSC01201.JPG',
   ];
 
   // Auto-play carousel
