@@ -9,6 +9,7 @@ import Match from "../components/Match.tsx";
 import type { Team } from "../types/Team.ts";
 import type { TeamStats } from "../types/TeamStats.ts";
 import type { SeriesStats } from "../types/SeriesStats.ts";
+import { formatDuration } from "../utils/formatters.ts";
 
 type Props = {
     team: Team | null;
@@ -91,7 +92,7 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
             {/* Right Column: Detailed View */}
             <div className="lg:col-span-8 sticky top-6">
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-4 px-1">
-                    Series Intelligence Breakdown
+                    Series Breakdown
                 </h3>
                 <div className="bg-gray-900/40 border border-gray-800 rounded-2xl min-h-[600px] shadow-2xl backdrop-blur-sm overflow-hidden">
                     {selectedSeriesData ? (
@@ -102,7 +103,7 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
                                         vs {selectedSeriesData.seriesState.teams.find(t => t.id !== team.id)?.name}
                                     </h2>
                                     <p className="text-xs text-gray-500 font-bold uppercase tracking-[0.2em] mt-1">
-                                        {selectedSeriesData.seriesState.format} Series Analysis
+                                        {selectedSeriesData.seriesState.format}
                                     </p>
                                 </div>
                                 <div className="text-right">
@@ -136,7 +137,7 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
                                                 </span>
                                             </div>
                                             <div className="text-sm font-black uppercase tracking-tight">{game.map.name}</div>
-                                            <div className="text-[10px] opacity-40 font-mono mt-0.5">{game.duration}</div>
+                                            <div className="text-[10px] opacity-40 font-mono mt-0.5">{formatDuration(game.duration)}</div>
                                         </button>
                                     );
                                 })}

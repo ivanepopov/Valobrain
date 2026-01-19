@@ -24,7 +24,7 @@ const Match: React.FC<MatchProps> = ({ match }) => {
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-600 border-b border-gray-900">
-                                        <th className="pb-2 pl-1">Operator</th>
+                                        <th className="pb-2 pl-1">Player</th>
                                         <th className="pb-2">Agent</th>
                                         <th className="pb-2 text-center">K</th>
                                         <th className="pb-2 text-center">D</th>

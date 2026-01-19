@@ -1,5 +1,6 @@
 import type {SeriesStats} from "../types/SeriesStats.ts";
 import type {Team} from "../types/Team.ts";
+import { getAgentLogo } from "../utils/agentLogos.ts";
 
 type Props = {
     team: Team | null;
@@ -51,8 +52,22 @@ const AgentStatistics = ({ team, allSeriesData }: Props) => {
                 <div className="space-y-4">
                     {sortedAgents.slice(0, 6).map((agent) => (
                         <div key={agent.name} className="space-y-1">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-white font-medium">{agent.name}</span>
+                            <div className="flex justify-between text-sm items-center">
+                                <div className="flex items-center gap-2">
+                                    {getAgentLogo(agent.name) ? (
+                                        <img 
+                                            src={getAgentLogo(agent.name)} 
+                                            alt={agent.name}
+                                            title={agent.name}
+                                            className="w-6 h-6 rounded object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-6 h-6 rounded bg-gray-700 flex items-center justify-center text-[8px] text-gray-400 font-bold">
+                                            {agent.name.substring(0, 2)}
+                                        </div>
+                                    )}
+                                    <span className="text-white font-medium">{agent.name}</span>
+                                </div>
                                 <span className="text-gray-400 font-mono">{agent.pickRate.toFixed(0)}%</span>
                             </div>
                             <div className="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
@@ -97,9 +112,21 @@ const AgentStatistics = ({ team, allSeriesData }: Props) => {
                                         style={{ height: `${(agent.picks / maxPicks) * 160}px` }}
                                     />
                                 </div>
-                                <span className="text-[10px] text-gray-400 mt-3 rotate-45 origin-left truncate w-12 text-center">
-                                    {agent.name}
-                                </span>
+                                {/* Agent Image instead of text */}
+                                <div className="mt-2">
+                                    {getAgentLogo(agent.name) ? (
+                                        <img 
+                                            src={getAgentLogo(agent.name)} 
+                                            alt={agent.name}
+                                            title={agent.name}
+                                            className="w-8 h-8 rounded object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-8 h-8 rounded bg-gray-700 flex items-center justify-center text-[8px] text-gray-400 font-bold">
+                                            {agent.name.substring(0, 2)}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         ))}
                     </div>
