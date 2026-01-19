@@ -206,7 +206,7 @@ const Dashboard = () => {
                                             className={`
                                                 flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300
                                                 ${activeTab === tab.id 
-                                                    ? 'bg-blue-600 text-white' 
+                                                    ? 'bg-blue-900 text-white' 
                                                     : 'text-blue-200 hover:bg-white/5'
                                                 }
                                             `}
