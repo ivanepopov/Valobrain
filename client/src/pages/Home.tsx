@@ -98,9 +98,9 @@ const Home = () => {
 
   const matchImages = [
     '/DSC01465.JPG',
-    '/DSC01201.JPG',
     '/DSC01331.JPG',
     '/DSC01412.JPG',
+    '/DSC01201.JPG',
   ];
 
   // Auto-play carousel
@@ -114,7 +114,7 @@ const Home = () => {
   }, [matchImages.length, isPlaying]);
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 py-12 px-6 overflow-hidden">
+    <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 py-12 px-6 overflow-hidden">
       {/* Neural Network Background */}
       <svg className="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
         <defs>
@@ -198,7 +198,7 @@ const Home = () => {
                 />
                 <button
                   type="submit"
-                  className="px-8 py-3 bg-blue-600 hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-400 text-white font-semibold rounded-xl transition-all duration-300"
+                  className="px-8 py-3 bg-blue-900 hover:bg-white/5 text-white font-semibold rounded-xl transition-all duration-300"
                 >
                   Search
                 </button>
