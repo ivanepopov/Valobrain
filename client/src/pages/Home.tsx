@@ -20,6 +20,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [teamName, setTeamName] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [teamsDropdown, setTeamsDropdown] = useState<Team[]>([]);
   const [nodes, setNodes] = useState<Node[]>([]);
 
@@ -96,19 +97,21 @@ const Home = () => {
   ];
 
   const matchImages = [
+    '/DSC01465.JPG',
     '/DSC01201.JPG',
     '/DSC01331.JPG',
     '/DSC01412.JPG',
-    '/DSC01465.JPG',
   ];
 
   // Auto-play carousel
   useEffect(() => {
+    if (!isPlaying) return;
+    
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % matchImages.length);
     }, 3000);
     return () => clearInterval(timer);
-  }, [matchImages.length]);
+  }, [matchImages.length, isPlaying]);
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 py-12 px-6 overflow-hidden">
@@ -324,10 +327,20 @@ const Home = () => {
               </div>
 
               {/* Play/Pause Button */}
-              <button className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full transition-all duration-300">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
+              <button 
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full transition-all duration-300"
+                aria-label={isPlaying ? 'Pause carousel' : 'Play carousel'}
+              >
+                {isPlaying ? (
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                )}
               </button>
             </div>
           </div>
