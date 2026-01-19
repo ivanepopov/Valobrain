@@ -19,6 +19,7 @@ const PlayerStatisticsTable = ({ team, roster, allSeriesData }: Props) => {
                         <th className="px-4 py-3">Player</th>
                         <th className="px-4 py-3 text-center">Matches</th>
                         <th className="px-4 py-3 text-center">Win %</th>
+                        <th className="px-4 py-3 text-center">ADR</th>
                         <th className="px-4 py-3 text-center">FB %</th>
                         <th className="px-4 py-3 text-center">KDA</th>
                     </tr>

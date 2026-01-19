@@ -17,6 +17,10 @@
  */
 import type {Team} from "../types/Team.ts";
 import PlayerStatisticsTable from "../components/PlayerStatisticsTable.tsx";
+import AgentStatistics from "../components/AgentStatistics.tsx";
+import MapPerformance from "../components/MapPerformance.tsx";
+import TeamLevelStatsOverview from "../components/TeamLevelStatsOverview.tsx";
+import WinConditionDistribution from "../components/WinConditionDistribution.tsx";
 import type {TeamStats} from "../types/TeamStats.ts";
 import type {SeriesStats} from "../types/SeriesStats.ts";
 
@@ -27,7 +31,7 @@ type Props = {
 }
 
 const AnalyticsBreakdown = ({ team, stats, allSeriesData }: Props) => {
-    if (!stats) return <div>Loading stats...</div>;
+    if (!stats) return <div className="text-gray-500 italic">Loading stats...</div>;
 
     // Derived roster from all matches
     const playersMap = new Map();
@@ -43,8 +47,28 @@ const AnalyticsBreakdown = ({ team, stats, allSeriesData }: Props) => {
 
     return (
         <div className="p-6">
-            <PlayerStatisticsTable 
+            <TeamLevelStatsOverview 
+                team={team}
+                allSeriesData={allSeriesData}
+            />
+
+            <AgentStatistics 
                 team={team} 
+                allSeriesData={allSeriesData} 
+            />
+
+            <MapPerformance 
+                team={team}
+                allSeriesData={allSeriesData}
+            />
+
+            <WinConditionDistribution 
+                team={team}
+                allSeriesData={allSeriesData}
+            />
+            
+            <PlayerStatisticsTable 
+                team={team}
                 roster={roster} 
                 allSeriesData={allSeriesData}
             />

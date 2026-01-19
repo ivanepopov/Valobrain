@@ -14,6 +14,9 @@ const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ playerName, seriesD
     let totalAssists = 0;
     let gamesPlayed = 0;
     let gamesWon = 0;
+    let totalDamage = 0;
+    let totalRounds = 0;
+    let firstKills = 0;
     const agentCounts: Record<string, number> = {};
 
     seriesData.forEach(series => {
@@ -33,20 +36,40 @@ const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ playerName, seriesD
                 totalDeaths += playerMatch.deaths;
                 totalAssists += playerMatch.killAssistsGiven;
 
-                // Track agent usage
+                // Process rounds for ADR and FK%
+                game.segments.forEach(segment => {
+                    totalRounds++;
+                    const playerSegment = segment.teams
+                        .flatMap(t => t.players)
+                        .find(p => p.name === playerName);
+                    
+                    if (playerSegment) {
+                        totalDamage += playerSegment.damageDealt || 0;
+                    }
+
+                    // Check for first kill in the round
+                    const teamWithFK = segment.teams.find(t => 
+                        t.objectives?.some(obj => obj.id === 'firstKill')
+                    );
+                    
+                    // If your data structure links the specific player to the 'firstKill' objective
+                    const playerGotFK = teamWithFK?.players?.some(p => p.name === playerName && (p as any).firstKill);
+                    if (playerGotFK) firstKills++;
+                });
+
                 const agentName = playerMatch.character.name;
                 agentCounts[agentName] = (agentCounts[agentName] || 0) + 1;
             }
         });
     });
 
-    // 2. Calculate derived metrics
     const winRate = gamesPlayed > 0 ? (gamesWon / gamesPlayed) * 100 : 0;
+    const adr = totalRounds > 0 ? (totalDamage / totalRounds).toFixed(1) : "0.0";
+    const fkRate = totalRounds > 0 ? ((firstKills / totalRounds) * 100).toFixed(3) : "0.000";
     const kda = totalDeaths > 0 
         ? ((totalKills + totalAssists) / totalDeaths).toFixed(2) 
         : (totalKills + totalAssists).toFixed(2);
 
-    // Get top 3 agents
     const topAgents = Object.entries(agentCounts)
         .sort(([, a], [, b]) => b - a)
         .slice(0, 3)
@@ -73,6 +96,12 @@ const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ playerName, seriesD
                 <span className={`font-bold ${winRate >= 50 ? 'text-green-500' : 'text-red-500'}`}>
                     {winRate.toFixed(0)}%
                 </span>
+            </td>
+            <td className="px-4 py-4 text-center font-mono text-amber-500 font-bold">
+                {adr}
+            </td>
+            <td className="px-4 py-4 text-center font-mono text-blue-400">
+                {fkRate}%
             </td>
             <td className="px-4 py-4 text-center font-mono">
                 <div className="flex flex-col items-center">
