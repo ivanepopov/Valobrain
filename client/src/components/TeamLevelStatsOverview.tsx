@@ -1,5 +1,6 @@
 import type { SeriesStats } from "../types/SeriesStats.ts";
 import type { Team } from "../types/Team.ts";
+import { GlassBox } from "./GlassBox.tsx";
 
 type Props = {
     team: Team | null;
@@ -49,11 +50,11 @@ const TeamLevelStatsOverview = ({ team, allSeriesData }: Props) => {
     const defenseWinRate = totalDefenseRounds > 0 ? (defenseRoundsWon / totalDefenseRounds) * 100 : 0;
 
     const StatCard = ({ label, value, subtext }: { label: string, value: string, subtext: string }) => (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-xl flex flex-col items-center justify-center">
-            <span className="text-gray-400 text-xs uppercase tracking-widest mb-2 font-bold">{label}</span>
-            <span className="text-4xl font-black text-white mb-1">{value}</span>
-            <span className="text-[10px] text-gray-500 font-mono uppercase tracking-tighter">{subtext}</span>
-        </div>
+        <GlassBox className="flex flex-col items-center justify-center text-center">
+            <span className="text-blue-200/60 text-xs uppercase tracking-widest mb-2 font-bold">{label}</span>
+            <span className="text-4xl font-bold text-white mb-1">{value}</span>
+            <span className="text-[10px] text-blue-200/40 font-mono uppercase tracking-tighter">{subtext}</span>
+        </GlassBox>
     );
 
     return (

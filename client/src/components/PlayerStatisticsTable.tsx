@@ -1,6 +1,7 @@
 import type {Team} from "../types/Team.ts";
 import PlayerStatistics from "./PlayerStatistics.tsx";
 import type {SeriesStats} from "../types/SeriesStats.ts";
+import { GlassBox } from "./GlassBox.tsx";
 
 type Props = {
     team: Team | null;
@@ -9,12 +10,12 @@ type Props = {
 };
 
 const PlayerStatisticsTable = ({ team, roster, allSeriesData }: Props) => {
-    if (!team) return <div className="p-4 text-gray-400 italic">Select a team to view player analytics</div>;
+    if (!team) return <div className="p-4 text-blue-200/40 italic">Select a team to view player analytics</div>;
 
     return (
-        <div className="mt-6 overflow-hidden rounded-lg border border-gray-700 bg-gray-900 shadow-xl">
-            <table className="w-full text-left text-sm text-gray-300">
-                <thead className="bg-gray-800 text-xs uppercase text-gray-400">
+        <GlassBox className="mt-6 p-0 overflow-hidden">
+            <table className="w-full text-left text-sm text-blue-100">
+                <thead className="bg-white/5 text-xs uppercase text-blue-200/60">
                     <tr>
                         <th className="px-4 py-3">Player</th>
                         <th className="px-4 py-3 text-center">Matches</th>
@@ -24,7 +25,7 @@ const PlayerStatisticsTable = ({ team, roster, allSeriesData }: Props) => {
                         <th className="px-4 py-3 text-center">KDA</th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-800">
+                <tbody className="divide-y divide-white/10">
                     {roster.map((player) => (
                         <PlayerStatistics 
                             key={player.id} 
@@ -35,7 +36,7 @@ const PlayerStatisticsTable = ({ team, roster, allSeriesData }: Props) => {
                     ))}
                 </tbody>
             </table>
-        </div>
+        </GlassBox>
     );
 };
 

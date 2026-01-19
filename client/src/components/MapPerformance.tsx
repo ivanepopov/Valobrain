@@ -1,5 +1,6 @@
 import type { SeriesStats } from "../types/SeriesStats.ts";
 import type { Team } from "../types/Team.ts";
+import { GlassBox } from "./GlassBox.tsx";
 
 type Props = {
     team: Team | null;
@@ -40,8 +41,8 @@ const MapPerformance = ({ team, allSeriesData }: Props) => {
         .sort((a, b) => b.winRate - a.winRate || b.total - a.total);
 
     return (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-xl mt-8">
-            <h3 className="text-gray-400 text-xs uppercase tracking-widest mb-6 font-bold">Map Win Rates</h3>
+        <GlassBox className="mt-8">
+            <h3 className="text-blue-200/60 text-xs uppercase tracking-widest mb-6 font-bold">Map Win Rates</h3>
             
             <div className="space-y-6">
                 {sortedMaps.length > 0 ? (
@@ -50,19 +51,19 @@ const MapPerformance = ({ team, allSeriesData }: Props) => {
                             <div className="flex justify-between items-end mb-1.5">
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-white font-bold text-sm">{map.name}</span>
-                                    <span className="text-gray-500 text-[10px] font-mono uppercase tracking-tighter">
+                                    <span className="text-blue-200/40 text-[10px] font-mono uppercase tracking-tighter">
                                         {map.record}
                                     </span>
                                 </div>
                                 <span className={`text-sm font-mono font-bold ${
                                     map.winRate >= 60 ? 'text-green-400' : 
-                                    map.winRate <= 40 ? 'text-red-400' : 'text-gray-300'
+                                    map.winRate <= 40 ? 'text-red-400' : 'text-blue-200/60'
                                 }`}>
                                     {map.winRate.toFixed(0)}%
                                 </span>
                             </div>
                             
-                            <div className="relative h-3 w-full bg-gray-800/50 rounded-sm overflow-hidden border border-gray-800">
+                            <div className="relative h-3 w-full bg-white/10 rounded-sm overflow-hidden border border-white/10">
                                 {/* Success Gradient Bar */}
                                 <div 
                                     className={`h-full transition-all duration-700 ease-out rounded-r-sm ${
@@ -74,7 +75,7 @@ const MapPerformance = ({ team, allSeriesData }: Props) => {
                                 />
                                 
                                 {/* Background grid markers */}
-                                <div className="absolute inset-0 flex justify-between pointer-events-none px-[25%] opacity-10">
+                                <div className="absolute inset-0 flex justify-between pointer-events-none px-[25%] opacity-20">
                                     <div className="h-full w-px bg-white" />
                                     <div className="h-full w-px bg-white" />
                                     <div className="h-full w-px bg-white" />
@@ -83,12 +84,12 @@ const MapPerformance = ({ team, allSeriesData }: Props) => {
                         </div>
                     ))
                 ) : (
-                    <div className="py-10 text-center text-gray-500 italic text-sm">
+                    <div className="py-10 text-center text-blue-200/40 italic text-sm">
                         No map data recorded for this team.
                     </div>
                 )}
             </div>
-        </div>
+        </GlassBox>
     );
 };
 
