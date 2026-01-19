@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Brain, BarChart3, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Brain, BarChart3, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import getTeams from '../services/getTeams.ts';
 import type { Team } from '../types/Team.ts';
@@ -109,14 +109,6 @@ const Home = () => {
     }, 3000);
     return () => clearInterval(timer);
   }, [matchImages.length]);
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % matchImages.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + matchImages.length) % matchImages.length);
-  };
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 py-12 px-6 overflow-hidden">
@@ -290,58 +282,53 @@ const Home = () => {
           transition={{ duration: 0.6, delay: 0.6 }}
         >
           <h2 className="text-2xl font-semibold text-white mb-6 text-center">Featured Matches</h2>
-          <div className="relative max-w-4xl mx-auto">
+          <div className="relative max-w-3xl mx-auto">
             {/* Carousel Container */}
-            <div className="relative overflow-hidden rounded-lg">
+            <div className="relative overflow-hidden rounded-3xl backdrop-blur-md bg-white/10 border border-white/10 p-4">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentSlide}
-                  initial={{ opacity: 0, x: 100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -100 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   transition={{ duration: 0.5 }}
-                  className="group relative aspect-video overflow-hidden rounded-lg backdrop-blur-md bg-white/5 border border-white/10 hover:border-blue-400/50 transition-all duration-300"
+                  className="relative aspect-video"
                 >
                   <img
                     src={matchImages[currentSlide]}
                     alt={`VALORANT Match ${currentSlide + 1}`}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="w-full h-full object-cover rounded-2xl"
                     onError={(e) => {
                       e.currentTarget.src = 'https://via.placeholder.com/800x450?text=Match+Image';
                     }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </motion.div>
               </AnimatePresence>
             </div>
 
-            {/* Navigation Arrows */}
-            <button
-              onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-blue-600/80 hover:bg-blue-500 text-white rounded-full backdrop-blur-sm transition-all duration-300 z-10"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-            <button
-              onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-blue-600/80 hover:bg-blue-500 text-white rounded-full backdrop-blur-sm transition-all duration-300 z-10"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
+            {/* Bottom Controls */}
+            <div className="flex justify-center items-center gap-4 mt-6">
+              {/* Dots Indicator */}
+              <div className="flex gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full">
+                {matchImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`transition-all duration-300 rounded-full ${
+                      currentSlide === index 
+                        ? 'bg-blue-400 w-12 h-2' 
+                        : 'bg-white/30 hover:bg-white/50 w-2 h-2'
+                    }`}
+                  />
+                ))}
+              </div>
 
-            {/* Dots Indicator */}
-            <div className="flex justify-center gap-2 mt-4">
-              {matchImages.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    currentSlide === index 
-                      ? 'bg-blue-400 w-8' 
-                      : 'bg-blue-400/30 hover:bg-blue-400/60'
-                  }`}
-                />
-              ))}
+              {/* Play/Pause Button */}
+              <button className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full transition-all duration-300">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </button>
             </div>
           </div>
         </motion.div>
