@@ -1,5 +1,6 @@
 import React from 'react';
 import type { SeriesStats } from "../types/SeriesStats.ts";
+import { getAgentLogo } from '../utils/agentLogos';
 
 interface PlayerStatisticsProps {
     playerId: string;
@@ -80,11 +81,21 @@ const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ playerName, seriesD
             <td className="px-4 py-4">
                 <div className="flex flex-col">
                     <span className="font-bold text-white">{playerName}</span>
-                    <div className="flex gap-1 mt-1">
+                    <div className="flex gap-1.5 mt-1">
                         {topAgents.map(agent => (
-                            <span key={agent} className="text-[10px] uppercase px-1.5 py-0.5 bg-gray-800 rounded text-gray-400 border border-gray-700">
-                                {agent}
-                            </span>
+                            getAgentLogo(agent) ? (
+                                <img 
+                                    key={agent}
+                                    src={getAgentLogo(agent)} 
+                                    alt={agent}
+                                    title={agent}
+                                    className="w-6 h-6 rounded object-cover border border-gray-700"
+                                />
+                            ) : (
+                                <span key={agent} className="text-[10px] uppercase px-1.5 py-0.5 bg-gray-800 rounded text-gray-400 border border-gray-700">
+                                    {agent}
+                                </span>
+                            )
                         ))}
                     </div>
                 </div>

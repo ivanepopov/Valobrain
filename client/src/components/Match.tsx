@@ -1,6 +1,7 @@
 import React from 'react';
 import type { MatchStats } from '../types/MatchStats';
 import type {Team} from "../types/Team.ts";
+import { getAgentLogo } from '../utils/agentLogos';
 
 interface MatchProps {
     match: MatchStats;
@@ -36,9 +37,18 @@ const Match: React.FC<MatchProps> = ({ match }) => {
                                         <tr key={pIndex} className="group hover:bg-white/[0.02] transition-colors">
                                             <td className="py-2 pl-1 text-sm font-bold text-gray-300">{player.name}</td>
                                             <td className="py-2">
-                                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">
-                                                    {player.character.name}
-                                                </span>
+                                                {getAgentLogo(player.character.name) ? (
+                                                    <img 
+                                                        src={getAgentLogo(player.character.name)} 
+                                                        alt={player.character.name}
+                                                        title={player.character.name}
+                                                        className="w-8 h-8 rounded object-cover"
+                                                    />
+                                                ) : (
+                                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">
+                                                        {player.character.name}
+                                                    </span>
+                                                )}
                                             </td>
                                             <td className="py-2 text-center font-mono text-xs text-gray-400">{player.kills}</td>
                                             <td className="py-2 text-center font-mono text-xs text-gray-500">{player.deaths}</td>
