@@ -8,10 +8,13 @@ const rateLimit = require("express-rate-limit");
 const mapService = require("../services/map-service");
 
 const router = express.Router();
+const apiKey = process.env.API_KEY;
 
 // Where we store downloaded match files
 const MATCH_DATA_DIR = path.resolve(__dirname, "../match_data");
-const GRID_FILE_URL = "https://cdn-cf.grid.gg/file-download/events/grid/series";
+// Use the official API domain instead of the CDN direct link
+const GRID_API_BASE = "https://api.grid.gg/file-download";
+const GRID_FILE_URL = `${GRID_API_BASE}/events/grid/series`;
 
 // Rate limit: 10 requests per minute (downloads are heavy)
 const statsLimiter = rateLimit({
@@ -45,28 +48,74 @@ const isValidSeriesId = (seriesId) => {
   return /^\d{5,10}$/.test(seriesId);
 };
 
-// Download the match ZIP from GRID and extract it
-const downloadAndExtract = async (seriesId) => {
-  const zipPath = path.join(MATCH_DATA_DIR, `${seriesId}.zip`);
-  const url = `${GRID_FILE_URL}/${seriesId}`;
+    // Download the match ZIP from GRID and extract it
+    const downloadAndExtract = async (seriesId) => {
+      const zipPath = path.join(MATCH_DATA_DIR, `${seriesId}.zip`);
+      const currentKey = process.env.API_KEY;
 
-  console.log(`Downloading match ${seriesId}...`);
+      // 1. First, try the standard GRID Events URL pattern as per docs
+      const url = `${GRID_API_BASE}/events/grid/series/${seriesId}`;
 
-  const response = await axios.get(url, {
-    headers: { "x-api-key": process.env.API_KEY },
-    responseType: "arraybuffer",
-    timeout: DOWNLOAD_TIMEOUT_MS,
-  });
+      console.log(`Downloading match ${seriesId} from Official GRID API...`);
 
-  fs.writeFileSync(zipPath, response.data);
-  console.log("Download complete. Extracting...");
+      try {
+        const response = await axios({
+          method: 'get',
+          url: url,
+          headers: { 
+            "x-api-key": currentKey,
+            "Accept": "application/zip, application/octet-stream",
+            "User-Agent": "Valobrain-Scouter/1.0" 
+          },
+          responseType: "arraybuffer",
+          timeout: DOWNLOAD_TIMEOUT_MS,
+        });
 
-  const zip = new AdmZip(zipPath);
-  zip.extractAllTo(MATCH_DATA_DIR, true);
+        if (response.status === 200) {
+          fs.writeFileSync(zipPath, response.data);
+          console.log("Download complete. Extracting...");
 
-  console.log("Extraction complete.");
-  return findCachedFile(seriesId);
-};
+          const zip = new AdmZip(zipPath);
+          zip.extractAllTo(MATCH_DATA_DIR, true);
+
+          // Clean up zip
+          if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+
+          console.log("Extraction complete.");
+          return findCachedFile(seriesId);
+        }
+      } catch (error) {
+        // If direct download fails with 404/403, try the "list" method
+        console.warn(`Direct download failed for ${seriesId}, attempting 'list' lookup...`);
+        
+        try {
+          const listRes = await axios.get(`${GRID_API_BASE}/list/${seriesId}`, {
+            headers: { "x-api-key": currentKey }
+          });
+
+          const fileInfo = listRes.data.files?.find(f => f.id === "events-grid-compressed");
+          
+          if (fileInfo && fileInfo.status === "ready") {
+            console.log(`Found file via list: ${fileInfo.fullURL}`);
+            // Recurse once with the specific URL if needed, or just fetch here
+            const retryRes = await axios.get(fileInfo.fullURL, {
+              headers: { "x-api-key": currentKey },
+              responseType: "arraybuffer"
+            });
+            fs.writeFileSync(zipPath, retryRes.data);
+            const zip = new AdmZip(zipPath);
+            zip.extractAllTo(MATCH_DATA_DIR, true);
+            if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+            return findCachedFile(seriesId);
+          }
+        } catch (listError) {
+          console.error("Critical Failure: File not available even via list API.");
+        }
+
+        console.error(`Download failed for series ${seriesId}:`, error.response?.status, error.message);
+        throw error;
+      }
+    };
 
 // Track a kill or death at a map location
 const trackZoneKill = (zoneStats, mapName, position, type) => {
@@ -186,7 +235,7 @@ const parseMatchFile = async (filename) => {
   // Track first blood each round
   let firstBloodThisRound = null;
   let startingPositions = null;
-  
+
   // Timing data for tempo analysis
   let roundStartTime = null;
   let firstContactTime = null;
@@ -204,7 +253,7 @@ const parseMatchFile = async (filename) => {
     }
 
     if (!wrapper.events) continue;
-    
+
     // Timestamp is on the wrapper, not individual events
     const eventTime = wrapper.occurredAt ? new Date(wrapper.occurredAt).getTime() : null;
 
@@ -257,7 +306,7 @@ const parseMatchFile = async (filename) => {
           if (victimId && players[victimId]) {
             players[victimId].firstDeaths++;
           }
-          
+
           // Record time of first contact
           if (!firstContactTime && eventTime) {
             firstContactTime = eventTime;
@@ -279,7 +328,7 @@ const parseMatchFile = async (filename) => {
         const roundTeams = event.target?.state?.teams;
         startingPositions = extractStartingPositions(roundTeams, mapName);
       }
-      
+
       // Start timing from when freeze time ends (when combat begins)
       if (type === "round-ended-freezetime") {
         roundStartTime = eventTime;
@@ -302,6 +351,7 @@ const parseMatchFile = async (filename) => {
         if (winner) {
           rounds.push({
             roundNumber: currentRound || rounds.length + 1,
+            mapName: mapName, // Ensure mapName is attached to every round
             winner: winner.name,
             winType: getWinType(
               bombPlanted,
@@ -315,11 +365,11 @@ const parseMatchFile = async (filename) => {
             // Timing data (in seconds from round start)
             timing: {
               roundStartTime,
-              timeToFirstContact: (roundStartTime && firstContactTime) 
-                ? Math.round((firstContactTime - roundStartTime) / 1000) 
+              timeToFirstContact: (roundStartTime && firstContactTime)
+                ? Math.round((firstContactTime - roundStartTime) / 1000)
                 : null,
-              timeToPlant: (roundStartTime && plantTime) 
-                ? Math.round((plantTime - roundStartTime) / 1000) 
+              timeToPlant: (roundStartTime && plantTime)
+                ? Math.round((plantTime - roundStartTime) / 1000)
                 : null,
             },
           });
@@ -348,7 +398,7 @@ const parseMatchFile = async (filename) => {
     ...player,
     // FK% = first kills / rounds played (as percentage)
     fkPercent: totalRounds > 0 ? Math.round((player.firstKills / totalRounds) * 100) : 0,
-    // FD% = first deaths / rounds played (as percentage)  
+    // FD% = first deaths / rounds played (as percentage)
     fdPercent: totalRounds > 0 ? Math.round((player.firstDeaths / totalRounds) * 100) : 0,
     // FK/FD differential
     fkFdDiff: player.firstKills - player.firstDeaths,
@@ -364,11 +414,22 @@ const parseMatchFile = async (filename) => {
 // --- Analysis ---
 
 // Generate some insights about the match
-const generateAnalysis = (players, rounds) => {
+const generateAnalysis = (allPlayers, rounds, teamName = null) => {
   const insights = [];
 
-  // Count win types
-  const winTypes = rounds.reduce((acc, r) => {
+  // Filter players and rounds to target team if specified
+  const players = teamName 
+    ? allPlayers.filter(p => p.teamName?.toLowerCase() === teamName.toLowerCase())
+    : allPlayers;
+
+  const filteredRounds = teamName
+    ? rounds.filter(r => r.winner?.toLowerCase() === teamName.toLowerCase())
+    : rounds;
+
+  if (players.length === 0) return insights;
+
+  // Count win types (Only for the target team)
+  const winTypes = filteredRounds.reduce((acc, r) => {
     acc[r.winType] = (acc[r.winType] || 0) + 1;
     return acc;
   }, {});
@@ -429,51 +490,39 @@ const generateAnalysis = (players, rounds) => {
     });
   }
 
-  // First Blood Dependency Analysis (Team Tendency from Strategies.md)
-  const roundsWithFB = rounds.filter((r) => r.firstBlood);
-  if (roundsWithFB.length > 0) {
-    // Group rounds by team that got first blood & if they won
-    const fbStats = {};
-    roundsWithFB.forEach((round) => {
-      const fbPlayer = players.find(
-        (p) =>
-          p.name === round.firstBlood?.killerName ||
-          (round.firstBlood?.killerId && p.id === round.firstBlood.killerId),
-      );
-      if (fbPlayer) {
-        const team = fbPlayer.teamName;
-        if (!fbStats[team]) fbStats[team] = { gotFB: 0, wonAfterFB: 0 };
-        fbStats[team].gotFB++;
-        if (round.winner === team) fbStats[team].wonAfterFB++;
-      }
-    });
-
-    // Find most FB-dependent team
-    const teams = Object.entries(fbStats);
-    if (teams.length > 0) {
-      const [bestTeam, stats] = teams.sort(
-        (a, b) => b[1].gotFB - a[1].gotFB,
-      )[0];
-      const winRate =
-        stats.gotFB > 0
-          ? Math.round((stats.wonAfterFB / stats.gotFB) * 100)
-          : 0;
-
-      if (stats.gotFB >= 3) {
-        insights.push({
-          category: "Team Tendency",
-          title:
-            winRate >= 70
-              ? "First Blood Dependent"
-              : "Struggles to Convert FBs",
-          description: `${bestTeam} got ${stats.gotFB} first bloods and won ${winRate}% of those rounds.`,
+  // First Blood Dependency Analysis
+    const roundsWithFB = rounds.filter((r) => r.firstBlood); // Look at ALL rounds with a FB
+    if (roundsWithFB.length > 0) {
+        const fbStats = {};
+        roundsWithFB.forEach((round) => {
+          // Find if the killer belongs to the target team
+          const killerName = round.firstBlood?.killerName;
+          const killerTeam = allPlayers.find(p => p.name === killerName)?.teamName;
+          
+          if (killerTeam && (!teamName || killerTeam.toLowerCase() === teamName.toLowerCase())) {
+            if (!fbStats[killerTeam]) fbStats[killerTeam] = { gotFB: 0, wonAfterFB: 0 };
+            fbStats[killerTeam].gotFB++;
+            if (round.winner === killerTeam) fbStats[killerTeam].wonAfterFB++;
+          }
         });
-      }
+
+        const teams = Object.entries(fbStats);
+        if (teams.length > 0) {
+          const [targetTeam, stats] = teams[0]; // Since we filtered by teamName, there's only one
+          const winRate = stats.gotFB > 0 ? Math.round((stats.wonAfterFB / stats.gotFB) * 100) : 0;
+
+          if (stats.gotFB >= 2) {
+            insights.push({
+              category: "Team Tendency",
+              title: winRate >= 70 ? "First Blood Dependent" : "Struggles to Convert FBs",
+              description: `${targetTeam} secured ${stats.gotFB} first bloods in this series and won ${winRate}% of those rounds.`,
+            });
+          }
+        }
     }
-  }
 
   // How close was the match?
-  const teamWins = rounds.reduce((acc, r) => {
+  const teamWins = filteredRounds.reduce((acc, r) => {
     acc[r.winner] = (acc[r.winner] || 0) + 1;
     return acc;
   }, {});
@@ -498,7 +547,7 @@ const generateAnalysis = (players, rounds) => {
 // Can filter to a specific team if teamName is provided
 const generateWinConditions = (rounds, teamName = null) => {
   // Only count this team's rounds if specified
-  const filteredRounds = teamName 
+  const filteredRounds = teamName
     ? rounds.filter(r => r.winner?.toLowerCase() === teamName.toLowerCase())
     : rounds;
 
@@ -573,7 +622,7 @@ const generateTempoStats = (rounds, teamName = null) => {
   const firstContactTimes = attackRounds
     .map(r => r.timing?.timeToFirstContact)
     .filter(t => t !== null && t !== undefined);
-  
+
   const plantTimes = attackRounds
     .map(r => r.timing?.timeToPlant)
     .filter(t => t !== null && t !== undefined);
@@ -647,14 +696,14 @@ router.get("/:seriesId", async (req, res) => {
 
     // Parse the file and generate insights
     const data = await parseMatchFile(jsonlFile);
-    
+
     // Optional team filter from query param
     const teamFilter = req.query.team || null;
-    
-    const analysis = generateAnalysis(data.players, data.rounds);
+
+    const analysis = generateAnalysis(data.players, data.rounds, teamFilter);
     const winConditions = generateWinConditions(data.rounds, teamFilter);
     const tempo = generateTempoStats(data.rounds, teamFilter);
-    
+
     // Filter player stats to specific team if requested
     const filteredStats = teamFilter
       ? data.players.filter(p => p.teamName?.toLowerCase() === teamFilter.toLowerCase())
