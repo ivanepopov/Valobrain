@@ -12,6 +12,7 @@ import type { Team } from "../types/Team.ts";
 import type { TeamStats } from "../types/TeamStats.ts";
 import type { SeriesStats } from "../types/SeriesStats.ts";
 import { formatDuration } from "../utils/formatters.ts";
+import { getMapImage } from "../utils/mapImages.ts";
 import { GlassBox } from "./GlassBox.tsx";
 
 type Props = {
@@ -150,19 +151,34 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
                                             <div 
                                                 key={idx}
                                                 className={`
-                                                    backdrop-blur-sm rounded-lg py-2 w-[200px]  border transition-all duration-300 hover:scale-105
+                                                    group relative rounded-lg py-2 w-[200px] border transition-all duration-300 hover:scale-105 overflow-hidden
                                                     ${isWin 
-                                                        ? 'bg-green-500/10 border-green-400/30 hover:border-green-400/60' 
-                                                        : 'bg-red-500/10 border-red-400/30 hover:border-red-400/60'
+                                                        ? 'border-green-400/30 hover:border-green-400/60' 
+                                                        : 'border-red-400/30 hover:border-red-400/60'
                                                     }
                                                 `}
+                                                style={{
+                                                    backgroundImage: getMapImage(game.map.name) ? `url(${getMapImage(game.map.name)})` : undefined,
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center',
+                                                }}
                                             >
-                                                <div className="flex flex-col items-center gap-1">
-                                                    <span className="text-white font-semibold text-sm">{game.map.name}</span>
-                                                    <span className={`text-lg font-bold ${isWin ? 'text-green-400' : 'text-red-400'}`}>
+                                                {/* Dark overlay */}
+                                                <div className="absolute inset-0 bg-black/40"></div>
+                                                
+                                                {/* Tint overlay - shows on hover */}
+                                                <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isWin ? 'bg-green-900/50' : 'bg-red-900/50'}`}></div>
+                                                
+                                                {/* Map number badge */}
+                                                <span className="absolute bottom-1 right-2 text-[10px] font-bold text-white/60 z-10">{idx + 1}</span>
+                                                
+                                                {/* Content */}
+                                                <div className="relative z-10 flex flex-col items-center gap-1">
+                                                    <span className="text-white font-semibold text-sm drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{game.map.name}</span>
+                                                    <span className={`text-lg font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${isWin ? 'text-green-400' : 'text-red-400'}`}>
                                                         {teamRoundsWon}-{opponentRoundsWon}
                                                     </span>
-                                                    <span className="text-blue-200/40 text-xs font-mono">{formatDuration(game.duration)}</span>
+                                                    <span className="text-white/80 text-xs font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{formatDuration(game.duration)}</span>
                                                 </div>
                                             </div>
                                         );
@@ -186,7 +202,7 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
                                             }
                                         `}
                                     >
-                                        All Maps
+                                        All
                                     </button>
                                     {selectedSeriesData.seriesState.games.map((game, idx) => (
                                         <button
