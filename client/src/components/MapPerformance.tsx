@@ -1,6 +1,7 @@
 import type { SeriesStats } from "../types/SeriesStats.ts";
 import type { Team } from "../types/Team.ts";
 import { GlassBox } from "./GlassBox.tsx";
+import { capitalize } from "../utils/formatters.ts";
 
 type Props = {
     team: Team | null;
@@ -50,7 +51,7 @@ const MapPerformance = ({ team, allSeriesData }: Props) => {
                         <div key={map.name} className="group">
                             <div className="flex justify-between items-end mb-1.5">
                                 <div className="flex items-baseline gap-2">
-                                    <span className="text-white font-bold text-sm">{map.name}</span>
+                                    <span className="text-white font-bold text-sm">{capitalize(map.name)}</span>
                                     <span className="text-blue-200/40 text-[10px] font-mono uppercase tracking-tighter">
                                         {map.record}
                                     </span>

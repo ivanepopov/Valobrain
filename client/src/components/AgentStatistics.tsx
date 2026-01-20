@@ -1,6 +1,7 @@
 import type {SeriesStats} from "../types/SeriesStats.ts";
 import type {Team} from "../types/Team.ts";
 import { getAgentLogo } from "../utils/agentLogos.ts";
+import { capitalize } from "../utils/formatters.ts";
 import { GlassBox } from "./GlassBox.tsx";
 import { Activity, Users } from "lucide-react";
 
@@ -71,7 +72,7 @@ const AgentStatistics = ({ team, allSeriesData }: Props) => {
                             )}
                             <div className="flex-1">
                                 <div className="flex justify-between mb-1">
-                                    <span className="text-blue-100 font-semibold">{agent.name}</span>
+                                    <span className="text-blue-100 font-semibold">{capitalize(agent.name)}</span>
                                     <span className="text-blue-400 font-semibold">{agent.pickRate.toFixed(0)}%</span>
                                 </div>
                                 <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">

@@ -3,6 +3,7 @@ import type {Team} from "../types/Team.ts";
 import type {SeriesStats} from "../types/SeriesStats.ts";
 import { GlassBox } from "./GlassBox.tsx";
 import { getAgentLogo } from '../utils/agentLogos';
+import { capitalize } from '../utils/formatters';
 
 type Props = {
     team: Team | null;
@@ -131,7 +132,7 @@ const PlayerStatisticsTable = ({ team, roster, allSeriesData }: Props) => {
                                                         className="w-8 h-8 rounded border border-white/10 object-cover"
                                                     />
                                                 ) : (
-                                                    <span key={i} className="text-blue-100 text-sm">{agentName}</span>
+                                                    <span key={i} className="text-blue-100 text-sm">{capitalize(agentName)}</span>
                                                 )
                                             ))}
                                         </div>

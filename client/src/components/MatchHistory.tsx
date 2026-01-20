@@ -11,7 +11,7 @@ import Match from "../components/Match.tsx";
 import type { Team } from "../types/Team.ts";
 import type { TeamStats } from "../types/TeamStats.ts";
 import type { SeriesStats } from "../types/SeriesStats.ts";
-import { formatDuration } from "../utils/formatters.ts";
+import { formatDuration, capitalize } from "../utils/formatters.ts";
 import { getMapImage } from "../utils/mapImages.ts";
 import { GlassBox } from "./GlassBox.tsx";
 
@@ -174,7 +174,7 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
                                                 
                                                 {/* Content */}
                                                 <div className="relative z-10 flex flex-col items-center gap-1">
-                                                    <span className="text-white font-semibold text-sm drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{game.map.name}</span>
+                                                    <span className="text-white font-semibold text-sm drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{capitalize(game.map.name)}</span>
                                                     <span className={`text-lg font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${isWin ? 'text-green-400' : 'text-red-400'}`}>
                                                         {teamRoundsWon}-{opponentRoundsWon}
                                                     </span>
@@ -219,7 +219,7 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
                                                 }
                                             `}
                                         >
-                                            {game.map.name}
+                                            {capitalize(game.map.name)}
                                         </button>
                                     ))}
                                 </div>
