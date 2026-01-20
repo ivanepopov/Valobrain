@@ -147,7 +147,7 @@ const Dashboard = () => {
     ];
 
     return (
-        <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 text-white p-8 overflow-hidden">
+        <div className="relative min-h-screen bg-linear-to-b from-slate-950 via-blue-950 to-slate-900 text-white p-8 overflow-hidden">
             {/* Neural Network Background */}
             <svg className="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
                 <defs>

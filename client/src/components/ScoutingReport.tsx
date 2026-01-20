@@ -312,7 +312,7 @@ const ScoutingReport: React.FC<ScoutingReportProps> = ({
 
                 {/* Tempo & Execution Summary */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="bg-gradient-to-br from-slate-900 to-black border border-slate-800 rounded-2xl p-8">
+                    <div className="bg-linear-to-br from-slate-900 to-black border border-slate-800 rounded-2xl p-8">
                         <div className="flex items-center gap-3 mb-6">
                             <TrendingUp className="w-5 h-5 text-green-400" />
                             <h3 className="font-black uppercase italic tracking-widest text-sm">Tempo Profile</h3>
