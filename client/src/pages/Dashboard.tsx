@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { ArrowLeft, Clock, BarChart3, FileText } from "lucide-react";
 import MatchHistory from "../components/MatchHistory";
 import AnalyticsBreakdown from "../components/AnalyticsBreakdown";
+import ScoutingReport from "../components/ScoutingReport";
 import getTeam from "../services/getTeam";
 import getTeamStats from "../services/getTeamStats";
 import getSeriesStats from "../services/getSeriesStats";
@@ -242,9 +243,10 @@ const Dashboard = () => {
                                 />
                             )}
                             {activeTab === "scouting" && (
-                                <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-12 text-center">
-                                    <p className="text-blue-200/60">Scouting reports are being generated for {team?.name}...</p>
-                                </div>
+                                <ScoutingReport
+                                    aggregationSeriesIds={stats?.aggregationSeriesIds || []}
+                                    teamName={team?.name}
+                                />
                             )}
                         </motion.div>
                     </>
