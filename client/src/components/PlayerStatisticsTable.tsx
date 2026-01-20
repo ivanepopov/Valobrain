@@ -22,7 +22,6 @@ const computePlayerStats = (playerName: string, seriesData: SeriesStats[]) => {
     let totalRounds = 0;
     let firstKills = 0;
     let firstDeaths = 0;
-    let totalACS = 0;
     const agentCounts: Record<string, number> = {};
 
     seriesData.forEach(series => {
@@ -65,7 +64,6 @@ const computePlayerStats = (playerName: string, seriesData: SeriesStats[]) => {
     const kda = totalDeaths > 0 
         ? ((totalKills + totalAssists) / totalDeaths).toFixed(2) 
         : (totalKills + totalAssists).toFixed(2);
-    const acs = totalRounds > 0 ? (totalACS / totalRounds).toFixed(1) : "0.0";
 
     const topAgents = Object.entries(agentCounts)
         .sort(([, a], [, b]) => b - a)
@@ -80,7 +78,7 @@ const computePlayerStats = (playerName: string, seriesData: SeriesStats[]) => {
         winRate: winRate.toFixed(0),
         kda,
         adr,
-        acs,
+
         fk: fkRate,
         fd: fdRate,
     };
@@ -111,7 +109,7 @@ const PlayerStatisticsTable = ({ team, roster, allSeriesData }: Props) => {
                                 <th className="text-center py-3 px-4 text-blue-200 font-semibold">Win %</th>
                                 <th className="text-center py-3 px-4 text-blue-200 font-semibold">KDA</th>
                                 <th className="text-center py-3 px-4 text-blue-200 font-semibold">ADR</th>
-                                <th className="text-center py-3 px-4 text-blue-200 font-semibold">ACS</th>
+
                                 <th className="text-center py-3 px-4 text-blue-200 font-semibold">FK %</th>
                                 <th className="text-center py-3 px-4 text-blue-200 font-semibold">FD %</th>
                             </tr>
@@ -142,7 +140,7 @@ const PlayerStatisticsTable = ({ team, roster, allSeriesData }: Props) => {
                                     <td className="py-3 px-4 text-center text-green-400 font-semibold">{player.winRate}%</td>
                                     <td className="py-3 px-4 text-center text-blue-100">{player.kda}</td>
                                     <td className="py-3 px-4 text-center text-blue-100">{player.adr}</td>
-                                    <td className="py-3 px-4 text-center text-blue-100">{player.acs}</td>
+
                                     <td className="py-3 px-4 text-center text-blue-100">{player.fk}%</td>
                                     <td className="py-3 px-4 text-center text-blue-100">{player.fd}%</td>
                                 </tr>
