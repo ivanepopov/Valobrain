@@ -4,11 +4,16 @@
  * Data surface for viewing match history.
  */
 import { useState, useEffect } from "react";
+import { motion } from "motion/react";
+import { Users } from "lucide-react";
 import Series from "../components/Series.tsx";
 import Match from "../components/Match.tsx";
 import type { Team } from "../types/Team.ts";
 import type { TeamStats } from "../types/TeamStats.ts";
 import type { SeriesStats } from "../types/SeriesStats.ts";
+import { formatDuration, capitalize } from "../utils/formatters.ts";
+import { getMapImage } from "../utils/mapImages.ts";
+import { GlassBox } from "./GlassBox.tsx";
 
 type Props = {
     team: Team | null;
@@ -20,6 +25,7 @@ type Props = {
 const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) => {
     const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null);
     const [selectedGameIndex, setSelectedGameIndex] = useState(0);
+    const [selectedMapTab, setSelectedMapTab] = useState<string>('All Maps');
 
     // Auto-select the first series once data arrives
     useEffect(() => {
@@ -36,51 +42,64 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
     const handleSeriesClick = (seriesId: string) => {
         setSelectedSeriesId(seriesId);
         setSelectedGameIndex(0);
+        setSelectedMapTab('All Maps');
     };
 
-    if (!team) return <div className="text-gray-500 italic">Select a team</div>;
+    if (!team) return <div className="text-blue-200/60 italic">Select a team</div>;
 
     if (!stats || isLoadingSeries) {
         return (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="space-y-4">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-24 bg-gray-900/50 border border-gray-800 rounded-xl animate-pulse" />
+                        <div key={i} className="h-24 backdrop-blur-md bg-white/5 border border-white/10 rounded-xl animate-pulse" />
                     ))}
                 </div>
-                <div className="hidden lg:block h-96 bg-gray-900/20 border border-gray-800 rounded-2xl animate-pulse" />
+                <div className="lg:col-span-2 h-96 backdrop-blur-md bg-white/5 border border-white/10 rounded-xl animate-pulse" />
             </div>
         );
     }
 
+    // Calculate series score
+    const getSeriesScore = () => {
+        if (!selectedSeriesData) return { wins: 0, losses: 0 };
+        const wins = selectedSeriesData.seriesState.games.filter(g =>
+            g.teams.find(t => t.name === team.name)?.won
+        ).length;
+        const losses = selectedSeriesData.seriesState.games.length - wins;
+        return { wins, losses };
+    };
+
+    const seriesScore = getSeriesScore();
+    const isSeriesWin = seriesScore.wins > seriesScore.losses;
+    const opponent = selectedSeriesData?.seriesState.teams.find(t => t.id !== team.id);
+
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             {/* Left Column: Series List */}
-            <div className="lg:col-span-4 space-y-3 max-h-[calc(100vh-320px)] overflow-y-auto pr-4 custom-scrollbar">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-4 px-1">
+            <div className="space-y-3 max-h-[calc(100vh-320px)] overflow-y-auto pr-2 custom-scrollbar">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-blue-200 mb-4 px-1">
                     Match Timeline
                 </h3>
                 {allSeriesData.length === 0 ? (
-                    <div className="bg-gray-900/30 border border-gray-800 rounded-2xl p-8 text-center">
-                        <p className="text-gray-500 font-medium italic">No match history available</p>
-                    </div>
+                    <GlassBox className="p-8 text-center">
+                        <p className="text-blue-200/60 font-medium italic">No match history available</p>
+                    </GlassBox>
                 ) : (
                     allSeriesData.map((data) => {
                         const seriesId = data.seriesState.games[0]?.id.split('-')[0];
+                        const isSelected = selectedSeriesId === seriesId;
 
                         return (
                             <div
                                 key={seriesId}
                                 onClick={() => handleSeriesClick(seriesId)}
-                                className={`cursor-pointer transition-all duration-200 ${
-                                    selectedSeriesId === seriesId 
-                                    ? "ring-1 ring-blue-500 ring-offset-1 ring-offset-gray-950 rounded-xl" 
-                                    : "opacity-70 hover:opacity-100"
-                                }`}
+                                className="cursor-pointer"
                             >
                                 <Series
                                     seriesData={data}
                                     team={team}
+                                    isSelected={isSelected}
                                 />
                             </div>
                         );
@@ -89,81 +108,142 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
             </div>
 
             {/* Right Column: Detailed View */}
-            <div className="lg:col-span-8 sticky top-6">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-4 px-1">
-                    Series Intelligence Breakdown
-                </h3>
-                <div className="bg-gray-900/40 border border-gray-800 rounded-2xl min-h-[600px] shadow-2xl backdrop-blur-sm overflow-hidden">
+            <div className="lg:col-span-2">
+                <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
                     {selectedSeriesData ? (
-                        <div className="p-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                            <div className="flex items-center justify-between mb-8 border-b border-gray-800 pb-6">
-                                <div>
-                                    <h2 className="text-2xl font-black uppercase tracking-tighter italic text-white">
-                                        vs {selectedSeriesData.seriesState.teams.find(t => t.id !== team.id)?.name}
+                        <GlassBox>
+                            {/* Series Header */}
+                            <div className="mb-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                                        {team.name} vs {opponent?.name || 'Unknown'}
                                     </h2>
-                                    <p className="text-xs text-gray-500 font-bold uppercase tracking-[0.2em] mt-1">
-                                        {selectedSeriesData.seriesState.format} Series Analysis
-                                    </p>
+                                    <div className={`
+                                        px-4 py-2 rounded-lg font-bold text-lg
+                                        ${isSeriesWin 
+                                            ? 'bg-green-500/20 text-green-400' 
+                                            : 'bg-red-500/20 text-red-400'
+                                        }
+                                    `}>
+                                        {seriesScore.wins}-{seriesScore.losses}
+                                    </div>
                                 </div>
-                                <div className="text-right">
-                                    <span className="text-xs text-gray-600 font-mono block mb-1">REF_ID: {selectedSeriesId?.substring(0, 8)}</span>
-                                </div>
-                            </div>
 
-                            {/* Map Selection Navigation */}
-                            <div className="flex gap-3 mb-8">
-                                {selectedSeriesData.seriesState.games.map((game, index) => {
-                                    const gameTeam = game.teams.find(t => t.name === team.name);
-                                    const isWin = gameTeam?.won;
-                                    const isActive = selectedGameIndex === index;
-
-                                    return (
-                                        <button
-                                            key={index}
-                                            onClick={() => setSelectedGameIndex(index)}
-                                            className={`flex-1 py-3 px-4 rounded-xl border transition-all text-left relative overflow-hidden ${
-                                                isActive
-                                                    ? isWin 
-                                                        ? "bg-green-500/10 border-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.1)]"
-                                                        : "bg-red-500/10 border-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.1)]"
-                                                    : "bg-gray-900/40 border-gray-800 text-gray-500 hover:border-gray-700"
-                                            }`}
-                                        >
-                                            <div className="flex justify-between items-start mb-1">
-                                                <span className="text-[10px] font-black uppercase opacity-50">Map {index + 1}</span>
-                                                <span className={`text-[10px] font-bold ${isWin ? 'text-green-500' : 'text-red-500'}`}>
-                                                    {isWin ? 'WIN' : 'LOSS'}
-                                                </span>
+                                {/* Map Results */}
+                                <div className="flex flex-wrap justify-center gap-3">
+                                    {selectedSeriesData.seriesState.games.map((game, idx) => {
+                                        const gameTeam = game.teams.find(t => t.name === team.name);
+                                        const isWin = gameTeam?.won;
+                                        
+                                        // Calculate round scores from segments
+                                        const teamRoundsWon = game.segments?.filter(s => 
+                                            s.teams.find(t => t.name === team.name)?.won
+                                        ).length || 0;
+                                        const opponentRoundsWon = game.segments?.filter(s => 
+                                            s.teams.find(t => t.name !== team.name)?.won
+                                        ).length || 0;
+                                        
+                                        return (
+                                            <div 
+                                                key={idx}
+                                                className={`
+                                                    group relative rounded-lg py-2 w-[200px] border transition-all duration-300 hover:scale-105 overflow-hidden
+                                                    ${isWin 
+                                                        ? 'border-green-400/30 hover:border-green-400/60' 
+                                                        : 'border-red-400/30 hover:border-red-400/60'
+                                                    }
+                                                `}
+                                                style={{
+                                                    backgroundImage: getMapImage(game.map.name) ? `url(${getMapImage(game.map.name)})` : undefined,
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center',
+                                                }}
+                                            >
+                                                {/* Dark overlay */}
+                                                <div className="absolute inset-0 bg-black/40"></div>
+                                                
+                                                {/* Tint overlay - shows on hover */}
+                                                <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isWin ? 'bg-green-900/50' : 'bg-red-900/50'}`}></div>
+                                                
+                                                {/* Map number badge */}
+                                                <span className="absolute bottom-1 right-2 text-[10px] font-bold text-white/60 z-10">{idx + 1}</span>
+                                                
+                                                {/* Content */}
+                                                <div className="relative z-10 flex flex-col items-center gap-1">
+                                                    <span className="text-white font-semibold text-sm drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{capitalize(game.map.name)}</span>
+                                                    <span className={`text-lg font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${isWin ? 'text-green-400' : 'text-red-400'}`}>
+                                                        {teamRoundsWon}-{opponentRoundsWon}
+                                                    </span>
+                                                    <span className="text-white/80 text-xs font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{formatDuration(game.duration)}</span>
+                                                </div>
                                             </div>
-                                            <div className="text-sm font-black uppercase tracking-tight">{game.map.name}</div>
-                                            <div className="text-[10px] opacity-40 font-mono mt-0.5">{game.duration}</div>
-                                        </button>
-                                    );
-                                })}
+                                        );
+                                    })}
+                                </div>
                             </div>
 
+                            {/* Map Selection Tabs */}
+                            <div className="mb-4">
+                                <div className="flex gap-2 flex-wrap">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedMapTab('All Maps');
+                                            setSelectedGameIndex(0);
+                                        }}
+                                        className={`
+                                            px-4 py-2 rounded-lg font-semibold transition-all duration-300
+                                            ${selectedMapTab === 'All Maps'
+                                                ? 'bg-blue-900 text-white'
+                                                : 'bg-white/5 text-blue-200 hover:bg-white/10'
+                                            }
+                                        `}
+                                    >
+                                        All
+                                    </button>
+                                    {selectedSeriesData.seriesState.games.map((game, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => {
+                                                setSelectedMapTab(`Map ${idx + 1}`);
+                                                setSelectedGameIndex(idx);
+                                            }}
+                                            className={`
+                                                px-4 py-2 rounded-lg font-semibold transition-all duration-300
+                                                ${selectedMapTab === `Map ${idx + 1}`
+                                                    ? 'bg-blue-900 text-white'
+                                                    : 'bg-white/5 text-blue-200 hover:bg-white/10'
+                                                }
+                                            `}
+                                        >
+                                            {capitalize(game.map.name)}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Match Stats */}
                             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                                 <Match 
-                                    match={selectedSeriesData.seriesState.games[selectedGameIndex]} 
-                                    team={team} 
+                                    match={selectedMapTab === 'All Maps' ? null : selectedSeriesData.seriesState.games[selectedGameIndex]} 
+                                    team={team}
+                                    allMaps={selectedMapTab === 'All Maps' ? selectedSeriesData.seriesState.games : undefined}
                                 />
                             </div>
-                        </div>
+                        </GlassBox>
                     ) : (
-                        <div className="flex flex-col items-center justify-center h-[600px] text-center p-12">
-                            <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-600">
-                                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
+                        <GlassBox>
+                            <div className="flex flex-col items-center justify-center py-20 text-center">
+                                <Users className="w-16 h-16 text-blue-400/30 mb-4" />
+                                <h3 className="text-xl font-semibold text-white mb-2">No Series Selected</h3>
+                                <p className="text-blue-200">Select a series from the timeline to view detailed statistics</p>
                             </div>
-                            <h4 className="text-gray-300 font-bold mb-2">No Series Selected</h4>
-                            <p className="text-gray-500 text-sm max-w-xs">
-                                Select a match from the timeline to view detailed performance metrics.
-                            </p>
-                        </div>
+                        </GlassBox>
                     )}
-                </div>
+                </motion.div>
             </div>
         </div>
     );

@@ -1,5 +1,9 @@
 import type {SeriesStats} from "../types/SeriesStats.ts";
 import type {Team} from "../types/Team.ts";
+import { getAgentLogo } from "../utils/agentLogos.ts";
+import { capitalize } from "../utils/formatters.ts";
+import { GlassBox } from "./GlassBox.tsx";
+import { Activity, Users } from "lucide-react";
 
 type Props = {
     team: Team | null;
@@ -46,29 +50,56 @@ const AgentStatistics = ({ team, allSeriesData }: Props) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             {/* Pick Rate Card */}
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-xl">
-                <h3 className="text-gray-400 text-xs uppercase tracking-widest mb-6 font-bold">Agent Pick Rate (%)</h3>
+            <GlassBox>
+                <div className="flex items-center gap-2 mb-4">
+                    <Users className="w-5 h-5 text-blue-400" />
+                    <h3 className="text-lg font-semibold text-white">Agent Comfort</h3>
+                </div>
                 <div className="space-y-4">
                     {sortedAgents.slice(0, 6).map((agent) => (
-                        <div key={agent.name} className="space-y-1">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-white font-medium">{agent.name}</span>
-                                <span className="text-gray-400 font-mono">{agent.pickRate.toFixed(0)}%</span>
-                            </div>
-                            <div className="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
-                                <div 
-                                    className="h-full bg-indigo-500 rounded-full transition-all duration-500"
-                                    style={{ width: `${agent.pickRate}%` }}
+                        <div key={agent.name} className="flex items-center gap-4">
+                            {getAgentLogo(agent.name) ? (
+                                <img 
+                                    src={getAgentLogo(agent.name)} 
+                                    alt={agent.name}
+                                    title={agent.name}
+                                    className="w-12 h-12 rounded-lg border-2 border-white/10 object-cover"
                                 />
+                            ) : (
+                                <div className="w-12 h-12 rounded-lg border-2 border-white/10 bg-white/10 flex items-center justify-center text-sm text-blue-200/60 font-bold">
+                                    {agent.name.substring(0, 2)}
+                                </div>
+                            )}
+                            <div className="flex-1">
+                                <div className="flex justify-between mb-1">
+                                    <span className="text-blue-100 font-semibold">{capitalize(agent.name)}</span>
+                                    <span className="text-blue-400 font-semibold">{agent.pickRate.toFixed(0)}%</span>
+                                </div>
+                                <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                                    <div 
+                                        className="h-2 rounded-full transition-all duration-500" 
+                                        style={{ 
+                                            width: `${agent.pickRate}%`,
+                                            backgroundColor: agent.pickRate < 50 
+                                                ? '#ef4444' 
+                                                : agent.pickRate < 70 
+                                                    ? '#eab308' 
+                                                    : '#22c55e'
+                                        }}
+                                    ></div>
+                                </div>
                             </div>
                         </div>
                     ))}
                 </div>
-            </div>
+            </GlassBox>
 
             {/* Total Picks Bar Graph */}
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-xl">
-                <h3 className="text-gray-400 text-xs uppercase tracking-widest mb-6 font-bold">Total Agent Picks</h3>
+            <GlassBox>
+                <div className="flex items-center gap-2 mb-4">
+                    <Activity className="w-5 h-5 text-blue-400" />
+                    <h3 className="text-lg font-semibold text-white">Agent Usage</h3>
+                </div>
                 <div className="relative h-48 mt-4">
                     {/* Y-Axis Grid Lines & Numbers */}
                     <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
@@ -76,8 +107,8 @@ const AgentStatistics = ({ team, allSeriesData }: Props) => {
                             const val = Math.round(maxPicks - (maxPicks / 4) * i);
                             return (
                                 <div key={i} className="flex items-center w-full gap-2">
-                                    <span className="text-[10px] font-mono text-gray-600 w-4 text-right">{val}</span>
-                                    <div className="flex-1 h-px bg-gray-800/50" />
+                                    <span className="text-[10px] font-mono text-blue-200/40 w-4 text-right">{val}</span>
+                                    <div className="flex-1 h-px bg-white/10" />
                                 </div>
                             );
                         })}
@@ -89,22 +120,34 @@ const AgentStatistics = ({ team, allSeriesData }: Props) => {
                             <div key={agent.name} className="flex flex-col items-center flex-1 group h-full justify-end">
                                 <div className="relative w-full flex flex-col items-center">
                                     {/* Tooltip-like value */}
-                                    <span className="absolute -top-6 text-[10px] font-mono text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span className="absolute -top-6 text-[10px] font-mono text-blue-200/60 opacity-0 group-hover:opacity-100 transition-opacity">
                                         {agent.picks}
                                     </span>
                                     <div 
-                                        className="w-full bg-indigo-600/40 border-t-2 border-indigo-400 rounded-t-sm transition-all duration-500 group-hover:bg-indigo-500/60"
+                                        className="w-full bg-blue-400/40 border-t-2 border-blue-400 rounded-t-sm transition-all duration-500 group-hover:bg-blue-400/60"
                                         style={{ height: `${(agent.picks / maxPicks) * 160}px` }}
                                     />
                                 </div>
-                                <span className="text-[10px] text-gray-400 mt-3 rotate-45 origin-left truncate w-12 text-center">
-                                    {agent.name}
-                                </span>
+                                {/* Agent Image instead of text */}
+                                <div className="mt-2">
+                                    {getAgentLogo(agent.name) ? (
+                                        <img 
+                                            src={getAgentLogo(agent.name)} 
+                                            alt={agent.name}
+                                            title={agent.name}
+                                            className="w-8 h-8 rounded object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-[8px] text-blue-200/60 font-bold">
+                                            {agent.name.substring(0, 2)}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         ))}
                     </div>
                 </div>
-            </div>
+            </GlassBox>
         </div>
     );
 };

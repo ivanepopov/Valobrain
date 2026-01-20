@@ -1,5 +1,7 @@
 import type { SeriesStats } from "../types/SeriesStats.ts";
 import type { Team } from "../types/Team.ts";
+import { GlassBox } from "./GlassBox.tsx";
+import { Trophy, Target, Shield } from "lucide-react";
 
 type Props = {
     team: Team | null;
@@ -48,31 +50,43 @@ const TeamLevelStatsOverview = ({ team, allSeriesData }: Props) => {
     const attackWinRate = totalAttackRounds > 0 ? (attackRoundsWon / totalAttackRounds) * 100 : 0;
     const defenseWinRate = totalDefenseRounds > 0 ? (defenseRoundsWon / totalDefenseRounds) * 100 : 0;
 
-    const StatCard = ({ label, value, subtext }: { label: string, value: string, subtext: string }) => (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-xl flex flex-col items-center justify-center">
-            <span className="text-gray-400 text-xs uppercase tracking-widest mb-2 font-bold">{label}</span>
-            <span className="text-4xl font-black text-white mb-1">{value}</span>
-            <span className="text-[10px] text-gray-500 font-mono uppercase tracking-tighter">{subtext}</span>
-        </div>
-    );
-
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <StatCard 
-                label="Match Win Rate" 
-                value={`${matchWinRate.toFixed(1)}%`} 
-                subtext={`${matchesWon}W - ${totalMatches - matchesWon}L`}
-            />
-            <StatCard 
-                label="Attack Win Rate" 
-                value={`${attackWinRate.toFixed(1)}%`} 
-                subtext={`${attackRoundsWon} / ${totalAttackRounds} Rounds`}
-            />
-            <StatCard 
-                label="Defense Win Rate" 
-                value={`${defenseWinRate.toFixed(1)}%`} 
-                subtext={`${defenseRoundsWon} / ${totalDefenseRounds} Rounds`}
-            />
+            <GlassBox>
+                <div className="flex items-center gap-3 mb-2">
+                    <Trophy className="w-5 h-5 text-green-400" />
+                    <p className="text-blue-200 text-sm">Overall Match Win Rate</p>
+                </div>
+                <p className="text-3xl font-bold text-white">{matchWinRate.toFixed(1)}%</p>
+                <p className="text-xs text-blue-200/40 font-mono mt-1">{matchesWon}W - {totalMatches - matchesWon}L</p>
+                <div className="mt-2 w-full bg-white/10 rounded-full h-2">
+                    <div className="bg-green-400 h-2 rounded-full" style={{ width: `${matchWinRate}%` }}></div>
+                </div>
+            </GlassBox>
+
+            <GlassBox>
+                <div className="flex items-center gap-3 mb-2">
+                    <Target className="w-5 h-5 text-red-400" />
+                    <p className="text-blue-200 text-sm">Attack Round Win Rate</p>
+                </div>
+                <p className="text-3xl font-bold text-white">{attackWinRate.toFixed(1)}%</p>
+                <p className="text-xs text-blue-200/40 font-mono mt-1">{attackRoundsWon} / {totalAttackRounds} Rounds</p>
+                <div className="mt-2 w-full bg-white/10 rounded-full h-2">
+                    <div className="bg-red-400 h-2 rounded-full" style={{ width: `${attackWinRate}%` }}></div>
+                </div>
+            </GlassBox>
+
+            <GlassBox>
+                <div className="flex items-center gap-3 mb-2">
+                    <Shield className="w-5 h-5 text-blue-400" />
+                    <p className="text-blue-200 text-sm">Defense Round Win Rate</p>
+                </div>
+                <p className="text-3xl font-bold text-white">{defenseWinRate.toFixed(1)}%</p>
+                <p className="text-xs text-blue-200/40 font-mono mt-1">{defenseRoundsWon} / {totalDefenseRounds} Rounds</p>
+                <div className="mt-2 w-full bg-white/10 rounded-full h-2">
+                    <div className="bg-blue-400 h-2 rounded-full" style={{ width: `${defenseWinRate}%` }}></div>
+                </div>
+            </GlassBox>
         </div>
     );
 };
