@@ -38,9 +38,7 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
         setSelectedGameIndex(0);
     };
 
-    if (!team) return <div className="text-gray-500 italic">Select a team</div>;
-
-    if (!stats || isLoadingSeries) {
+    if (!team || !stats || isLoadingSeries) {
         return (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
@@ -56,44 +54,46 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             {/* Left Column: Series List */}
-            <div className="lg:col-span-4 space-y-3 max-h-[calc(100vh-320px)] overflow-y-auto pr-4 custom-scrollbar">
+            <div className="lg:col-span-4 sticky top-6">
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-4 px-1">
                     Match Timeline
                 </h3>
-                {allSeriesData.length === 0 ? (
-                    <div className="bg-gray-900/30 border border-gray-800 rounded-2xl p-8 text-center">
-                        <p className="text-gray-500 font-medium italic">No match history available</p>
-                    </div>
-                ) : (
-                    allSeriesData.map((data) => {
-                        const seriesId = data.seriesState.games[0]?.id.split('-')[0];
+                <div className="space-y-3 h-200 max-h-200 overflow-y-auto pr-4 custom-scrollbar">
+                    {allSeriesData.length === 0 ? (
+                        <div className="bg-gray-900/30 border border-gray-800 rounded-2xl p-8 text-center">
+                            <p className="text-gray-500 font-medium italic">No match history available</p>
+                        </div>
+                    ) : (
+                        allSeriesData.map((data) => {
+                            const seriesId = data.seriesState.games[0]?.id.split('-')[0];
 
-                        return (
-                            <div
-                                key={seriesId}
-                                onClick={() => handleSeriesClick(seriesId)}
-                                className={`cursor-pointer transition-all duration-200 ${
-                                    selectedSeriesId === seriesId 
-                                    ? "ring-1 ring-blue-500 ring-offset-1 ring-offset-gray-950 rounded-xl" 
-                                    : "opacity-70 hover:opacity-100"
-                                }`}
-                            >
-                                <Series
-                                    seriesData={data}
-                                    team={team}
-                                />
-                            </div>
-                        );
-                    })
-                )}
+                            return (
+                                <div
+                                    key={seriesId}
+                                    onClick={() => handleSeriesClick(seriesId)}
+                                    className={`cursor-pointer transition-all duration-200 ${
+                                        selectedSeriesId === seriesId 
+                                        ? "ring-1 ring-blue-500 ring-offset-1 ring-offset-gray-950 rounded-xl" 
+                                        : "opacity-70 hover:opacity-100"
+                                    }`}
+                                >
+                                    <Series
+                                        seriesData={data}
+                                        team={team}
+                                    />
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
             </div>
 
             {/* Right Column: Detailed View */}
-            <div className="lg:col-span-8 sticky top-6">
+            <div className="lg:col-span-8">
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-4 px-1">
                     Series Intelligence Breakdown
                 </h3>
-                <div className="bg-gray-900/40 border border-gray-800 rounded-2xl min-h-[600px] shadow-2xl backdrop-blur-sm overflow-hidden">
+                <div className="bg-gray-900/40 border border-gray-800 rounded-2xl min-h-200 shadow-2xl backdrop-blur-sm overflow-hidden">
                     {selectedSeriesData ? (
                         <div className="p-6 animate-in fade-in slide-in-from-right-4 duration-300">
                             <div className="flex items-center justify-between mb-8 border-b border-gray-800 pb-6">
@@ -150,7 +150,7 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
                             </div>
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center justify-center h-[600px] text-center p-12">
+                        <div className="flex flex-col items-center justify-center h-full text-center p-12">
                             <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-600">
                                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
