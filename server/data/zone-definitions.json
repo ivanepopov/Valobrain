@@ -1,0 +1,1043 @@
+{
+  "version": "1.0",
+  "coordSystem": "GRID API (game units)",
+  "notes": "Polygons define zone boundaries. Buffer adds tolerance. Coordinates based on GRID API position data.",
+  
+  "Ascent": {
+    "mapBounds": { "minX": -10000, "maxX": 15000, "minY": -10000, "maxY": 15000 },
+    "zones": {
+      "A-Lobby": {
+        "polygon": [
+          { "x": 8500, "y": -4500 },
+          { "x": 11000, "y": -4500 },
+          { "x": 11000, "y": -2000 },
+          { "x": 8500, "y": -2000 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["A-Main", "Attacker-Spawn"]
+      },
+      "A-Main": {
+        "polygon": [
+          { "x": 8500, "y": -2000 },
+          { "x": 11500, "y": -2000 },
+          { "x": 11500, "y": 1000 },
+          { "x": 8500, "y": 1000 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["A-Lobby", "A-Site", "Garden"]
+      },
+      "A-Site": {
+        "polygon": [
+          { "x": 10500, "y": 1000 },
+          { "x": 14000, "y": 1000 },
+          { "x": 14000, "y": 4500 },
+          { "x": 10500, "y": 4500 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true,
+        "adjacentZones": ["A-Main", "Heaven", "Garden"]
+      },
+      "Mid": {
+        "polygon": [
+          { "x": 4500, "y": -2000 },
+          { "x": 7500, "y": -2000 },
+          { "x": 7500, "y": 3000 },
+          { "x": 4500, "y": 3000 }
+        ],
+        "buffer": 250,
+        "type": "neutral",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["Mid-Top", "Mid-Bottom", "Market", "Pizza"]
+      },
+      "Mid-Top": {
+        "polygon": [
+          { "x": 4500, "y": 3000 },
+          { "x": 7500, "y": 3000 },
+          { "x": 7500, "y": 6000 },
+          { "x": 4500, "y": 6000 }
+        ],
+        "buffer": 200,
+        "type": "neutral",
+        "defaultOwner": "defender",
+        "adjacentZones": ["Mid", "Defender-Spawn"]
+      },
+      "Mid-Bottom": {
+        "polygon": [
+          { "x": 4500, "y": -5000 },
+          { "x": 7500, "y": -5000 },
+          { "x": 7500, "y": -2000 },
+          { "x": 4500, "y": -2000 }
+        ],
+        "buffer": 200,
+        "type": "neutral",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["Mid", "B-Main"]
+      },
+      "B-Main": {
+        "polygon": [
+          { "x": 500, "y": -6000 },
+          { "x": 4000, "y": -6000 },
+          { "x": 4000, "y": -2500 },
+          { "x": 500, "y": -2500 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["B-Lobby", "B-Site", "Mid-Bottom"]
+      },
+      "B-Lobby": {
+        "polygon": [
+          { "x": -2000, "y": -6000 },
+          { "x": 500, "y": -6000 },
+          { "x": 500, "y": -3000 },
+          { "x": -2000, "y": -3000 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["B-Main", "Attacker-Spawn"]
+      },
+      "B-Site": {
+        "polygon": [
+          { "x": -500, "y": -2500 },
+          { "x": 3500, "y": -2500 },
+          { "x": 3500, "y": 1500 },
+          { "x": -500, "y": 1500 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true,
+        "adjacentZones": ["B-Main", "Market", "CT-Spawn"]
+      },
+      "Market": {
+        "polygon": [
+          { "x": 3500, "y": 0 },
+          { "x": 5500, "y": 0 },
+          { "x": 5500, "y": 3000 },
+          { "x": 3500, "y": 3000 }
+        ],
+        "buffer": 150,
+        "type": "connector",
+        "defaultOwner": "defender",
+        "adjacentZones": ["B-Site", "Mid", "Defender-Spawn"]
+      },
+      "Attacker-Spawn": {
+        "polygon": [
+          { "x": 2000, "y": -9000 },
+          { "x": 8000, "y": -9000 },
+          { "x": 8000, "y": -6000 },
+          { "x": 2000, "y": -6000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "attacker",
+        "adjacentZones": ["A-Lobby", "B-Lobby", "Mid-Bottom"]
+      },
+      "Defender-Spawn": {
+        "polygon": [
+          { "x": 4000, "y": 5500 },
+          { "x": 10000, "y": 5500 },
+          { "x": 10000, "y": 9000 },
+          { "x": 4000, "y": 9000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "defender",
+        "adjacentZones": ["Mid-Top", "Market", "A-Site"]
+      }
+    }
+  },
+
+  "Haven": {
+    "mapBounds": { "minX": -12000, "maxX": 12000, "minY": -12000, "maxY": 12000 },
+    "zones": {
+      "A-Lobby": {
+        "polygon": [
+          { "x": 6000, "y": -7000 },
+          { "x": 9000, "y": -7000 },
+          { "x": 9000, "y": -4000 },
+          { "x": 6000, "y": -4000 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["A-Long", "A-Short", "Attacker-Spawn"]
+      },
+      "A-Long": {
+        "polygon": [
+          { "x": 7500, "y": -4000 },
+          { "x": 10500, "y": -4000 },
+          { "x": 10500, "y": 0 },
+          { "x": 7500, "y": 0 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["A-Lobby", "A-Site"]
+      },
+      "A-Site": {
+        "polygon": [
+          { "x": 7000, "y": 0 },
+          { "x": 11000, "y": 0 },
+          { "x": 11000, "y": 4000 },
+          { "x": 7000, "y": 4000 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true,
+        "adjacentZones": ["A-Long", "A-Short", "Defender-Spawn"]
+      },
+      "A-Short": {
+        "polygon": [
+          { "x": 4500, "y": -2000 },
+          { "x": 7000, "y": -2000 },
+          { "x": 7000, "y": 1500 },
+          { "x": 4500, "y": 1500 }
+        ],
+        "buffer": 200,
+        "type": "connector",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["A-Lobby", "A-Site", "Mid"]
+      },
+      "Mid": {
+        "polygon": [
+          { "x": 0, "y": -4000 },
+          { "x": 4500, "y": -4000 },
+          { "x": 4500, "y": 2000 },
+          { "x": 0, "y": 2000 }
+        ],
+        "buffer": 250,
+        "type": "neutral",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["A-Short", "Garage", "C-Link"]
+      },
+      "Garage": {
+        "polygon": [
+          { "x": -3500, "y": -3000 },
+          { "x": 0, "y": -3000 },
+          { "x": 0, "y": 1000 },
+          { "x": -3500, "y": 1000 }
+        ],
+        "buffer": 200,
+        "type": "connector",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["Mid", "C-Long", "C-Site"]
+      },
+      "C-Long": {
+        "polygon": [
+          { "x": -8000, "y": -5000 },
+          { "x": -4000, "y": -5000 },
+          { "x": -4000, "y": -1000 },
+          { "x": -8000, "y": -1000 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["C-Lobby", "C-Site", "Garage"]
+      },
+      "C-Lobby": {
+        "polygon": [
+          { "x": -8000, "y": -8000 },
+          { "x": -4000, "y": -8000 },
+          { "x": -4000, "y": -5000 },
+          { "x": -8000, "y": -5000 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["C-Long", "Attacker-Spawn"]
+      },
+      "C-Site": {
+        "polygon": [
+          { "x": -7500, "y": -1000 },
+          { "x": -3000, "y": -1000 },
+          { "x": -3000, "y": 3500 },
+          { "x": -7500, "y": 3500 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true,
+        "adjacentZones": ["C-Long", "Garage", "C-Link"]
+      },
+      "B-Site": {
+        "polygon": [
+          { "x": -2000, "y": 3000 },
+          { "x": 3000, "y": 3000 },
+          { "x": 3000, "y": 7000 },
+          { "x": -2000, "y": 7000 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true,
+        "adjacentZones": ["Mid", "Defender-Spawn"]
+      },
+      "Attacker-Spawn": {
+        "polygon": [
+          { "x": -2000, "y": -10000 },
+          { "x": 5000, "y": -10000 },
+          { "x": 5000, "y": -7000 },
+          { "x": -2000, "y": -7000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "attacker",
+        "adjacentZones": ["A-Lobby", "C-Lobby", "Mid"]
+      },
+      "Defender-Spawn": {
+        "polygon": [
+          { "x": 0, "y": 6000 },
+          { "x": 7000, "y": 6000 },
+          { "x": 7000, "y": 10000 },
+          { "x": 0, "y": 10000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "defender",
+        "adjacentZones": ["A-Site", "B-Site"]
+      }
+    }
+  },
+
+  "Bind": {
+    "mapBounds": { "minX": -10000, "maxX": 10000, "minY": -10000, "maxY": 10000 },
+    "zones": {
+      "A-Lobby": {
+        "polygon": [
+          { "x": 4000, "y": -7000 },
+          { "x": 7500, "y": -7000 },
+          { "x": 7500, "y": -3500 },
+          { "x": 4000, "y": -3500 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["A-Short", "A-Bath", "Attacker-Spawn"]
+      },
+      "A-Short": {
+        "polygon": [
+          { "x": 5000, "y": -3500 },
+          { "x": 8000, "y": -3500 },
+          { "x": 8000, "y": 0 },
+          { "x": 5000, "y": 0 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["A-Lobby", "A-Site"]
+      },
+      "A-Bath": {
+        "polygon": [
+          { "x": 2500, "y": -4500 },
+          { "x": 5000, "y": -4500 },
+          { "x": 5000, "y": -1500 },
+          { "x": 2500, "y": -1500 }
+        ],
+        "buffer": 200,
+        "type": "connector",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["A-Lobby", "A-Site"]
+      },
+      "A-Site": {
+        "polygon": [
+          { "x": 4500, "y": -1500 },
+          { "x": 9000, "y": -1500 },
+          { "x": 9000, "y": 3000 },
+          { "x": 4500, "y": 3000 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true,
+        "adjacentZones": ["A-Short", "A-Bath", "Defender-Spawn", "A-TP"]
+      },
+      "A-TP": {
+        "polygon": [
+          { "x": 2000, "y": -1000 },
+          { "x": 4500, "y": -1000 },
+          { "x": 4500, "y": 2000 },
+          { "x": 2000, "y": 2000 }
+        ],
+        "buffer": 150,
+        "type": "connector",
+        "defaultOwner": "defender",
+        "teleportTo": "B-TP",
+        "adjacentZones": ["A-Site"]
+      },
+      "B-Lobby": {
+        "polygon": [
+          { "x": -7500, "y": -6000 },
+          { "x": -4000, "y": -6000 },
+          { "x": -4000, "y": -2500 },
+          { "x": -7500, "y": -2500 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["B-Long", "B-Short", "Attacker-Spawn"]
+      },
+      "B-Long": {
+        "polygon": [
+          { "x": -7000, "y": -2500 },
+          { "x": -3500, "y": -2500 },
+          { "x": -3500, "y": 1000 },
+          { "x": -7000, "y": 1000 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["B-Lobby", "B-Site"]
+      },
+      "B-Short": {
+        "polygon": [
+          { "x": -4000, "y": -2500 },
+          { "x": -1000, "y": -2500 },
+          { "x": -1000, "y": 0 },
+          { "x": -4000, "y": 0 }
+        ],
+        "buffer": 200,
+        "type": "connector",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["B-Lobby", "B-Site", "Hookah"]
+      },
+      "Hookah": {
+        "polygon": [
+          { "x": -4000, "y": 0 },
+          { "x": -1000, "y": 0 },
+          { "x": -1000, "y": 3000 },
+          { "x": -4000, "y": 3000 }
+        ],
+        "buffer": 200,
+        "type": "connector",
+        "defaultOwner": "neutral",
+        "adjacentZones": ["B-Short", "B-Site"]
+      },
+      "B-Site": {
+        "polygon": [
+          { "x": -7000, "y": 0 },
+          { "x": -3500, "y": 0 },
+          { "x": -3500, "y": 4500 },
+          { "x": -7000, "y": 4500 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true,
+        "adjacentZones": ["B-Long", "Hookah", "B-TP", "Defender-Spawn"]
+      },
+      "B-TP": {
+        "polygon": [
+          { "x": -3500, "y": 2000 },
+          { "x": -1000, "y": 2000 },
+          { "x": -1000, "y": 5000 },
+          { "x": -3500, "y": 5000 }
+        ],
+        "buffer": 150,
+        "type": "connector",
+        "defaultOwner": "defender",
+        "teleportTo": "A-TP",
+        "adjacentZones": ["B-Site"]
+      },
+      "Attacker-Spawn": {
+        "polygon": [
+          { "x": -3000, "y": -9000 },
+          { "x": 3000, "y": -9000 },
+          { "x": 3000, "y": -6000 },
+          { "x": -3000, "y": -6000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "attacker",
+        "adjacentZones": ["A-Lobby", "B-Lobby"]
+      },
+      "Defender-Spawn": {
+        "polygon": [
+          { "x": -2000, "y": 4000 },
+          { "x": 4000, "y": 4000 },
+          { "x": 4000, "y": 8000 },
+          { "x": -2000, "y": 8000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "defender",
+        "adjacentZones": ["A-Site", "B-Site"]
+      }
+    }
+  },
+
+  "Split": {
+    "mapBounds": { "minX": -8000, "maxX": 12000, "minY": -8000, "maxY": 12000 },
+    "zones": {
+      "A-Lobby": {
+        "polygon": [
+          { "x": 5000, "y": -5000 },
+          { "x": 8000, "y": -5000 },
+          { "x": 8000, "y": -1500 },
+          { "x": 5000, "y": -1500 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral"
+      },
+      "A-Main": {
+        "polygon": [
+          { "x": 7000, "y": -1500 },
+          { "x": 10000, "y": -1500 },
+          { "x": 10000, "y": 2000 },
+          { "x": 7000, "y": 2000 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral"
+      },
+      "A-Site": {
+        "polygon": [
+          { "x": 7000, "y": 2000 },
+          { "x": 11000, "y": 2000 },
+          { "x": 11000, "y": 6000 },
+          { "x": 7000, "y": 6000 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true
+      },
+      "Mid": {
+        "polygon": [
+          { "x": 2000, "y": -2000 },
+          { "x": 6000, "y": -2000 },
+          { "x": 6000, "y": 3000 },
+          { "x": 2000, "y": 3000 }
+        ],
+        "buffer": 250,
+        "type": "neutral",
+        "defaultOwner": "neutral"
+      },
+      "B-Lobby": {
+        "polygon": [
+          { "x": -4000, "y": -5000 },
+          { "x": 0, "y": -5000 },
+          { "x": 0, "y": -1500 },
+          { "x": -4000, "y": -1500 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral"
+      },
+      "B-Main": {
+        "polygon": [
+          { "x": -5000, "y": -1500 },
+          { "x": -1000, "y": -1500 },
+          { "x": -1000, "y": 2000 },
+          { "x": -5000, "y": 2000 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral"
+      },
+      "B-Site": {
+        "polygon": [
+          { "x": -6000, "y": 2000 },
+          { "x": -1000, "y": 2000 },
+          { "x": -1000, "y": 6000 },
+          { "x": -6000, "y": 6000 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true
+      },
+      "Attacker-Spawn": {
+        "polygon": [
+          { "x": -1000, "y": -8000 },
+          { "x": 5000, "y": -8000 },
+          { "x": 5000, "y": -5000 },
+          { "x": -1000, "y": -5000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "attacker"
+      },
+      "Defender-Spawn": {
+        "polygon": [
+          { "x": 0, "y": 6000 },
+          { "x": 6000, "y": 6000 },
+          { "x": 6000, "y": 10000 },
+          { "x": 0, "y": 10000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "defender"
+      }
+    }
+  },
+
+  "Icebox": {
+    "mapBounds": { "minX": -10000, "maxX": 10000, "minY": -10000, "maxY": 10000 },
+    "zones": {
+      "A-Lobby": {
+        "polygon": [
+          { "x": 4000, "y": -6000 },
+          { "x": 7500, "y": -6000 },
+          { "x": 7500, "y": -2500 },
+          { "x": 4000, "y": -2500 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral"
+      },
+      "A-Site": {
+        "polygon": [
+          { "x": 5000, "y": -2500 },
+          { "x": 9000, "y": -2500 },
+          { "x": 9000, "y": 2000 },
+          { "x": 5000, "y": 2000 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true
+      },
+      "Mid": {
+        "polygon": [
+          { "x": 0, "y": -4000 },
+          { "x": 4000, "y": -4000 },
+          { "x": 4000, "y": 1000 },
+          { "x": 0, "y": 1000 }
+        ],
+        "buffer": 250,
+        "type": "neutral",
+        "defaultOwner": "neutral"
+      },
+      "B-Lobby": {
+        "polygon": [
+          { "x": -7000, "y": -6000 },
+          { "x": -3000, "y": -6000 },
+          { "x": -3000, "y": -2000 },
+          { "x": -7000, "y": -2000 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral"
+      },
+      "B-Site": {
+        "polygon": [
+          { "x": -8000, "y": -2000 },
+          { "x": -3000, "y": -2000 },
+          { "x": -3000, "y": 3000 },
+          { "x": -8000, "y": 3000 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true
+      },
+      "Attacker-Spawn": {
+        "polygon": [
+          { "x": -2000, "y": -9000 },
+          { "x": 4000, "y": -9000 },
+          { "x": 4000, "y": -6000 },
+          { "x": -2000, "y": -6000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "attacker"
+      },
+      "Defender-Spawn": {
+        "polygon": [
+          { "x": -2000, "y": 3000 },
+          { "x": 4000, "y": 3000 },
+          { "x": 4000, "y": 7000 },
+          { "x": -2000, "y": 7000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "defender"
+      }
+    }
+  },
+
+  "Breeze": {
+    "mapBounds": { "minX": -12000, "maxX": 12000, "minY": -12000, "maxY": 12000 },
+    "zones": {
+      "A-Lobby": {
+        "polygon": [
+          { "x": 4000, "y": -7000 },
+          { "x": 8000, "y": -7000 },
+          { "x": 8000, "y": -3000 },
+          { "x": 4000, "y": -3000 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral"
+      },
+      "A-Site": {
+        "polygon": [
+          { "x": 6000, "y": -3000 },
+          { "x": 11000, "y": -3000 },
+          { "x": 11000, "y": 2000 },
+          { "x": 6000, "y": 2000 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true
+      },
+      "Mid": {
+        "polygon": [
+          { "x": -1000, "y": -5000 },
+          { "x": 4000, "y": -5000 },
+          { "x": 4000, "y": 1000 },
+          { "x": -1000, "y": 1000 }
+        ],
+        "buffer": 250,
+        "type": "neutral",
+        "defaultOwner": "neutral"
+      },
+      "B-Lobby": {
+        "polygon": [
+          { "x": -8000, "y": -6000 },
+          { "x": -4000, "y": -6000 },
+          { "x": -4000, "y": -2000 },
+          { "x": -8000, "y": -2000 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral"
+      },
+      "B-Site": {
+        "polygon": [
+          { "x": -10000, "y": -2000 },
+          { "x": -4000, "y": -2000 },
+          { "x": -4000, "y": 4000 },
+          { "x": -10000, "y": 4000 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true
+      },
+      "Attacker-Spawn": {
+        "polygon": [
+          { "x": -3000, "y": -10000 },
+          { "x": 4000, "y": -10000 },
+          { "x": 4000, "y": -7000 },
+          { "x": -3000, "y": -7000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "attacker"
+      },
+      "Defender-Spawn": {
+        "polygon": [
+          { "x": -2000, "y": 4000 },
+          { "x": 5000, "y": 4000 },
+          { "x": 5000, "y": 9000 },
+          { "x": -2000, "y": 9000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "defender"
+      }
+    }
+  },
+
+  "Fracture": {
+    "mapBounds": { "minX": -12000, "maxX": 12000, "minY": -12000, "maxY": 12000 },
+    "zones": {
+      "A-Main": {
+        "polygon": [
+          { "x": 5000, "y": -4000 },
+          { "x": 9000, "y": -4000 },
+          { "x": 9000, "y": 0 },
+          { "x": 5000, "y": 0 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral"
+      },
+      "A-Site": {
+        "polygon": [
+          { "x": 6000, "y": 0 },
+          { "x": 11000, "y": 0 },
+          { "x": 11000, "y": 5000 },
+          { "x": 6000, "y": 5000 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true
+      },
+      "Mid": {
+        "polygon": [
+          { "x": -1000, "y": -3000 },
+          { "x": 5000, "y": -3000 },
+          { "x": 5000, "y": 3000 },
+          { "x": -1000, "y": 3000 }
+        ],
+        "buffer": 250,
+        "type": "neutral",
+        "defaultOwner": "neutral"
+      },
+      "B-Main": {
+        "polygon": [
+          { "x": -8000, "y": -4000 },
+          { "x": -4000, "y": -4000 },
+          { "x": -4000, "y": 0 },
+          { "x": -8000, "y": 0 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral"
+      },
+      "B-Site": {
+        "polygon": [
+          { "x": -10000, "y": 0 },
+          { "x": -5000, "y": 0 },
+          { "x": -5000, "y": 5000 },
+          { "x": -10000, "y": 5000 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true
+      },
+      "Attacker-Spawn-A": {
+        "polygon": [
+          { "x": 6000, "y": -8000 },
+          { "x": 11000, "y": -8000 },
+          { "x": 11000, "y": -4000 },
+          { "x": 6000, "y": -4000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "attacker"
+      },
+      "Attacker-Spawn-B": {
+        "polygon": [
+          { "x": -10000, "y": -8000 },
+          { "x": -5000, "y": -8000 },
+          { "x": -5000, "y": -4000 },
+          { "x": -10000, "y": -4000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "attacker"
+      },
+      "Defender-Spawn": {
+        "polygon": [
+          { "x": -2000, "y": 5000 },
+          { "x": 3000, "y": 5000 },
+          { "x": 3000, "y": 10000 },
+          { "x": -2000, "y": 10000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "defender"
+      }
+    }
+  },
+
+  "Pearl": {
+    "mapBounds": { "minX": -10000, "maxX": 10000, "minY": -10000, "maxY": 10000 },
+    "zones": {
+      "A-Lobby": {
+        "polygon": [
+          { "x": 4000, "y": -6000 },
+          { "x": 8000, "y": -6000 },
+          { "x": 8000, "y": -2000 },
+          { "x": 4000, "y": -2000 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral"
+      },
+      "A-Site": {
+        "polygon": [
+          { "x": 5000, "y": -2000 },
+          { "x": 9000, "y": -2000 },
+          { "x": 9000, "y": 3000 },
+          { "x": 5000, "y": 3000 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true
+      },
+      "Mid": {
+        "polygon": [
+          { "x": 0, "y": -4000 },
+          { "x": 4000, "y": -4000 },
+          { "x": 4000, "y": 2000 },
+          { "x": 0, "y": 2000 }
+        ],
+        "buffer": 250,
+        "type": "neutral",
+        "defaultOwner": "neutral"
+      },
+      "B-Lobby": {
+        "polygon": [
+          { "x": -7000, "y": -6000 },
+          { "x": -3000, "y": -6000 },
+          { "x": -3000, "y": -2000 },
+          { "x": -7000, "y": -2000 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral"
+      },
+      "B-Site": {
+        "polygon": [
+          { "x": -8000, "y": -2000 },
+          { "x": -3000, "y": -2000 },
+          { "x": -3000, "y": 3000 },
+          { "x": -8000, "y": 3000 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true
+      },
+      "Attacker-Spawn": {
+        "polygon": [
+          { "x": -2000, "y": -9000 },
+          { "x": 4000, "y": -9000 },
+          { "x": 4000, "y": -6000 },
+          { "x": -2000, "y": -6000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "attacker"
+      },
+      "Defender-Spawn": {
+        "polygon": [
+          { "x": -2000, "y": 3000 },
+          { "x": 4000, "y": 3000 },
+          { "x": 4000, "y": 8000 },
+          { "x": -2000, "y": 8000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "defender"
+      }
+    }
+  },
+
+  "Lotus": {
+    "mapBounds": { "minX": -12000, "maxX": 12000, "minY": -12000, "maxY": 12000 },
+    "zones": {
+      "A-Lobby": {
+        "polygon": [
+          { "x": 5000, "y": -6000 },
+          { "x": 9000, "y": -6000 },
+          { "x": 9000, "y": -2000 },
+          { "x": 5000, "y": -2000 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral"
+      },
+      "A-Site": {
+        "polygon": [
+          { "x": 6000, "y": -2000 },
+          { "x": 11000, "y": -2000 },
+          { "x": 11000, "y": 3000 },
+          { "x": 6000, "y": 3000 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true
+      },
+      "Mid": {
+        "polygon": [
+          { "x": -1000, "y": -4000 },
+          { "x": 5000, "y": -4000 },
+          { "x": 5000, "y": 2000 },
+          { "x": -1000, "y": 2000 }
+        ],
+        "buffer": 250,
+        "type": "neutral",
+        "defaultOwner": "neutral"
+      },
+      "B-Lobby": {
+        "polygon": [
+          { "x": -3000, "y": -6000 },
+          { "x": 1000, "y": -6000 },
+          { "x": 1000, "y": -2500 },
+          { "x": -3000, "y": -2500 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral"
+      },
+      "B-Site": {
+        "polygon": [
+          { "x": -3000, "y": -2500 },
+          { "x": 2000, "y": -2500 },
+          { "x": 2000, "y": 2000 },
+          { "x": -3000, "y": 2000 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true
+      },
+      "C-Lobby": {
+        "polygon": [
+          { "x": -8000, "y": -5000 },
+          { "x": -4000, "y": -5000 },
+          { "x": -4000, "y": -1000 },
+          { "x": -8000, "y": -1000 }
+        ],
+        "buffer": 200,
+        "type": "chokepoint",
+        "defaultOwner": "neutral"
+      },
+      "C-Site": {
+        "polygon": [
+          { "x": -10000, "y": -1000 },
+          { "x": -5000, "y": -1000 },
+          { "x": -5000, "y": 4000 },
+          { "x": -10000, "y": 4000 }
+        ],
+        "buffer": 150,
+        "type": "site",
+        "defaultOwner": "defender",
+        "plantable": true
+      },
+      "Attacker-Spawn": {
+        "polygon": [
+          { "x": -2000, "y": -10000 },
+          { "x": 5000, "y": -10000 },
+          { "x": 5000, "y": -6000 },
+          { "x": -2000, "y": -6000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "attacker"
+      },
+      "Defender-Spawn": {
+        "polygon": [
+          { "x": -2000, "y": 4000 },
+          { "x": 5000, "y": 4000 },
+          { "x": 5000, "y": 9000 },
+          { "x": -2000, "y": 9000 }
+        ],
+        "buffer": 300,
+        "type": "spawn",
+        "defaultOwner": "defender"
+      }
+    }
+  }
+}
+
