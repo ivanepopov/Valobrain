@@ -28,10 +28,23 @@ type Props = {
     team: Team | null;
     stats: TeamStats | null;
     allSeriesData: SeriesStats[];
+    isLoadingSeries: boolean;
 }
 
-const AnalyticsBreakdown = ({ team, stats, allSeriesData }: Props) => {
-    if (!stats) return <div className="text-gray-500 italic">Loading stats...</div>;
+const AnalyticsBreakdown = ({ team, stats, allSeriesData, isLoadingSeries }: Props) => {
+
+    if (!team || !stats || isLoadingSeries) {
+        return (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-24 bg-gray-900/50 border border-gray-800 rounded-xl animate-pulse" />
+                    ))}
+                </div>
+                <div className="hidden lg:block h-96 bg-gray-900/20 border border-gray-800 rounded-2xl animate-pulse" />
+            </div>
+        );
+    }
 
     // Derived roster from all matches
     const playersMap = new Map();
