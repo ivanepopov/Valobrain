@@ -183,18 +183,19 @@ const Home = () => {
 
           {/* Search Bar */}
           <form onSubmit={handleSubmit} className="max-w-2xl mx-auto relative">
-            <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-3 hover:border-blue-400/50 transition-all duration-300">
+            <div
+                className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-3 hover:border-blue-400/50 transition-all duration-300">
               <div className="flex items-center gap-3">
-                <Search className="w-6 h-6 text-blue-400 ml-3" />
+                <Search className="w-6 h-6 text-blue-400 ml-3"/>
                 <input
-                  type="text"
-                  value={teamName}
-                  onChange={(e) => {
-                    setTeamName(e.target.value);
-                    fetchTeams(e.target.value);
-                  }}
-                  placeholder="Enter team name..."
-                  className="flex-1 bg-transparent text-white placeholder-blue-200/50 outline-none text-lg py-3"
+                    type="text"
+                    value={teamName}
+                    onChange={(e) => {
+                      setTeamName(e.target.value);
+                      fetchTeams(e.target.value);
+                    }}
+                    placeholder="Enter team name..."
+                    className="flex-1 bg-transparent text-white placeholder-blue-200/50 outline-none text-lg py-3"
                 />
                 <button
                   type="submit"
@@ -207,31 +208,36 @@ const Home = () => {
 
             {/* Dropdown */}
             {teamsDropdown.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-3 bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
-                <div className="py-2">
-                  {teamsDropdown.map((t) => (
-                    <button
-                      key={t.id}
-                      onClick={() => {
-                        setTeamName(t.name);
-                        handleTeamSelect(t);
-                      }}
-                      className="w-full flex items-center px-5 py-3 hover:bg-white/10 transition-colors text-left group"
-                    >
-                      {t.logoUrl ? (
-                        <img src={t.logoUrl} alt="" className="w-8 h-8 rounded-md mr-4 object-contain bg-black/40 p-1" />
-                      ) : (
-                        <div className="w-8 h-8 rounded-md mr-4 bg-gray-800 flex items-center justify-center text-xs text-gray-400 font-bold uppercase">
-                          {t.name.substring(0, 1)}
-                        </div>
-                      )}
-                      <span className="text-sm font-semibold text-blue-200 group-hover:text-blue-100 transition-colors">
+                <div
+                    className="absolute top-full left-0 right-0 mt-3 bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                  <div className="py-2">
+                    {teamsDropdown.map((t) => (
+                        <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => {
+                              setTeamName(t.name);
+                              handleTeamSelect(t);
+                            }}
+                            className="w-full flex items-center px-5 py-3 hover:bg-white/10 transition-colors text-left group"
+                        >
+                          {t.logoUrl ? (
+                              <img src={t.logoUrl} alt=""
+                                   className="w-8 h-8 rounded-md mr-4 object-contain bg-black/40 p-1"/>
+                          ) : (
+                              <div
+                                  className="w-8 h-8 rounded-md mr-4 bg-gray-800 flex items-center justify-center text-xs text-gray-400 font-bold uppercase">
+                                {t.name.substring(0, 1)}
+                              </div>
+                          )}
+                          <span
+                              className="text-sm font-semibold text-blue-200 group-hover:text-blue-100 transition-colors">
                         {t.name}
                       </span>
-                    </button>
-                  ))}
+                        </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
             )}
           </form>
 
