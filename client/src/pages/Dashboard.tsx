@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import MatchHistory from "../components/MatchHistory";
 import AnalyticsBreakdown from "../components/AnalyticsBreakdown";
+import ScoutingReport from "../components/ScoutingReport";
 import getTeam from "../services/getTeam";
 import getTeamStats from "../services/getTeamStats";
 import getSeriesStats from "../services/getSeriesStats";
@@ -134,12 +135,13 @@ const Dashboard = () => {
                             />
                         )}
                         {activeTab === "scouting" && (
-                            <div className="bg-gray-900/50 rounded-2xl p-12 border border-dashed border-gray-800 text-center">
-                                <p className="text-gray-500">Scouting reports are being generated for {team?.name}...</p>
-                            </div>
+                            <ScoutingReport
+                                aggregationSeriesIds={stats?.aggregationSeriesIds || []}
+                                teamName={team?.name}
+                            />
                         )}
-                    </div>
-                </>
+                        </div>
+                    </>
             )}
         </div>
     );
