@@ -2,6 +2,7 @@ import type {SeriesStats} from "../types/SeriesStats.ts";
 import type {Team} from "../types/Team.ts";
 import { getAgentLogo } from "../utils/agentLogos.ts";
 import { GlassBox } from "./GlassBox.tsx";
+import { Activity, Users } from "lucide-react";
 
 type Props = {
     team: Team | null;
@@ -49,33 +50,36 @@ const AgentStatistics = ({ team, allSeriesData }: Props) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             {/* Pick Rate Card */}
             <GlassBox>
-                <h3 className="text-blue-200/60 text-xs uppercase tracking-widest mb-6 font-bold">Agent Pick Rate (%)</h3>
+                <div className="flex items-center gap-2 mb-4">
+                    <Users className="w-5 h-5 text-blue-400" />
+                    <h3 className="text-lg font-semibold text-white">Agent Comfort</h3>
+                </div>
                 <div className="space-y-4">
                     {sortedAgents.slice(0, 6).map((agent) => (
-                        <div key={agent.name} className="space-y-1">
-                            <div className="flex justify-between text-sm items-center">
-                                <div className="flex items-center gap-2">
-                                    {getAgentLogo(agent.name) ? (
-                                        <img 
-                                            src={getAgentLogo(agent.name)} 
-                                            alt={agent.name}
-                                            title={agent.name}
-                                            className="w-6 h-6 rounded object-cover"
-                                        />
-                                    ) : (
-                                        <div className="w-6 h-6 rounded bg-white/10 flex items-center justify-center text-[8px] text-blue-200/60 font-bold">
-                                            {agent.name.substring(0, 2)}
-                                        </div>
-                                    )}
-                                    <span className="text-white font-medium">{agent.name}</span>
-                                </div>
-                                <span className="text-blue-200/60 font-mono">{agent.pickRate.toFixed(0)}%</span>
-                            </div>
-                            <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                                <div 
-                                    className="h-full bg-blue-400 rounded-full transition-all duration-500"
-                                    style={{ width: `${agent.pickRate}%` }}
+                        <div key={agent.name} className="flex items-center gap-4">
+                            {getAgentLogo(agent.name) ? (
+                                <img 
+                                    src={getAgentLogo(agent.name)} 
+                                    alt={agent.name}
+                                    title={agent.name}
+                                    className="w-12 h-12 rounded-lg border-2 border-white/10 object-cover"
                                 />
+                            ) : (
+                                <div className="w-12 h-12 rounded-lg border-2 border-white/10 bg-white/10 flex items-center justify-center text-sm text-blue-200/60 font-bold">
+                                    {agent.name.substring(0, 2)}
+                                </div>
+                            )}
+                            <div className="flex-1">
+                                <div className="flex justify-between mb-1">
+                                    <span className="text-blue-100 font-semibold">{agent.name}</span>
+                                    <span className="text-blue-400 font-semibold">{agent.pickRate.toFixed(0)}%</span>
+                                </div>
+                                <div className="w-full bg-white/10 rounded-full h-2">
+                                    <div 
+                                        className="bg-gradient-to-r from-blue-400 to-cyan-400 h-2 rounded-full transition-all duration-500" 
+                                        style={{ width: `${agent.pickRate}%` }}
+                                    ></div>
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -84,7 +88,10 @@ const AgentStatistics = ({ team, allSeriesData }: Props) => {
 
             {/* Total Picks Bar Graph */}
             <GlassBox>
-                <h3 className="text-blue-200/60 text-xs uppercase tracking-widest mb-6 font-bold">Total Agent Picks</h3>
+                <div className="flex items-center gap-2 mb-4">
+                    <Activity className="w-5 h-5 text-blue-400" />
+                    <h3 className="text-lg font-semibold text-white">Agent Usage</h3>
+                </div>
                 <div className="relative h-48 mt-4">
                     {/* Y-Axis Grid Lines & Numbers */}
                     <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">

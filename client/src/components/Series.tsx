@@ -5,9 +5,10 @@ import type { SeriesStats } from "../types/SeriesStats.ts";
 interface SeriesProps {
     seriesData: SeriesStats;
     team: Team | null;
+    isSelected?: boolean;
 }
 
-const Series: React.FC<SeriesProps> = ({ seriesData, team }) => {
+const Series: React.FC<SeriesProps> = ({ seriesData, team, isSelected = false }) => {
     const series = seriesData.seriesState;
     const opponent = series.teams.find(t => t.name !== team?.name);
     const mainTeam = series.teams.find(t => t.name === team?.name);
@@ -17,40 +18,51 @@ const Series: React.FC<SeriesProps> = ({ seriesData, team }) => {
     ).length;
 
     const lossCount = series.games.length - winCount;
+    const isWin = winCount > lossCount;
 
     return (
-        <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-5 hover:border-blue-400/50 hover:bg-white/10 transition-all duration-300 group">
-            {/* Header: Format and Status */}
-            <div className="flex justify-between items-center mb-4">
-                <span className="text-[10px] font-bold font-mono text-blue-200/60 uppercase tracking-widest">
-                    {series.format} Series
-                </span>
-                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wider ${
-                    mainTeam?.won 
-                        ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
-                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                }`}>
-                    {mainTeam?.won ? 'SERIES WIN' : 'SERIES LOSS'}
+        <div className={`
+            w-full text-left p-4 rounded-lg border-2 transition-all duration-300
+            ${isSelected
+                ? 'border-blue-400 bg-blue-400/10'
+                : 'border-white/10 hover:border-white/20 bg-white/5'
+            }
+        `}>
+            {/* Header: Team vs Opponent with Result */}
+            <div className="flex items-center justify-between mb-2">
+                <span className="text-white font-semibold">{team?.name} vs {opponent?.name || 'Unknown'}</span>
+                <span className={`
+                    px-3 py-1 rounded-full text-sm font-bold
+                    ${isWin 
+                        ? 'bg-green-500/20 text-green-400' 
+                        : 'bg-red-500/20 text-red-400'
+                    }
+                `}>
+                    {winCount}-{lossCount}
                 </span>
             </div>
 
-            {/* Main Content: Opponent and Score */}
-            <div className="flex items-end justify-between">
-                <div className="flex-1">
-                    <p className="text-[10px] text-blue-200/40 font-bold uppercase tracking-widest mb-1">Opponent</p>
-                    <h4 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
-                        vs {opponent?.name || 'Unknown'}
-                    </h4>
-                </div>
-                
-                <div className="text-right">
-                    <p className="text-[10px] text-blue-200/40 font-bold uppercase tracking-widest mb-1">Score</p>
-                    <div className="text-2xl font-bold leading-none">
-                        <span className={winCount > lossCount ? 'text-green-400' : 'text-blue-200/60'}>{winCount}</span>
-                        <span className="text-blue-200/30 mx-1.5">-</span>
-                        <span className={lossCount > winCount ? 'text-red-400' : 'text-blue-200/60'}>{lossCount}</span>
-                    </div>
-                </div>
+            {/* Format and Date Row */}
+            <div className="flex items-center justify-between text-sm mb-2">
+                <span className="text-blue-300 font-semibold">{series.format}</span>
+            </div>
+
+            {/* Map results mini display */}
+            <div className="flex gap-1 mt-2">
+                {series.games.map((game, idx) => {
+                    const gameTeam = game.teams.find(t => t.name === team?.name);
+                    const gameWon = gameTeam?.won;
+                    return (
+                        <div
+                            key={idx}
+                            className={`
+                                flex-1 h-1.5 rounded-full
+                                ${gameWon ? 'bg-green-400' : 'bg-red-400'}
+                            `}
+                            title={`${game.map.name}: ${gameWon ? 'Win' : 'Loss'}`}
+                        />
+                    );
+                })}
             </div>
         </div>
     );

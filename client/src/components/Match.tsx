@@ -1,69 +1,185 @@
 import React from 'react';
 import type { MatchStats } from '../types/MatchStats';
-import type {Team} from "../types/Team.ts";
+import type { Team } from "../types/Team.ts";
 import { getAgentLogo } from '../utils/agentLogos';
 
 interface MatchProps {
-    match: MatchStats;
+    match: MatchStats | null;
     team: Team | null;
+    allMaps?: MatchStats[]; // For "All Maps" aggregation
 }
 
-const Match: React.FC<MatchProps> = ({ match }) => {
+// Helper to aggregate player stats from all maps
+const aggregatePlayerStats = (games: MatchStats[], teamName: string) => {
+    const playerStatsMap: Record<string, {
+        name: string;
+        agents: Set<string>;
+        kills: number;
+        deaths: number;
+        killAssistsGiven: number;
+    }> = {};
+
+    games.forEach(game => {
+        const teamData = game.teams.find(t => t.name === teamName);
+        if (!teamData) return;
+
+        teamData.players.forEach(player => {
+            if (!playerStatsMap[player.name]) {
+                playerStatsMap[player.name] = {
+                    name: player.name,
+                    agents: new Set(),
+                    kills: 0,
+                    deaths: 0,
+                    killAssistsGiven: 0,
+                };
+            }
+            playerStatsMap[player.name].agents.add(player.character.name);
+            playerStatsMap[player.name].kills += player.kills;
+            playerStatsMap[player.name].deaths += player.deaths;
+            playerStatsMap[player.name].killAssistsGiven += player.killAssistsGiven;
+        });
+    });
+
+    return Object.values(playerStatsMap).map(p => ({
+        name: p.name,
+        character: { name: Array.from(p.agents).join(', ') },
+        kills: p.kills,
+        deaths: p.deaths,
+        killAssistsGiven: p.killAssistsGiven,
+    }));
+};
+
+// Reusable table component for consistent styling
+const StatsTable: React.FC<{
+    teamName: string;
+    isWinner: boolean;
+    players: Array<{
+        name: string;
+        character: { name: string };
+        kills: number;
+        deaths: number;
+        killAssistsGiven: number;
+    }>;
+    isMultipleAgents?: boolean;
+}> = ({ teamName, isWinner, players, isMultipleAgents = false }) => (
+    <div className="relative">
+        <h3 className={`text-sm font-black uppercase tracking-[0.3em] mb-4 flex items-center gap-3 ${isWinner ? 'text-green-400' : 'text-red-400'}`}>
+            <span className={`w-1 h-4 rounded-full ${isWinner ? 'bg-green-400' : 'bg-red-400'}`}></span>
+            {teamName}
+        </h3>
+
+        <div className="backdrop-blur-sm bg-white/5 rounded-lg overflow-x-auto">
+            <table className="w-full text-left border-collapse table-fixed">
+                <thead>
+                    <tr className="border-b border-white/10">
+                        <th className="py-3 px-4 text-blue-200 text-sm w-[25%]">Player</th>
+                        <th className="py-3 px-4 text-blue-200 text-sm w-[25%]">Agent</th>
+                        <th className="py-3 px-4 text-center text-blue-200 text-sm w-[12.5%]">K</th>
+                        <th className="py-3 px-4 text-center text-blue-200 text-sm w-[12.5%]">D</th>
+                        <th className="py-3 px-4 text-center text-blue-200 text-sm w-[12.5%]">A</th>
+                        <th className="py-3 px-4 text-center text-blue-200 text-sm w-[12.5%]">+/-</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {players.map((player, pIndex) => (
+                        <tr key={pIndex} className="border-b border-white/5 hover:bg-white/5 transition-colors h-14">
+                            <td className="py-3 px-4 text-white font-semibold">{player.name}</td>
+                            <td className="py-3 px-4">
+                                <div className="flex gap-1 items-center h-8">
+                                    {isMultipleAgents ? (
+                                        player.character.name.split(', ').map((agentName, i) => (
+                                            getAgentLogo(agentName) ? (
+                                                <img 
+                                                    key={i}
+                                                    src={getAgentLogo(agentName)} 
+                                                    alt={agentName}
+                                                    title={agentName}
+                                                    className="w-8 h-8 rounded-lg border border-white/10 object-cover"
+                                                />
+                                            ) : (
+                                                <span key={i} className="text-blue-100 text-xs bg-white/10 px-2 py-1 rounded">
+                                                    {agentName}
+                                                </span>
+                                            )
+                                        ))
+                                    ) : (
+                                        getAgentLogo(player.character.name) ? (
+                                            <img 
+                                                src={getAgentLogo(player.character.name)} 
+                                                alt={player.character.name}
+                                                title={player.character.name}
+                                                className="w-8 h-8 rounded-lg border border-white/10 object-cover"
+                                            />
+                                        ) : (
+                                            <span className="text-blue-100 text-sm">
+                                                {player.character.name}
+                                            </span>
+                                        )
+                                    )}
+                                </div>
+                            </td>
+                            <td className="py-3 px-4 text-center text-blue-100 font-medium">{player.kills}</td>
+                            <td className="py-3 px-4 text-center text-blue-100">{player.deaths}</td>
+                            <td className="py-3 px-4 text-center text-blue-100">{player.killAssistsGiven}</td>
+                            <td className={`py-3 px-4 text-center font-semibold ${
+                                player.kills - player.deaths >= 0 ? 'text-green-400' : 'text-red-400'
+                            }`}>
+                                {player.kills - player.deaths > 0 ? '+' : ''}{player.kills - player.deaths}
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    </div>
+);
+
+const Match: React.FC<MatchProps> = ({ match, team, allMaps }) => {
+    // If allMaps is provided, show aggregated stats
+    const isAllMaps = allMaps && allMaps.length > 0;
+
+    if (isAllMaps) {
+        const teamNames = allMaps[0]?.teams.map(t => t.name) || [];
+        
+        return (
+            <div className="flex flex-col gap-8">
+                <div className="flex flex-col gap-10">
+                    {teamNames.map((teamName, teamIndex) => {
+                        const aggregatedPlayers = aggregatePlayerStats(allMaps, teamName);
+                        const winsCount = allMaps.filter(g => 
+                            g.teams.find(t => t.name === teamName)?.won
+                        ).length;
+                        const isWinner = winsCount > allMaps.length / 2;
+
+                        return (
+                            <StatsTable
+                                key={teamIndex}
+                                teamName={teamName}
+                                isWinner={isWinner}
+                                players={aggregatedPlayers}
+                                isMultipleAgents={true}
+                            />
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    }
+
+    // Single map view
+    if (!match) return null;
+
     return (
         <div className="flex flex-col gap-8">
-            {/* Teams Stacked as Rows */}
             <div className="flex flex-col gap-10">
-                {match.teams.map((team, teamIndex) => (
-                    <div key={teamIndex} className="relative">
-                        <h3 className={`text-sm font-black uppercase tracking-[0.3em] mb-4 flex items-center gap-3 ${team.won ? 'text-green-500' : 'text-red-500'}`}>
-                            <span className={`w-1 h-4 rounded-full ${team.won ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                            {team.name}
-                        </h3>
-
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-600 border-b border-gray-900">
-                                        <th className="pb-2 pl-1">Player</th>
-                                        <th className="pb-2">Agent</th>
-                                        <th className="pb-2 text-center">K</th>
-                                        <th className="pb-2 text-center">D</th>
-                                        <th className="pb-2 text-center">A</th>
-                                        <th className="pb-2 text-center">+/-</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-900/50">
-                                    {team.players.map((player, pIndex) => (
-                                        <tr key={pIndex} className="group hover:bg-white/[0.02] transition-colors">
-                                            <td className="py-2 pl-1 text-sm font-bold text-gray-300">{player.name}</td>
-                                            <td className="py-2">
-                                                {getAgentLogo(player.character.name) ? (
-                                                    <img 
-                                                        src={getAgentLogo(player.character.name)} 
-                                                        alt={player.character.name}
-                                                        title={player.character.name}
-                                                        className="w-8 h-8 rounded object-cover"
-                                                    />
-                                                ) : (
-                                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">
-                                                        {player.character.name}
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="py-2 text-center font-mono text-xs text-gray-400">{player.kills}</td>
-                                            <td className="py-2 text-center font-mono text-xs text-gray-500">{player.deaths}</td>
-                                            <td className="py-2 text-center font-mono text-xs text-gray-500">{player.killAssistsGiven}</td>
-                                            <td className={`py-2 text-center font-mono text-xs font-bold ${
-                                                player.kills - player.deaths >= 0 ? 'text-green-500/70' : 'text-red-500/70'
-                                            }`}>
-                                                {player.kills - player.deaths > 0 ? '+' : ''}{player.kills - player.deaths}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                {match.teams.map((matchTeam, teamIndex) => (
+                    <StatsTable
+                        key={teamIndex}
+                        teamName={matchTeam.name}
+                        isWinner={matchTeam.won}
+                        players={matchTeam.players}
+                        isMultipleAgents={false}
+                    />
                 ))}
             </div>
         </div>
