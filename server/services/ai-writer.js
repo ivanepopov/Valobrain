@@ -8,7 +8,7 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Initialize Gemini
-const API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyA3iwEGUEtGxpaQSMuiC94YFUok1JEimXk';
+const API_KEY = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 // Model configuration
