@@ -74,10 +74,17 @@ const AgentStatistics = ({ team, allSeriesData }: Props) => {
                                     <span className="text-blue-100 font-semibold">{agent.name}</span>
                                     <span className="text-blue-400 font-semibold">{agent.pickRate.toFixed(0)}%</span>
                                 </div>
-                                <div className="w-full bg-white/10 rounded-full h-2">
+                                <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
                                     <div 
-                                        className="bg-gradient-to-r from-blue-400 to-cyan-400 h-2 rounded-full transition-all duration-500" 
-                                        style={{ width: `${agent.pickRate}%` }}
+                                        className="h-2 rounded-full transition-all duration-500" 
+                                        style={{ 
+                                            width: `${agent.pickRate}%`,
+                                            backgroundColor: agent.pickRate < 50 
+                                                ? '#ef4444' 
+                                                : agent.pickRate < 70 
+                                                    ? '#eab308' 
+                                                    : '#22c55e'
+                                        }}
                                     ></div>
                                 </div>
                             </div>
