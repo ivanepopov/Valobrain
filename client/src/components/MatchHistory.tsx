@@ -45,9 +45,7 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
         setSelectedMapTab('All Maps');
     };
 
-    if (!team) return <div className="text-blue-200/60 italic">Select a team</div>;
-
-    if (!stats || isLoadingSeries) {
+    if (!team || !stats || isLoadingSeries) {
         return (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="space-y-4">

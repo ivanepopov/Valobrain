@@ -8,6 +8,7 @@ import ScoutingReport from "../components/ScoutingReport";
 import getTeam from "../services/getTeam";
 import getTeamStats from "../services/getTeamStats";
 import getSeriesStats from "../services/getSeriesStats";
+import { getAdvancedSeriesStats } from "../services/getAdvancedSeriesStats";
 import type { Team } from "../types/Team";
 import type { TeamStats } from "../types/TeamStats";
 import type { SeriesStats } from "../types/SeriesStats";
@@ -29,6 +30,13 @@ const Dashboard = () => {
     const [stats, setStats] = useState<TeamStats | null>(null);
     const [allSeriesData, setAllSeriesData] = useState<SeriesStats[]>([]);
     const [isFetchingSeries, setIsFetchingSeries] = useState(false);
+    
+    // Scouting states
+    const [scoutingRawData, setScoutingRawData] = useState<any[]>([]);
+    const [isScoutingLoading, setIsScoutingLoading] = useState(false);
+    const [scoutingProgress, setScoutingProgress] = useState({ current: 0, total: 0, status: '' });
+    const [scoutingError, setScoutingError] = useState<string | null>(null);
+
     const [nodes, setNodes] = useState<Node[]>([]);
 
     // Neural network nodes
@@ -83,9 +91,52 @@ const Dashboard = () => {
                     );
                     setAllSeriesData(validResults);
                     setIsFetchingSeries(false);
+
+                    // Start Scouting Background Fetch
+                    performBackgroundScouting(statsData.aggregationSeriesIds, teamData?.name);
                 }
             }
         };
+
+        const performBackgroundScouting = async (ids: string[], teamName?: string) => {
+            const cacheKey = `scout_raw_cache_${teamName || 'unknown'}`;
+            const cached = sessionStorage.getItem(cacheKey);
+            if (cached) {
+                try {
+                    const parsed = JSON.parse(cached);
+                    if (parsed.idHash === ids.join(',')) {
+                        setScoutingRawData(parsed.data);
+                        return;
+                    }
+                } catch (e) { sessionStorage.removeItem(cacheKey); }
+            }
+
+            setIsScoutingLoading(true);
+            const fetched: any[] = [];
+            for (let i = 0; i < ids.length; i++) {
+                setScoutingProgress({ current: i + 1, total: ids.length, status: 'Downloading Match Data...' });
+                try {
+                    const data = await getAdvancedSeriesStats(ids[i], teamName);
+                    if (data) fetched.push(data);
+                } catch (err: any) {
+                    if (err.status === 429) {
+                        setScoutingProgress(prev => ({ ...prev, status: 'Rate limit hit. Cooling down...' }));
+                        await new Promise(r => setTimeout(r, 8000));
+                        i--; continue;
+                    }
+                }
+                if (i < ids.length - 1) await new Promise(r => setTimeout(r, 4000));
+            }
+            
+            if (fetched.length > 0) {
+                setScoutingRawData(fetched);
+                sessionStorage.setItem(cacheKey, JSON.stringify({ idHash: ids.join(','), data: fetched }));
+            } else {
+                setScoutingError("Scouting data unavailable.");
+            }
+            setIsScoutingLoading(false);
+        };
+
         fetchTeamData();
     }, [teamId]);
 
@@ -96,7 +147,7 @@ const Dashboard = () => {
     ];
 
     return (
-        <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 text-white p-8 overflow-hidden">
+        <div className="relative min-h-screen bg-linear-to-b from-slate-950 via-blue-950 to-slate-900 text-white p-8 overflow-hidden">
             {/* Neural Network Background */}
             <svg className="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
                 <defs>
@@ -238,14 +289,18 @@ const Dashboard = () => {
                             {activeTab === "analytics" && (
                                 <AnalyticsBreakdown 
                                     team={team} 
-                                    stats={stats} 
-                                    allSeriesData={allSeriesData} 
+                                    stats={stats}
+                                    allSeriesData={allSeriesData}
+                                    isLoadingSeries={isFetchingSeries}
                                 />
                             )}
                             {activeTab === "scouting" && (
                                 <ScoutingReport
-                                    aggregationSeriesIds={stats?.aggregationSeriesIds || []}
                                     teamName={team?.name}
+                                    rawData={scoutingRawData}
+                                    isLoading={isScoutingLoading}
+                                    progress={scoutingProgress}
+                                    error={scoutingError}
                                 />
                             )}
                         </motion.div>

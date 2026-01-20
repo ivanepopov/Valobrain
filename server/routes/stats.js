@@ -8,7 +8,6 @@ const rateLimit = require("express-rate-limit");
 const mapService = require("../services/map-service");
 
 const router = express.Router();
-const apiKey = process.env.API_KEY;
 
 // Where we store downloaded match files
 const MATCH_DATA_DIR = path.resolve(__dirname, "../match_data");
@@ -48,74 +47,74 @@ const isValidSeriesId = (seriesId) => {
   return /^\d{5,10}$/.test(seriesId);
 };
 
-    // Download the match ZIP from GRID and extract it
-    const downloadAndExtract = async (seriesId) => {
-      const zipPath = path.join(MATCH_DATA_DIR, `${seriesId}.zip`);
-      const currentKey = process.env.API_KEY;
+// Download the match ZIP from GRID and extract it
+const downloadAndExtract = async (seriesId) => {
+  const zipPath = path.join(MATCH_DATA_DIR, `${seriesId}.zip`);
+  const currentKey = process.env.API_KEY;
 
-      // 1. First, try the standard GRID Events URL pattern as per docs
-      const url = `${GRID_API_BASE}/events/grid/series/${seriesId}`;
+  // 1. First, try the standard GRID Events URL pattern as per docs
+  const url = `${GRID_API_BASE}/events/grid/series/${seriesId}`;
 
-      console.log(`Downloading match ${seriesId} from Official GRID API...`);
+  console.log(`Downloading match ${seriesId} from Official GRID API...`);
 
-      try {
-        const response = await axios({
-          method: 'get',
-          url: url,
-          headers: { 
-            "x-api-key": currentKey,
-            "Accept": "application/zip, application/octet-stream",
-            "User-Agent": "Valobrain-Scouter/1.0" 
-          },
-          responseType: "arraybuffer",
-          timeout: DOWNLOAD_TIMEOUT_MS,
+  try {
+    const response = await axios({
+      method: 'get',
+      url: url,
+      headers: {
+        "x-api-key": currentKey,
+        "Accept": "application/zip, application/octet-stream",
+        "User-Agent": "Valobrain-Scouter/1.0"
+      },
+      responseType: "arraybuffer",
+      timeout: DOWNLOAD_TIMEOUT_MS,
+    });
+
+    if (response.status === 200) {
+      fs.writeFileSync(zipPath, response.data);
+      console.log("Download complete. Extracting...");
+
+      const zip = new AdmZip(zipPath);
+      zip.extractAllTo(MATCH_DATA_DIR, true);
+
+      // Clean up zip
+      if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+
+      console.log("Extraction complete.");
+      return findCachedFile(seriesId);
+    }
+  } catch (error) {
+    // If direct download fails with 404/403, try the "list" method
+    console.warn(`Direct download failed for ${seriesId}, attempting 'list' lookup...`);
+
+    try {
+      const listRes = await axios.get(`${GRID_API_BASE}/list/${seriesId}`, {
+        headers: { "x-api-key": currentKey }
+      });
+
+      const fileInfo = listRes.data.files?.find(f => f.id === "events-grid-compressed");
+
+      if (fileInfo && fileInfo.status === "ready") {
+        console.log(`Found file via list: ${fileInfo.fullURL}`);
+        // Recurse once with the specific URL if needed, or just fetch here
+        const retryRes = await axios.get(fileInfo.fullURL, {
+          headers: { "x-api-key": currentKey },
+          responseType: "arraybuffer"
         });
-
-        if (response.status === 200) {
-          fs.writeFileSync(zipPath, response.data);
-          console.log("Download complete. Extracting...");
-
-          const zip = new AdmZip(zipPath);
-          zip.extractAllTo(MATCH_DATA_DIR, true);
-
-          // Clean up zip
-          if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
-
-          console.log("Extraction complete.");
-          return findCachedFile(seriesId);
-        }
-      } catch (error) {
-        // If direct download fails with 404/403, try the "list" method
-        console.warn(`Direct download failed for ${seriesId}, attempting 'list' lookup...`);
-        
-        try {
-          const listRes = await axios.get(`${GRID_API_BASE}/list/${seriesId}`, {
-            headers: { "x-api-key": currentKey }
-          });
-
-          const fileInfo = listRes.data.files?.find(f => f.id === "events-grid-compressed");
-          
-          if (fileInfo && fileInfo.status === "ready") {
-            console.log(`Found file via list: ${fileInfo.fullURL}`);
-            // Recurse once with the specific URL if needed, or just fetch here
-            const retryRes = await axios.get(fileInfo.fullURL, {
-              headers: { "x-api-key": currentKey },
-              responseType: "arraybuffer"
-            });
-            fs.writeFileSync(zipPath, retryRes.data);
-            const zip = new AdmZip(zipPath);
-            zip.extractAllTo(MATCH_DATA_DIR, true);
-            if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
-            return findCachedFile(seriesId);
-          }
-        } catch (listError) {
-          console.error("Critical Failure: File not available even via list API.");
-        }
-
-        console.error(`Download failed for series ${seriesId}:`, error.response?.status, error.message);
-        throw error;
+        fs.writeFileSync(zipPath, retryRes.data);
+        const zip = new AdmZip(zipPath);
+        zip.extractAllTo(MATCH_DATA_DIR, true);
+        if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+        return findCachedFile(seriesId);
       }
-    };
+    } catch (listError) {
+      console.error("Critical Failure: File not available even via list API.");
+    }
+
+    console.error(`Download failed for series ${seriesId}:`, error.response?.status, error.message);
+    throw error;
+  }
+};
 
 // Track a kill or death at a map location
 const trackZoneKill = (zoneStats, mapName, position, type) => {
