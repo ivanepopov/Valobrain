@@ -8,8 +8,13 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Initialize Gemini
+// Initialize Gemini
 const API_KEY = process.env.GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(API_KEY);
+
+if (!API_KEY) {
+  console.warn("WARNING: GEMINI_API_KEY is not set. AI writing features will fail.");
+}
+const genAI = new GoogleGenerativeAI(API_KEY || 'dummy_key_to_prevent_crash');
 
 // Model configuration
 const MODEL_NAME = 'gemini-2.0-flash';

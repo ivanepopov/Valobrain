@@ -12,7 +12,7 @@ router.get('/teams/:contains', (req, res) => {
     const contains = req.params.contains;
     const teamsQuery = `
       query GetTeams {
-        teams(first: 5, filter: { titleId: 6, name: { contains: "${contains}" } }) {
+        teams(first: 50, filter: { titleId: 6, name: { contains: "${contains}" } }) {
           edges {
             node {
                 id

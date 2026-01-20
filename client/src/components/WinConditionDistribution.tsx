@@ -1,5 +1,6 @@
 import type { Team } from "../types/Team.ts";
 import type { SeriesStats } from "../types/SeriesStats.ts";
+import { GlassBox } from "./GlassBox.tsx";
 
 type Props = {
     team: Team | null;
@@ -32,16 +33,9 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
                 const objectives = teamInRound.objectives.map(o => o.id);
                 const enemyObjectives = opponentInRound.objectives.map(o => o.id);
                 
-                // Check for bomb plant/explode in both team's objectives depending on context
                 const isPlant = objectives.includes('plantBomb') || enemyObjectives.includes('plantBomb');
                 const isExplode = objectives.includes('explodeBomb');
                 const isDefuse = objectives.includes('defuseBomb');
-
-                // Pre-calculating kills for the winning team in this round
-                // (Looking at opponent's deaths - since specific round deaths aren't in SegmentStats, 
-                // we infer from logic or usually specific event flags if they were available)
-                // For this implementation, we follow the user logic: "all 5 defenders/attackers killed"
-                // Assuming lack of 'explode' or 'defuse' objectives implies kill win if it's not time.
                 
                 if (teamInRound.side === 'attacker') {
                     if (isExplode) {
@@ -55,7 +49,6 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
                     if (isDefuse) {
                         defenseConditions.bombDefusal++;
                     } else if (!isPlant && objectives.length === 0 && enemyObjectives.length === 0) {
-                        // "Time expired (no objectives for enemy team, and round marked as won)"
                         defenseConditions.timeExpired++;
                     } else {
                         defenseConditions.prePlantKills++;
@@ -69,19 +62,19 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
     const totalDefenseWins = Object.values(defenseConditions).reduce((a, b) => a + b, 0);
 
     const renderTable = (title: string, data: Record<string, number>, total: number) => (
-        <div className="flex-1 rounded-lg border border-gray-700 bg-gray-900 p-4">
-            <h3 className="text-gray-400 text-xs uppercase tracking-widest mb-6 font-bold">{title}</h3>
-            <table className="w-full text-left text-sm text-gray-300">
-                <thead className="bg-gray-800 text-xs uppercase text-gray-400">
+        <GlassBox className="flex-1">
+            <h3 className="text-blue-200/60 text-xs uppercase tracking-widest mb-6 font-bold">{title}</h3>
+            <table className="w-full text-left text-sm text-blue-100">
+                <thead className="bg-white/5 text-xs uppercase text-blue-200/60">
                     <tr>
-                        <th className="px-4 py-2">Condition</th>
+                        <th className="px-4 py-2 rounded-tl-lg">Condition</th>
                         <th className="px-4 py-2 text-center">Count</th>
-                        <th className="px-4 py-2 text-center">%</th>
+                        <th className="px-4 py-2 text-center rounded-tr-lg">%</th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-800">
+                <tbody className="divide-y divide-white/10">
                     {Object.entries(data).map(([key, value]) => (
-                        <tr key={key} className="hover:bg-gray-800/50">
+                        <tr key={key} className="hover:bg-white/5 transition-colors">
                             <td className="px-4 py-2 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</td>
                             <td className="px-4 py-2 text-center">{value}</td>
                             <td className="px-4 py-2 text-center">
@@ -90,15 +83,15 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
                         </tr>
                     ))}
                 </tbody>
-                <tfoot className="bg-gray-800/30 font-bold">
+                <tfoot className="bg-white/5 font-bold">
                     <tr>
-                        <td className="px-4 py-2">Total Wins</td>
+                        <td className="px-4 py-2 rounded-bl-lg">Total Wins</td>
                         <td className="px-4 py-2 text-center">{total}</td>
-                        <td className="px-4 py-2 text-center">100%</td>
+                        <td className="px-4 py-2 text-center rounded-br-lg">100%</td>
                     </tr>
                 </tfoot>
             </table>
-        </div>
+        </GlassBox>
     );
 
     return (
