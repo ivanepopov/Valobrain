@@ -8,7 +8,6 @@ const rateLimit = require("express-rate-limit");
 const mapService = require("../services/map-service");
 
 const router = express.Router();
-const apiKey = process.env.API_KEY;
 
 // Where we store downloaded match files
 const MATCH_DATA_DIR = path.resolve(__dirname, "../match_data");
