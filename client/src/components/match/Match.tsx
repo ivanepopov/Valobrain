@@ -1,11 +1,9 @@
 import React from 'react';
-import type { MatchStats } from '../types/MatchStats';
-import type { Team } from "../types/Team.ts";
-import { getAgentLogo } from '../utils/agentLogos';
+import type { MatchStats } from '../../types/MatchStats';
+import { getAgentLogo } from '../../utils/agentLogos';
 
 interface MatchProps {
     match: MatchStats | null;
-    team: Team | null;
     allMaps?: MatchStats[]; // For "All Maps" aggregation
 }
 
@@ -134,7 +132,7 @@ const StatsTable: React.FC<{
     </div>
 );
 
-const Match: React.FC<MatchProps> = ({ match, team, allMaps }) => {
+const Match: React.FC<MatchProps> = ({ match, allMaps }) => {
     // If allMaps is provided, show aggregated stats
     const isAllMaps = allMaps && allMaps.length > 0;
 

@@ -1,9 +1,9 @@
 import { motion } from "motion/react";
-import type {Team} from "../types/Team.ts";
-import type {SeriesStats} from "../types/SeriesStats.ts";
-import { GlassBox } from "./GlassBox.tsx";
-import { getAgentLogo } from '../utils/agentLogos';
-import { capitalize } from '../utils/formatters';
+import type {Team} from "../../types/Team.ts";
+import type {SeriesStats} from "../../types/SeriesStats.ts";
+import { GlassBox } from "../ui/GlassBox.tsx";
+import { getAgentLogo } from '../../utils/agentLogos';
+import { capitalize } from '../../utils/formatters';
 
 type Props = {
     team: Team | null;
