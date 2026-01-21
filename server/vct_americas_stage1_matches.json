@@ -1,0 +1,412 @@
+[
+  {
+    "id": "2629390",
+    "date": "2024-02-16T22:00:00Z",
+    "teams": "FURIA vs NRG"
+  },
+  {
+    "id": "2629391",
+    "date": "2024-02-17T01:00:00Z",
+    "teams": "MIBR (1) vs Cloud9"
+  },
+  {
+    "id": "2629395",
+    "date": "2024-02-19T22:00:00Z",
+    "teams": "MIBR (1) vs FURIA"
+  },
+  {
+    "id": "2629398",
+    "date": "2024-02-23T22:00:00Z",
+    "teams": "Cloud9 vs NRG"
+  },
+  {
+    "id": "2629401",
+    "date": "2024-02-25T20:00:00Z",
+    "teams": "MIBR (1) vs Cloud9"
+  },
+  {
+    "id": "2629405",
+    "date": "2024-03-02T22:00:00Z",
+    "teams": "Evil Geniuses vs LOUD (1)"
+  },
+  {
+    "id": "2629406",
+    "date": "2024-03-03T01:00:00Z",
+    "teams": "NRG vs Sentinels"
+  },
+  {
+    "id": "2629407",
+    "date": "2024-03-03T22:00:00Z",
+    "teams": "Sentinels vs LOUD (1)"
+  },
+  {
+    "id": "2637961",
+    "date": "2024-02-26T20:00:00Z",
+    "teams": "MIBR (1) vs Sentinels"
+  },
+  {
+    "id": "2637962",
+    "date": "2024-02-26T23:00:00Z",
+    "teams": "G2 Esports vs MIBR (1)"
+  },
+  {
+    "id": "2637963",
+    "date": "2024-02-27T02:00:00Z",
+    "teams": "Sentinels vs G2 Esports"
+  },
+  {
+    "id": "2654000",
+    "date": "2024-05-08T21:00:00Z",
+    "teams": "Cloud9 vs G2 Esports"
+  },
+  {
+    "id": "2654001",
+    "date": "2024-05-09T00:00:00Z",
+    "teams": "100 Thieves vs LOUD (1)"
+  },
+  {
+    "id": "2654002",
+    "date": "2024-05-09T21:00:00Z",
+    "teams": "G2 Esports vs KRÜ Esports"
+  },
+  {
+    "id": "2654003",
+    "date": "2024-05-10T00:00:00Z",
+    "teams": "100 Thieves vs Leviatán Esports"
+  },
+  {
+    "id": "2654004",
+    "date": "2024-05-10T21:00:00Z",
+    "teams": "100 Thieves vs G2 Esports"
+  },
+  {
+    "id": "2654005",
+    "date": "2024-05-11T00:00:00Z",
+    "teams": "Leviatán Esports vs KRÜ Esports"
+  },
+  {
+    "id": "2654012",
+    "date": "2024-05-11T21:00:00Z",
+    "teams": "Leviatán Esports vs G2 Esports"
+  },
+  {
+    "id": "2654052",
+    "date": "2024-05-12T21:00:00Z",
+    "teams": "G2 Esports vs 100 Thieves"
+  },
+  {
+    "id": "2629392",
+    "date": "2024-02-17T22:00:00Z",
+    "teams": "Sentinels vs LOUD (1)"
+  },
+  {
+    "id": "2629393",
+    "date": "2024-02-18T01:00:00Z",
+    "teams": "100 Thieves vs Leviatán Esports"
+  },
+  {
+    "id": "2629396",
+    "date": "2024-02-20T01:00:00Z",
+    "teams": "100 Thieves vs Sentinels"
+  },
+  {
+    "id": "2629399",
+    "date": "2024-02-24T01:00:00Z",
+    "teams": "Leviatán Esports vs LOUD (1)"
+  },
+  {
+    "id": "2629402",
+    "date": "2024-02-25T23:00:00Z",
+    "teams": "Sentinels vs Leviatán Esports"
+  },
+  {
+    "id": "2629394",
+    "date": "2024-02-18T22:00:00Z",
+    "teams": "G2 Esports vs KRÜ Esports"
+  },
+  {
+    "id": "2629400",
+    "date": "2024-02-24T22:00:00Z",
+    "teams": "G2 Esports vs Evil Geniuses"
+  },
+  {
+    "id": "2629403",
+    "date": "2024-02-26T02:00:00Z",
+    "teams": "KRÜ Esports vs G2 Esports"
+  },
+  {
+    "id": "2653969",
+    "date": "2024-04-06T21:00:00Z",
+    "teams": "Cloud9 vs Leviatán Esports"
+  },
+  {
+    "id": "2653970",
+    "date": "2024-04-07T00:00:00Z",
+    "teams": "NRG vs LOUD (1)"
+  },
+  {
+    "id": "2653972",
+    "date": "2024-04-07T21:00:00Z",
+    "teams": "G2 Esports vs Evil Geniuses"
+  },
+  {
+    "id": "2653973",
+    "date": "2024-04-08T00:00:00Z",
+    "teams": "Sentinels vs 100 Thieves"
+  },
+  {
+    "id": "2653974",
+    "date": "2024-04-08T21:00:00Z",
+    "teams": "KRÜ Esports vs FURIA"
+  },
+  {
+    "id": "2653975",
+    "date": "2024-04-13T21:00:00Z",
+    "teams": "G2 Esports vs 100 Thieves"
+  },
+  {
+    "id": "2653976",
+    "date": "2024-04-14T00:00:00Z",
+    "teams": "Sentinels vs Leviatán Esports"
+  },
+  {
+    "id": "2653977",
+    "date": "2024-04-14T21:00:00Z",
+    "teams": "KRÜ Esports vs MIBR (1)"
+  },
+  {
+    "id": "2653978",
+    "date": "2024-04-15T00:00:00Z",
+    "teams": "NRG vs FURIA"
+  },
+  {
+    "id": "2653979",
+    "date": "2024-04-15T21:00:00Z",
+    "teams": "Cloud9 vs Evil Geniuses"
+  },
+  {
+    "id": "2653980",
+    "date": "2024-04-20T21:00:00Z",
+    "teams": "Sentinels vs MIBR (1)"
+  },
+  {
+    "id": "2653981",
+    "date": "2024-04-21T00:00:00Z",
+    "teams": "Cloud9 vs LOUD (1)"
+  },
+  {
+    "id": "2653982",
+    "date": "2024-04-21T21:00:00Z",
+    "teams": "KRÜ Esports vs Evil Geniuses"
+  },
+  {
+    "id": "2653983",
+    "date": "2024-04-22T00:00:00Z",
+    "teams": "NRG vs Leviatán Esports"
+  },
+  {
+    "id": "2653984",
+    "date": "2024-04-22T21:00:00Z",
+    "teams": "G2 Esports vs FURIA"
+  },
+  {
+    "id": "2653985",
+    "date": "2024-04-23T00:00:00Z",
+    "teams": "Cloud9 vs 100 Thieves"
+  },
+  {
+    "id": "2653986",
+    "date": "2024-04-23T21:00:00Z",
+    "teams": "Sentinels vs Evil Geniuses"
+  },
+  {
+    "id": "2653987",
+    "date": "2024-04-24T00:00:00Z",
+    "teams": "NRG vs MIBR (1)"
+  },
+  {
+    "id": "2653988",
+    "date": "2024-04-24T21:00:00Z",
+    "teams": "G2 Esports vs Leviatán Esports"
+  },
+  {
+    "id": "2653989",
+    "date": "2024-04-25T00:00:00Z",
+    "teams": "KRÜ Esports vs LOUD (1)"
+  },
+  {
+    "id": "2653990",
+    "date": "2024-04-27T21:00:00Z",
+    "teams": "G2 Esports vs MIBR (1)"
+  },
+  {
+    "id": "2653991",
+    "date": "2024-04-28T00:00:00Z",
+    "teams": "Sentinels vs LOUD (1)"
+  },
+  {
+    "id": "2653992",
+    "date": "2024-04-28T21:00:00Z",
+    "teams": "Cloud9 vs FURIA"
+  },
+  {
+    "id": "2653993",
+    "date": "2024-04-29T00:00:00Z",
+    "teams": "NRG vs Evil Geniuses"
+  },
+  {
+    "id": "2653994",
+    "date": "2024-04-29T21:00:00Z",
+    "teams": "KRÜ Esports vs 100 Thieves"
+  },
+  {
+    "id": "2653995",
+    "date": "2024-05-04T00:00:00Z",
+    "teams": "Sentinels vs FURIA"
+  },
+  {
+    "id": "2653996",
+    "date": "2024-05-04T21:00:00Z",
+    "teams": "NRG vs 100 Thieves"
+  },
+  {
+    "id": "2653997",
+    "date": "2024-05-05T00:00:00Z",
+    "teams": "KRÜ Esports vs Leviatán Esports"
+  },
+  {
+    "id": "2653998",
+    "date": "2024-05-05T21:00:00Z",
+    "teams": "Cloud9 vs MIBR (1)"
+  },
+  {
+    "id": "2653999",
+    "date": "2024-05-06T00:00:00Z",
+    "teams": "G2 Esports vs LOUD (1)"
+  },
+  {
+    "id": "2681809",
+    "date": "2024-06-22T21:00:00Z",
+    "teams": "MIBR (1) vs Leviatán Esports"
+  },
+  {
+    "id": "2681811",
+    "date": "2024-06-23T21:00:00Z",
+    "teams": "FURIA vs 100 Thieves"
+  },
+  {
+    "id": "2681812",
+    "date": "2024-06-24T00:00:00Z",
+    "teams": "LOUD (1) vs Evil Geniuses"
+  },
+  {
+    "id": "2681817",
+    "date": "2024-06-29T21:00:00Z",
+    "teams": "Evil Geniuses vs FURIA"
+  },
+  {
+    "id": "2681819",
+    "date": "2024-06-30T21:00:00Z",
+    "teams": "LOUD (1) vs MIBR (1)"
+  },
+  {
+    "id": "2681820",
+    "date": "2024-07-01T00:00:00Z",
+    "teams": "Leviatán Esports vs 100 Thieves"
+  },
+  {
+    "id": "2681823",
+    "date": "2024-07-02T21:00:00Z",
+    "teams": "Evil Geniuses vs Leviatán Esports"
+  },
+  {
+    "id": "2681824",
+    "date": "2024-07-03T00:00:00Z",
+    "teams": "LOUD (1) vs FURIA"
+  },
+  {
+    "id": "2681826",
+    "date": "2024-07-03T21:00:00Z",
+    "teams": "MIBR (1) vs 100 Thieves"
+  },
+  {
+    "id": "2681830",
+    "date": "2024-07-07T00:00:00Z",
+    "teams": "LOUD (1) vs Leviatán Esports"
+  },
+  {
+    "id": "2681831",
+    "date": "2024-07-07T21:00:00Z",
+    "teams": "MIBR (1) vs FURIA"
+  },
+  {
+    "id": "2681834",
+    "date": "2024-07-08T21:00:00Z",
+    "teams": "Evil Geniuses vs 100 Thieves"
+  },
+  {
+    "id": "2681836",
+    "date": "2024-07-13T21:00:00Z",
+    "teams": "Evil Geniuses vs MIBR (1)"
+  },
+  {
+    "id": "2681837",
+    "date": "2024-07-14T00:00:00Z",
+    "teams": "Leviatán Esports vs FURIA"
+  },
+  {
+    "id": "2681838",
+    "date": "2024-07-14T21:00:00Z",
+    "teams": "LOUD (1) vs 100 Thieves"
+  },
+  {
+    "id": "2681810",
+    "date": "2024-06-23T00:00:00Z",
+    "teams": "Sentinels vs NRG"
+  },
+  {
+    "id": "2681814",
+    "date": "2024-06-24T21:00:00Z",
+    "teams": "G2 Esports vs Cloud9"
+  },
+  {
+    "id": "2681818",
+    "date": "2024-06-30T00:00:00Z",
+    "teams": "Sentinels vs KRÜ Esports"
+  },
+  {
+    "id": "2681821",
+    "date": "2024-07-01T21:00:00Z",
+    "teams": "NRG vs G2 Esports"
+  },
+  {
+    "id": "2681822",
+    "date": "2024-07-02T00:00:00Z",
+    "teams": "Sentinels vs Cloud9"
+  },
+  {
+    "id": "2681827",
+    "date": "2024-07-04T00:00:00Z",
+    "teams": "NRG vs KRÜ Esports"
+  },
+  {
+    "id": "2681829",
+    "date": "2024-07-06T21:00:00Z",
+    "teams": "G2 Esports vs KRÜ Esports"
+  },
+  {
+    "id": "2681832",
+    "date": "2024-07-08T00:00:00Z",
+    "teams": "NRG vs Cloud9"
+  },
+  {
+    "id": "2681835",
+    "date": "2024-07-13T00:00:00Z",
+    "teams": "Cloud9 vs KRÜ Esports"
+  },
+  {
+    "id": "2681839",
+    "date": "2024-07-15T00:00:00Z",
+    "teams": "Sentinels vs G2 Esports"
+  }
+]

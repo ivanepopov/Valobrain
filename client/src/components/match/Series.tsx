@@ -1,6 +1,6 @@
 import React from 'react';
-import type { Team } from "../types/Team.ts";
-import type { SeriesStats } from "../types/SeriesStats.ts";
+import type { Team } from "../../types/Team.ts";
+import type { SeriesStats } from "../../types/SeriesStats.ts";
 
 interface SeriesProps {
     seriesData: SeriesStats;
@@ -11,7 +11,6 @@ interface SeriesProps {
 const Series: React.FC<SeriesProps> = ({ seriesData, team, isSelected = false }) => {
     const series = seriesData.seriesState;
     const opponent = series.teams.find(t => t.name !== team?.name);
-    const mainTeam = series.teams.find(t => t.name === team?.name);
 
     const winCount = series.games.filter(g =>
         g.teams.find(t => t.name === team?.name)?.won
