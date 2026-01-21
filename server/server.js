@@ -6,7 +6,7 @@ const path = require('path');
 require('dotenv/config');
 
 // Import routes
-const gridRoutes = require('./routes/grid');
+
 const statsRoutes = require('./routes/stats');
 const scoutingRoutes = require('./routes/scouting');
 const centralDataRoutes = require('./routes/central-data');
@@ -45,7 +45,7 @@ app.get('/api/health', (req, res) => {
 });
 
 /* Mount Routes (migrated from backend) */
-app.use('/api/grid', gridRoutes);
+
 app.use('/api/advanced-stats', statsRoutes);
 app.use('/api/scouting', scoutingRoutes);
 app.use('/api/central', centralDataRoutes);

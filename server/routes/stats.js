@@ -6,14 +6,9 @@ const readline = require("readline");
 const AdmZip = require("adm-zip");
 const rateLimit = require("express-rate-limit");
 const mapService = require("../services/map-service");
+const matchDataService = require("../services/match-data-service");
 
 const router = express.Router();
-
-// Where we store downloaded match files
-const MATCH_DATA_DIR = path.resolve(__dirname, "../match_data");
-// Use the official API domain instead of the CDN direct link
-const GRID_API_BASE = "https://api.grid.gg/file-download";
-const GRID_FILE_URL = `${GRID_API_BASE}/events/grid/series`;
 
 // Rate limit: 10 requests per minute (downloads are heavy)
 const statsLimiter = rateLimit({
@@ -24,97 +19,20 @@ const statsLimiter = rateLimit({
 
 router.use(statsLimiter);
 
-// Request timeout for downloads (30 seconds)
-const DOWNLOAD_TIMEOUT_MS = 30000;
-
 // --- Helper Functions ---
 
 // Make sure the match_data folder exists
-const ensureDataDir = () => {
-  if (!fs.existsSync(MATCH_DATA_DIR)) {
-    fs.mkdirSync(MATCH_DATA_DIR, { recursive: true });
-  }
-};
+
 
 // Look for a cached .jsonl file for this series
-const findCachedFile = (seriesId) => {
-  const files = fs.readdirSync(MATCH_DATA_DIR);
-  return files.find((f) => f.includes(seriesId) && f.endsWith(".jsonl"));
-};
+
 
 // Validate seriesId format
 const isValidSeriesId = (seriesId) => {
   return /^\d{5,10}$/.test(seriesId);
 };
 
-// Download the match ZIP from GRID and extract it
-const downloadAndExtract = async (seriesId) => {
-  const zipPath = path.join(MATCH_DATA_DIR, `${seriesId}.zip`);
-  const currentKey = process.env.API_KEY;
 
-  // 1. First, try the standard GRID Events URL pattern as per docs
-  const url = `${GRID_API_BASE}/events/grid/series/${seriesId}`;
-
-  console.log(`Downloading match ${seriesId} from Official GRID API...`);
-
-  try {
-    const response = await axios({
-      method: 'get',
-      url: url,
-      headers: {
-        "x-api-key": currentKey,
-        "Accept": "application/zip, application/octet-stream",
-        "User-Agent": "Valobrain-Scouter/1.0"
-      },
-      responseType: "arraybuffer",
-      timeout: DOWNLOAD_TIMEOUT_MS,
-    });
-
-    if (response.status === 200) {
-      fs.writeFileSync(zipPath, response.data);
-      console.log("Download complete. Extracting...");
-
-      const zip = new AdmZip(zipPath);
-      zip.extractAllTo(MATCH_DATA_DIR, true);
-
-      // Clean up zip
-      if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
-
-      console.log("Extraction complete.");
-      return findCachedFile(seriesId);
-    }
-  } catch (error) {
-    // If direct download fails with 404/403, try the "list" method
-    console.warn(`Direct download failed for ${seriesId}, attempting 'list' lookup...`);
-
-    try {
-      const listRes = await axios.get(`${GRID_API_BASE}/list/${seriesId}`, {
-        headers: { "x-api-key": currentKey }
-      });
-
-      const fileInfo = listRes.data.files?.find(f => f.id === "events-grid-compressed");
-
-      if (fileInfo && fileInfo.status === "ready") {
-        console.log(`Found file via list: ${fileInfo.fullURL}`);
-        // Recurse once with the specific URL if needed, or just fetch here
-        const retryRes = await axios.get(fileInfo.fullURL, {
-          headers: { "x-api-key": currentKey },
-          responseType: "arraybuffer"
-        });
-        fs.writeFileSync(zipPath, retryRes.data);
-        const zip = new AdmZip(zipPath);
-        zip.extractAllTo(MATCH_DATA_DIR, true);
-        if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
-        return findCachedFile(seriesId);
-      }
-    } catch (listError) {
-      console.error("Critical Failure: File not available even via list API.");
-    }
-
-    console.error(`Download failed for series ${seriesId}:`, error.response?.status, error.message);
-    throw error;
-  }
-};
 
 // Track a kill or death at a map location
 const trackZoneKill = (zoneStats, mapName, position, type) => {
@@ -673,28 +591,12 @@ router.get("/:seriesId", async (req, res) => {
       });
     }
 
-    ensureDataDir();
-
-    // Check if we already have this match cached
-    let jsonlFile = findCachedFile(seriesId);
-    let source = "cache";
-
-    // If not, download it
-    if (!jsonlFile) {
-      jsonlFile = await downloadAndExtract(seriesId);
-      source = "download";
-
-      if (!jsonlFile) {
-        return res
-          .status(404)
-          .json({ error: "Match file not found after download" });
-      }
-    }
-
-    console.log(`Using ${source}: ${jsonlFile}`);
+    // Use Service to get Data
+    const jsonlFile = await matchDataService.getMatchData(seriesId);
+    console.log(`[StatsRoute] Processing: ${jsonlFile}`);
 
     // Parse the file and generate insights
-    const data = await parseMatchFile(jsonlFile);
+    const data = await parseMatchFile(path.basename(jsonlFile));
 
     // Optional team filter from query param
     const teamFilter = req.query.team || null;
@@ -709,7 +611,7 @@ router.get("/:seriesId", async (req, res) => {
       : data.players;
 
     res.json({
-      source,
+      source: "service",
       team: teamFilter || 'all',
       stats: filteredStats,
       rounds: data.rounds,
@@ -723,13 +625,8 @@ router.get("/:seriesId", async (req, res) => {
     if (error.code === "ECONNABORTED") {
       return res.status(504).json({ error: "Download timed out, try again" });
     }
-    if (error.response?.status === 404) {
-      return res.status(404).json({ error: "Match not found in GRID" });
-    }
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      return res
-        .status(500)
-        .json({ error: "API key issue, check server config" });
+    if (error.message.includes("not found")) {
+        return res.status(404).json({ error: "Match not found in GRID or Cache" });
     }
 
     console.error("Error:", error.message);
