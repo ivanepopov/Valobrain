@@ -13,6 +13,7 @@ router.get('/:seriesId', (req, res) => {
     const seriesQuery = `
       query getSeriesStats {
         seriesState(id: "${seriesId}") {
+          startTimeScheduled
           format
           teams {
             id
