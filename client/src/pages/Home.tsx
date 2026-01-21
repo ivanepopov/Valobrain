@@ -75,7 +75,6 @@ const Home = () => {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 py-12 px-6 overflow-hidden">
-      {/* Neural Network Background */}
       <NeuralBackground />
 
       <div className="relative z-10 max-w-6xl mx-auto">

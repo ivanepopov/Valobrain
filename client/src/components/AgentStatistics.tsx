@@ -55,29 +55,29 @@ const AgentStatistics = ({ team, allSeriesData }: Props) => {
                     <Users className="w-5 h-5 text-blue-400" />
                     <h3 className="text-lg font-semibold text-white">Agent Comfort</h3>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3">
                     {sortedAgents.slice(0, 6).map((agent) => (
-                        <div key={agent.name} className="flex items-center gap-4">
+                        <div key={agent.name} className="flex items-center gap-3">
                             {getAgentLogo(agent.name) ? (
                                 <img 
                                     src={getAgentLogo(agent.name)} 
                                     alt={agent.name}
                                     title={agent.name}
-                                    className="w-12 h-12 rounded-lg border-2 border-white/10 object-cover"
+                                    className="w-10 h-10 rounded-lg border-2 border-white/10 object-cover"
                                 />
                             ) : (
-                                <div className="w-12 h-12 rounded-lg border-2 border-white/10 bg-white/10 flex items-center justify-center text-sm text-blue-200/60 font-bold">
+                                <div className="w-10 h-10 rounded-lg border-2 border-white/10 bg-white/10 flex items-center justify-center text-xs text-blue-200/60 font-bold">
                                     {agent.name.substring(0, 2)}
                                 </div>
                             )}
                             <div className="flex-1">
                                 <div className="flex justify-between mb-1">
-                                    <span className="text-blue-100 font-semibold">{capitalize(agent.name)}</span>
-                                    <span className="text-blue-400 font-semibold">{agent.pickRate.toFixed(0)}%</span>
+                                    <span className="text-blue-100 font-medium text-sm">{capitalize(agent.name)}</span>
+                                    <span className="text-blue-400 font-semibold text-sm">{agent.pickRate.toFixed(0)}%</span>
                                 </div>
-                                <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                                <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
                                     <div 
-                                        className="h-2 rounded-full transition-all duration-500" 
+                                        className="h-1.5 rounded-full transition-all duration-500" 
                                         style={{ 
                                             width: `${agent.pickRate}%`,
                                             backgroundColor: agent.pickRate < 50 

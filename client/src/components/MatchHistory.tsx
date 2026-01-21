@@ -131,10 +131,29 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
                                     `}>
                                         {seriesScore.wins}-{seriesScore.losses}
                                     </div>
+
                                 </div>
 
                                 {/* Map Results */}
                                 <div className="flex flex-wrap justify-center gap-3">
+                                    
+                                    <div
+                                        onClick={() => {
+                                            setSelectedMapTab('All Maps');
+                                            setSelectedGameIndex(0);
+                                        }}
+                                        className={`
+                                            group relative rounded-lg py-2 w-[100px] h-fit border transition-all duration-300 hover:scale-105 overflow-hidden cursor-pointer flex flex-col items-center justify-center gap-2
+                                            ${selectedMapTab === 'All Maps'
+                                                ? 'bg-blue-900/40 border-blue-400 ring-2 ring-blue-400 scale-105 shadow-lg shadow-blue-500/20'
+                                                : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10'
+                                            }
+                                        `}
+                                    >
+                                        <span className="text-white font-bold text-sm">All Maps</span>
+
+                                    </div>
+
                                     {selectedSeriesData.seriesState.games.map((game, idx) => {
                                         const gameTeam = game.teams.find(t => t.name === team.name);
                                         const isWin = gameTeam?.won;
@@ -150,11 +169,19 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
                                         return (
                                             <div 
                                                 key={idx}
+                                                onClick={() => {
+                                                    setSelectedMapTab(`Map ${idx + 1}`);
+                                                    setSelectedGameIndex(idx);
+                                                }}
                                                 className={`
-                                                    group relative rounded-lg py-2 w-[200px] border transition-all duration-300 hover:scale-105 overflow-hidden
+                                                    group relative rounded-lg py-2 w-[200px] border transition-all duration-300 hover:scale-105 overflow-hidden cursor-pointer
                                                     ${isWin 
                                                         ? 'border-green-400/30 hover:border-green-400/60' 
                                                         : 'border-red-400/30 hover:border-red-400/60'
+                                                    }
+                                                    ${selectedMapTab === `Map ${idx + 1}`
+                                                        ? 'ring-2 ring-blue-400 scale-105 shadow-lg shadow-blue-500/20'
+                                                        : 'opacity-80 hover:opacity-100'
                                                     }
                                                 `}
                                                 style={{
@@ -186,44 +213,7 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
                                 </div>
                             </div>
 
-                            {/* Map Selection Tabs */}
-                            <div className="mb-4">
-                                <div className="flex gap-2 flex-wrap">
-                                    <button
-                                        onClick={() => {
-                                            setSelectedMapTab('All Maps');
-                                            setSelectedGameIndex(0);
-                                        }}
-                                        className={`
-                                            px-4 py-2 rounded-lg font-semibold transition-all duration-300
-                                            ${selectedMapTab === 'All Maps'
-                                                ? 'bg-blue-900 text-white'
-                                                : 'bg-white/5 text-blue-200 hover:bg-white/10'
-                                            }
-                                        `}
-                                    >
-                                        All
-                                    </button>
-                                    {selectedSeriesData.seriesState.games.map((game, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => {
-                                                setSelectedMapTab(`Map ${idx + 1}`);
-                                                setSelectedGameIndex(idx);
-                                            }}
-                                            className={`
-                                                px-4 py-2 rounded-lg font-semibold transition-all duration-300
-                                                ${selectedMapTab === `Map ${idx + 1}`
-                                                    ? 'bg-blue-900 text-white'
-                                                    : 'bg-white/5 text-blue-200 hover:bg-white/10'
-                                                }
-                                            `}
-                                        >
-                                            {capitalize(game.map.name)}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
+
 
                             {/* Match Stats */}
                             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
