@@ -95,13 +95,13 @@ const AgentStatistics = ({ team, allSeriesData }: Props) => {
             </GlassBox>
 
             {/* Total Picks Bar Graph */}
-            <GlassBox>
+            <GlassBox className="flex flex-col">
                 <div className="flex items-center gap-2 mb-4">
                     <Activity className="w-5 h-5 text-blue-400" />
                     <h3 className="text-lg font-semibold text-white">Agent Usage</h3>
                 </div>
-                <div className="mt-4">
-                    <div className="relative h-48">
+                <div className="flex-1 flex flex-col">
+                    <div className="relative flex-1 min-h-[250px]">
                         {/* Y-Axis Grid Lines & Numbers */}
                         <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                             {[...Array(5)].map((_, i) => {
@@ -124,7 +124,7 @@ const AgentStatistics = ({ team, allSeriesData }: Props) => {
                                         <span className="absolute -top-6 text-[10px] font-mono text-blue-200/60 opacity-0 group-hover:opacity-100 transition-opacity">
                                             {agent.picks}
                                         </span>
-                                        <div 
+                                        <div
                                             className="w-full bg-blue-400/40 border-t-2 border-blue-400 rounded-t-sm transition-all duration-500 group-hover:bg-blue-400/60"
                                             style={{ height: `${(agent.picks / maxPicks) * 100}%` }}
                                         />
@@ -135,12 +135,12 @@ const AgentStatistics = ({ team, allSeriesData }: Props) => {
                     </div>
 
                     {/* Agent Icons (X-Axis Labels) */}
-                    <div className="flex justify-between gap-2 px-2 ml-6 mt-4">
+                    <div className="flex justify-between gap-2 px-2 ml-6 mt-4 pb-2">
                         {sortedAgents.slice(0, 8).map((agent) => (
                             <div key={agent.name} className="flex-1 flex justify-center">
                                 {getAgentLogo(agent.name) ? (
-                                    <img 
-                                        src={getAgentLogo(agent.name)} 
+                                    <img
+                                        src={getAgentLogo(agent.name)}
                                         alt={agent.name}
                                         title={agent.name}
                                         className="w-8 h-8 rounded-md border border-white/5 object-cover shrink-0"

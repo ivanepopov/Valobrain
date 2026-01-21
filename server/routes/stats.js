@@ -17,22 +17,16 @@ const statsLimiter = rateLimit({
   message: { error: "Too many requests, please wait a minute" },
 });
 
+const MATCH_DATA_DIR = path.join(__dirname, "..", "match_data");
+
 router.use(statsLimiter);
 
 // --- Helper Functions ---
-
-// Make sure the match_data folder exists
-
-
-// Look for a cached .jsonl file for this series
-
 
 // Validate seriesId format
 const isValidSeriesId = (seriesId) => {
   return /^\d{5,10}$/.test(seriesId);
 };
-
-
 
 // Track a kill or death at a map location
 const trackZoneKill = (zoneStats, mapName, position, type) => {

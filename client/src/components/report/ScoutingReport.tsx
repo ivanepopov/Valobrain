@@ -6,9 +6,9 @@ import {
     AlertCircle, 
     Loader2,
     ShieldCheck,
-    Filter,
-    Calendar
 } from 'lucide-react';
+import MapFilter from "../ui/MapFilter.tsx";
+import HistoryFilter from "../ui/HistoryFilter.tsx";
 
 interface ScoutingReportProps {
     teamName?: string;
@@ -17,8 +17,6 @@ interface ScoutingReportProps {
     progress: { current: number; total: number; status: string };
     error: string | null;
 }
-
-const VALORANT_MAPS = ["All", "Abyss", "Ascent", "Bind", "Breeze", "Corrode", "Fracture", "Haven", "Icebox", "Lotus", "Pearl", "Split", "Sunset"];
 
 const ScoutingReport: React.FC<ScoutingReportProps> = ({ 
     teamName, 
@@ -30,6 +28,43 @@ const ScoutingReport: React.FC<ScoutingReportProps> = ({
     const [scoutData, setScoutData] = useState<any>(null);
     const [selectedMap, setSelectedMap] = useState<string>("All");
     const [selectedSeries, setSelectedSeries] = useState<string>("All");
+
+    const seriesOptions = [
+        { value: "All", label: "Aggregate All" },
+        ...rawData.map((series, idx) => {
+            // 1. Determine Opponent Name
+            const opponent = series.rounds?.[0]?.winner === teamName
+                ? series.rounds.find((r: any) => r.winner !== teamName)?.winner || "Unknown"
+                : series.rounds?.[0]?.winner || "Unknown";
+
+            // 2. Group rounds by map to calculate Map Wins
+            const mapResults: Record<string, { teamRounds: number; opponentRounds: number }> = {};
+
+            series.rounds?.forEach((r: any) => {
+                if (!mapResults[r.mapName]) {
+                    mapResults[r.mapName] = { teamRounds: 0, opponentRounds: 0 };
+                }
+                if (r.winner === teamName) mapResults[r.mapName].teamRounds++;
+                else if (r.winner === opponent) mapResults[r.mapName].opponentRounds++;
+            });
+
+            let teamMapWins = 0;
+            let opponentMapWins = 0;
+
+            Object.values(mapResults).forEach(res => {
+                if (res.teamRounds > res.opponentRounds) teamMapWins++;
+                else if (res.opponentRounds > res.teamRounds) opponentMapWins++;
+            });
+
+            const result = teamMapWins > opponentMapWins ? 'W' : 'L';
+
+            return {
+                value: idx.toString(),
+                label: `vs ${opponent} (${teamMapWins}-${opponentMapWins} ${result})`
+            };
+        })
+    ];
+
 
     const aggregateData = (allData: any[], mapFilter: string, seriesFilter: string) => {
         // Handle Single Series Selection (Uses Backend Analysis)
@@ -205,76 +240,17 @@ const ScoutingReport: React.FC<ScoutingReportProps> = ({
 
             <div className="flex flex-wrap gap-3">
                 {/* Series Filter */}
-                <div className="bg-slate-900/50 border border-slate-800 p-1.5 rounded-xl flex items-center gap-1">
-                    <div className="flex items-center gap-2 px-3 py-1.5 border-r border-slate-800 mr-1 shrink-0">
-                        <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">History</span>
-                    </div>
-                    <select
-                        value={selectedSeries}
-                        onChange={(e) => {
-                            setSelectedSeries(e.target.value);
-                            if (e.target.value !== "All") setSelectedMap("All");
-                        }}
-                        className="bg-transparent text-[10px] font-black uppercase tracking-wider text-white px-2 py-1 outline-none cursor-pointer"
-                    >
-                        <option value="All" className="bg-slate-900">Aggregate All</option>
-                        {rawData.map((series, idx) => {
-                                // 1. Determine Opponent Name
-                                const opponent = series.rounds?.[0]?.winner === teamName 
-                                    ? series.rounds.find((r: any) => r.winner !== teamName)?.winner || "Unknown"
-                                    : series.rounds?.[0]?.winner || "Unknown";
-                                
-                                // 2. Group rounds by map to calculate Map Wins
-                                const mapResults: Record<string, { teamRounds: number; opponentRounds: number }> = {};
-                                
-                                series.rounds?.forEach((r: any) => {
-                                    if (!mapResults[r.mapName]) {
-                                        mapResults[r.mapName] = { teamRounds: 0, opponentRounds: 0 };
-                                    }
-                                    if (r.winner === teamName) mapResults[r.mapName].teamRounds++;
-                                    else if (r.winner === opponent) mapResults[r.mapName].opponentRounds++;
-                                });
-
-                                let teamMapWins = 0;
-                                let opponentMapWins = 0;
-
-                                Object.values(mapResults).forEach(res => {
-                                    if (res.teamRounds > res.opponentRounds) teamMapWins++;
-                                    else if (res.opponentRounds > res.teamRounds) opponentMapWins++;
-                                });
-
-                                const result = teamMapWins > opponentMapWins ? 'W' : 'L';
-
-                                return (
-                                    <option key={idx} value={idx.toString()} className="bg-slate-900">
-                                        vs {opponent} ({teamMapWins}-{opponentMapWins} {result})
-                                    </option>
-                                );
-                            })}
-                        </select>
-                </div>
+                <HistoryFilter
+                    value={selectedSeries}
+                    onChange={(val) => {
+                        setSelectedSeries(val);
+                        if (val !== "All") setSelectedMap("All");
+                    }}
+                    options={seriesOptions}
+                />
 
                 {/* Map Filter Component */}
-                <div className={`bg-slate-900/50 border border-slate-800 p-1.5 rounded-xl flex items-center gap-1 overflow-x-auto custom-scrollbar max-w-full scroll-smooth transition-opacity ${selectedSeries !== 'All' ? 'opacity-50 pointer-events-none' : ''}`}>
-                    <div className="flex items-center gap-2 px-3 py-1.5 border-r border-slate-800 mr-1 shrink-0">
-                        <Filter className="w-3.5 h-3.5 text-slate-500" />
-                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Map</span>
-                    </div>
-                    {VALORANT_MAPS.map(m => (
-                        <button
-                            key={m}
-                            onClick={() => setSelectedMap(m)}
-                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all shrink-0 ${
-                                selectedMap === m
-                                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20'
-                                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                            }`}
-                        >
-                            {m}
-                        </button>
-                    ))}
-                </div>
+                <MapFilter selectedMap={selectedMap} setSelectedMap={setSelectedMap} selectedSeries={selectedSeries} />
             </div>
         </div>
 
