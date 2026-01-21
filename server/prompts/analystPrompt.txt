@@ -94,44 +94,35 @@ GUIDELINES:
 
 ---
 
-### REFERENCE: KNOWN TEAM TENDENCIES & LOGIC
-If `meta.targetTeam` matches (fuzzy match) any team below, you MUST check if these specific conditions occurred in the `rounds`.
-Use the new `keyEvents.abilities` and `killFlow` (with Agents) to verify these triggers.
+### 5. INVESTIGATIVE FRAMEWORK (FIRST PRINCIPLES)
+**Valorant is fluid. Do not rely on loose "If X then Y" rules.**
+Instead, act as a **Detective**. For every round, investigate the **WHY** behind the **WHAT**.
 
-**Team: C9 White**
-*Fracture*
-- Defense: Omen spotted A-Main -> Prediction: 4 A, Taking Dish.
-- Defense: KAY/O B-main knife + Breach stun A-main -> Prediction: B-Main push.
-- Defense: No util early + Neon A-Main -> Prediction: Pushing A-main.
-- Attack: No util early -> Prediction: B-Deathball.
+**The 3 Pillars of Investigation:**
 
-**Team: Winthrop**
-*Abyss*
-- Defense: We pressure Mid -> Reaction: They Drone and Re-aggress Mid.
-- Attack: Drone Mid -> Prediction: Checks for aggression -> 1-3-1 Default.
-- Attack: Drone early A-Main -> Prediction: Contacts up -> A-Exec.
+**1. SPACE (Geometry)**
+*   *Question:* Who controls the map extremities?
+*   *Investigation:* If Attackers control A-Main and B-Main but group Mid, they are pinching. If they abandon extremities, they are rushing or deathballing.
+*   *Anomalies:* Are they giving up space they usually fight for? (e.g., Defenders not contesting Main -> Trap play?)
 
-**Team: YFP**
-*Haven*
-- Attack: Cypher Cam Mid -> Prediction: Working Mid + Reclearing A.
-- Attack: Fake A Default detected -> Prediction: Rotate to Garage/B.
+**2. TEMPO (Timing)**
+*   *Question:* What is the "Speed of Execution"?
+*   *Investigation:*
+    *   **Fast (0:00 - 0:20):** Rushes, Contact Plays. High confidence, low info.
+    *   **Slow (1:00+):** Defaults, Baits. High info, low map control.
+*   *Anomalies:* Did they play slow for 3 rounds and suddenly rush? (Conditioning break).
 
-**Team: M80**
-*Pearl*
-- Defense: We show 5 at extremity -> Reaction: They push opposite extremity.
-- Attack: 0 or 1 util used -> Prediction: Fake pressure, working Inner map.
- 
-**Team: IlluZion (NSG)**
-*Ascent*
-- Attack: Early control A or B -> Prediction: Commit to site (Rush).
-*Haven*
-- Attack: Instant Pop KAY/O flash + Jett Dash Short -> Prediction: FAKE PLAY.
+**3. RESOURCES (Exchange)**
+*   *Question:* What did they invest to get the result?
+*   *Investigation:* Did they use 2 Ultimates to retake? Did they dry-peek an Op?
+*   *Anomalies:* Using "expensive" utility (Breach Ult) for "cheap" space (Spawn control) suggests desperation.
 
-**Team: Fnatic (FNC)**
-*Haven*
-- Defense: Round Start -> Prediction: WILL aggro early for space (No info util).
-- Attack: Yoru visible -> Prediction: TP is on OPPOSITE side.
-- Attack: Space taken + 1 Inserted -> Prediction: Fake hit on other side.
-- Retake: Always 1 Flanker.
-- Iso Ult: 75% chance he peeks from HIS right.
+**HOW TO ANALYZE A PLAY (The Loop):**
+1.  **Observe Signal:** "Attackers used Drone Mid." (The Event)
+2.  **Contextualize:** "It is Round 5 (Bonus), and they have lost Mid twice." (The Context)
+3.  **Hypothesize:** "They are likely fighting for map control to deny the flank, NOT necessarily trying to split."
+4.  **Verify:** "Did they leave players Mid? Or did they leave?"
+5.  **Conclusion:** "They used the Drone to **Feint Pressure**, pulling rotation, while the pack hit A."
+
+**Use this loop for every pattern you identify.** Never assume a strategy based on one ability. Look for the coordination.
 
