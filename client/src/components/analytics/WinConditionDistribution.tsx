@@ -1,6 +1,6 @@
-import type { Team } from "../types/Team.ts";
-import type { SeriesStats } from "../types/SeriesStats.ts";
-import { GlassBox } from "./GlassBox.tsx";
+import type { Team } from "../../types/Team.ts";
+import type { SeriesStats } from "../../types/SeriesStats.ts";
+import { GlassBox } from "../ui/GlassBox.tsx";
 
 type Props = {
     team: Team | null;

@@ -6,14 +6,14 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Users } from "lucide-react";
-import Series from "../components/Series.tsx";
-import Match from "../components/Match.tsx";
-import type { Team } from "../types/Team.ts";
-import type { TeamStats } from "../types/TeamStats.ts";
-import type { SeriesStats } from "../types/SeriesStats.ts";
-import { formatDuration, capitalize } from "../utils/formatters.ts";
-import { getMapImage } from "../utils/mapImages.ts";
-import { GlassBox } from "./GlassBox.tsx";
+import Series from "./Series.tsx";
+import Match from "./Match.tsx";
+import type { Team } from "../../types/Team.ts";
+import type { TeamStats } from "../../types/TeamStats.ts";
+import type { SeriesStats } from "../../types/SeriesStats.ts";
+import { formatDuration, capitalize } from "../../utils/formatters.ts";
+import { getMapImage } from "../../utils/mapImages.ts";
+import { GlassBox } from "../ui/GlassBox.tsx";
 
 type Props = {
     team: Team | null;
@@ -227,7 +227,6 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
                             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                                 <Match 
                                     match={selectedMapTab === 'All Maps' ? null : selectedSeriesData.seriesState.games[selectedGameIndex]} 
-                                    team={team}
                                     allMaps={selectedMapTab === 'All Maps' ? selectedSeriesData.seriesState.games : undefined}
                                 />
                             </div>

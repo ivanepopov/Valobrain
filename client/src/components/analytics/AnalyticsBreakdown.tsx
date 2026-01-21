@@ -15,14 +15,14 @@
  * Sub-Feature #6: Situational Performance Graphs
  * Sub-Feature #7: Player Statistics Tables (Overall)
  */
-import type {Team} from "../types/Team.ts";
-import PlayerStatisticsTable from "../components/PlayerStatisticsTable.tsx";
-import AgentStatistics from "../components/AgentStatistics.tsx";
-import MapPerformance from "../components/MapPerformance.tsx";
-import TeamLevelStatsOverview from "../components/TeamLevelStatsOverview.tsx";
-import WinConditionDistribution from "../components/WinConditionDistribution.tsx";
-import type {TeamStats} from "../types/TeamStats.ts";
-import type {SeriesStats} from "../types/SeriesStats.ts";
+import type {Team} from "../../types/Team.ts";
+import PlayerStatisticsTable from "./PlayerStatisticsTable.tsx";
+import AgentStatistics from "./AgentStatistics.tsx";
+import MapPerformance from "./MapPerformance.tsx";
+import TeamLevelStatsOverview from "./TeamLevelStatsOverview.tsx";
+import WinConditionDistribution from "./WinConditionDistribution.tsx";
+import type {TeamStats} from "../../types/TeamStats.ts";
+import type {SeriesStats} from "../../types/SeriesStats.ts";
 
 type Props = {
     team: Team | null;

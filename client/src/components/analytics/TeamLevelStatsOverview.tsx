@@ -1,6 +1,6 @@
-import type { SeriesStats } from "../types/SeriesStats.ts";
-import type { Team } from "../types/Team.ts";
-import { GlassBox } from "./GlassBox.tsx";
+import type { SeriesStats } from "../../types/SeriesStats.ts";
+import type { Team } from "../../types/Team.ts";
+import { GlassBox } from "../ui/GlassBox.tsx";
 import { Trophy, Target, Shield } from "lucide-react";
 
 type Props = {
