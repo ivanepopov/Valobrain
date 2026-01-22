@@ -1,25 +1,12 @@
 const express = require("express");
-const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 const readline = require("readline");
-const AdmZip = require("adm-zip");
-const rateLimit = require("express-rate-limit");
 const mapService = require("../services/map-service");
 const matchDataService = require("../services/match-data-service");
 
 const router = express.Router();
-
-// Rate limit: 10 requests per minute (downloads are heavy)
-const statsLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 10,
-  message: { error: "Too many requests, please wait a minute" },
-});
-
 const MATCH_DATA_DIR = path.join(__dirname, "..", "match_data");
-
-router.use(statsLimiter);
 
 // --- Helper Functions ---
 
@@ -563,12 +550,6 @@ const generateTempoStats = (rounds, teamName = null) => {
   };
 };
 
-// Filter players to only include those from a specific team
-const filterPlayersByTeam = (players, teamName) => {
-  if (!teamName) return players;
-  return players.filter(p => p.teamName?.toLowerCase() === teamName.toLowerCase());
-};
-
 // --- Route ---
 
 // GET /api/advanced-stats/:seriesId
@@ -628,70 +609,6 @@ router.get("/:seriesId", async (req, res) => {
       error: error.message,
       hint: "Check if the seriesId is valid",
     });
-  }
-});
-
-// GET /api/advanced-stats/:seriesId/win-conditions
-// Returns just the win condition breakdown for a series
-// Optional query param: ?team=TeamName to filter to that team's wins
-router.get("/:seriesId/win-conditions", async (req, res) => {
-  try {
-    const { seriesId } = req.params;
-    const teamFilter = req.query.team || null;
-
-    if (!isValidSeriesId(seriesId)) {
-      return res.status(400).json({ error: "Invalid seriesId format" });
-    }
-
-    ensureDataDir();
-
-    let jsonlFile = findCachedFile(seriesId);
-    if (!jsonlFile) {
-      jsonlFile = await downloadAndExtract(seriesId);
-      if (!jsonlFile) {
-        return res.status(404).json({ error: "Match file not found" });
-      }
-    }
-
-    const data = await parseMatchFile(jsonlFile);
-    const winConditions = generateWinConditions(data.rounds, teamFilter);
-
-    res.json(winConditions);
-  } catch (error) {
-    console.error("Error:", error.message);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// GET /api/advanced-stats/:seriesId/tempo
-// Returns timing/tempo analysis for attack rounds
-// Optional query param: ?team=TeamName to filter to that team
-router.get("/:seriesId/tempo", async (req, res) => {
-  try {
-    const { seriesId } = req.params;
-    const teamFilter = req.query.team || null;
-
-    if (!isValidSeriesId(seriesId)) {
-      return res.status(400).json({ error: "Invalid seriesId format" });
-    }
-
-    ensureDataDir();
-
-    let jsonlFile = findCachedFile(seriesId);
-    if (!jsonlFile) {
-      jsonlFile = await downloadAndExtract(seriesId);
-      if (!jsonlFile) {
-        return res.status(404).json({ error: "Match file not found" });
-      }
-    }
-
-    const data = await parseMatchFile(jsonlFile);
-    const tempo = generateTempoStats(data.rounds, teamFilter);
-
-    res.json(tempo);
-  } catch (error) {
-    console.error("Error:", error.message);
-    res.status(500).json({ error: error.message });
   }
 });
 

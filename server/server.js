@@ -3,9 +3,10 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 require('dotenv/config');
+const { rateLimit } = require("express-rate-limit");
 
 /* Import routes */
-const statsRoutes = require('./routes/stats');
+const advancedStatsRoutes = require('./routes/advanced-stats');
 const scoutingRoutes = require('./routes/scouting');
 const centralDataRoutes = require('./routes/central-data');
 const seriesStateRoutes = require('./routes/series-state');
@@ -43,8 +44,14 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'ValoScout AI Backend is running' });
 });
 
+const advancedStatsLimiter = rateLimit({
+  windowMs: 30 * 1000,
+  max: 10,
+  message: { error: "Too many requests, please wait" },
+});
+
 /* Mount Routes (migrated from backend) */
-app.use('/api/advanced-stats', statsRoutes);
+app.use('/api/advanced-stats', advancedStatsLimiter, advancedStatsRoutes);
 app.use('/api/scouting', scoutingRoutes);
 app.use('/api/central', centralDataRoutes);
 app.use('/api/series', seriesStateRoutes);

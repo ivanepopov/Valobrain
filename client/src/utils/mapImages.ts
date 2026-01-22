@@ -31,5 +31,3 @@ export function getMapImage(mapName: string): string | undefined {
     const normalizedName = mapName.toLowerCase().trim();
     return mapImages[normalizedName];
 }
-
-export default mapImages;

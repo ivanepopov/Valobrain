@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {
-    Zap,
-    Target, 
-    TrendingUp, 
-    AlertCircle, 
+    Target,
+    TrendingUp,
+    AlertCircle,
     Loader2,
     ShieldCheck,
+    Trophy,
 } from 'lucide-react';
 import MapFilter from "../ui/MapFilter.tsx";
 import HistoryFilter from "../ui/HistoryFilter.tsx";
@@ -195,20 +195,25 @@ const ScoutingReport: React.FC<ScoutingReportProps> = ({
 
     if (isLoading && rawData.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-24 bg-slate-900/20 rounded-3xl border border-slate-800/50">
+            <div
+                className="flex flex-col items-center justify-center py-24 bg-slate-900/20 rounded-3xl border border-slate-800/50">
                 <div className="relative mb-6">
-                    <Loader2 className="w-12 h-12 animate-spin text-blue-500" />
-                    <Zap className="w-5 h-5 text-yellow-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+                    <Loader2 className="w-12 h-12 animate-spin text-blue-500"/>
+                    <Trophy className="w-5 h-5 text-blue-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse"/>
                 </div>
-                <h3 className="text-xl font-black uppercase tracking-widest italic text-white">Deep Intelligence Mining</h3>
-                <p className="text-slate-500 mt-2 font-medium uppercase text-[10px] tracking-[0.2em] text-center px-4 leading-relaxed">
-                    {progress.status} <br />
-                    <span className="text-blue-400 font-bold mt-1 inline-block">Series {progress.current} of {progress.total}</span>
+                <h3 className="text-xl font-black uppercase tracking-widest italic text-white">
+                    Deep Intelligence Mining
+                </h3>
+                <p className="text-slate-500 mt-2 font-bold uppercase text-[10px] tracking-[0.3em] text-center px-4">
+                    {progress.status}
+                </p>
+                <p className="text-blue-400 font-black uppercase text-xs tracking-wider mt-1">
+                    Series {progress.current} of {progress.total}
                 </p>
                 <div className="w-48 h-1.5 bg-slate-800 rounded-full mt-6 overflow-hidden">
                     <div
                         className="h-full bg-blue-500 transition-all duration-1000 ease-in-out"
-                        style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                        style={{width: `${(progress.current / progress.total) * 100}%` }}
                     />
                 </div>
             </div>
