@@ -56,10 +56,18 @@ async function parseMatchFile(filePath) {
                 const lineJson = JSON.parse(line);
                 
                 // Handle case where line is a wrapper containing 'events' array
-                const eventsToProcess = Array.isArray(lineJson.events) ? lineJson.events : [lineJson];
+                const events = Array.isArray(lineJson.events) ? lineJson.events : [lineJson];
+                const seriesState = lineJson.seriesState; // Capture Wrapper State
 
-                for (const event of eventsToProcess) {
+                let teamIdMap = {}; // { '99': 'Cloud9' }
+
+                for (const event of events) {
                     if (!event || !event.type) continue;
+
+                    // Normalize Timestamp
+                    if (!startTime && event.type === 'game-started-round' && event.roundNumber === 1) {
+                        startTime = new Date(event.occurredAt).getTime();
+                    }
                     
                     // Map Info
                     if (event.type === 'map-started' || event.type === 'game-started') {
@@ -72,26 +80,68 @@ async function parseMatchFile(filePath) {
                         currentRoundObj = {
                             roundNumber: event.roundNumber || (rounds.length + 1),
                             startTime: new Date(event.occurredAt).getTime(),
-                            events: [],
                             kills: [],
                             plantInfo: null,
                             defuseInfo: null,
                             winInfo: null,
-                            abilityCasts: [] // New: Track abilities
+                            abilityCasts: [] 
                         };
 
-                        // Extract Rosters (Name -> Agent)
+                        // Extract Rosters (Name -> Agent) AND Side Logic
                         const teams = event.actor?.state?.teams || [];
-                        console.log(`[Parser] Round ${event.roundNumber} - Teams found: ${teams.length}`); // DEBUG
+                        console.log(`[Parser] Round ${event.roundNumber} - Teams found: ${teams.length}`); 
+                        
+                        // New: Capture Side AND Economy
+                        const teamSides = {}; 
+                        const teamEconomy = {};
+
+                        // 1. Get Side from Event AND Build map
                         for (const team of teams) {
+                            if (team.name && team.id) {
+                                teamIdMap[team.id] = team.name;
+                            }
+                            if (team.name && team.side) {
+                                teamSides[team.name] = team.side;
+                            }
+                            // Map players from event
                             for (const p of team.players || []) {
                                 if (p.name && p.character?.name) {
                                     players[p.name] = p.character.name;
-                                    // console.log(`[Parser] Mapped ${p.name} -> ${p.character.name}`); // DEBUG
                                 }
                             }
                         }
-                        console.log(`[Parser] Total Players Mapped: ${Object.keys(players).length}`); // DEBUG
+
+                        // 2. Get Economy from SeriesState (Wrapper) - Pre-Buy
+                        if (seriesState && seriesState.games && seriesState.games[0] && seriesState.games[0].teams) {
+                             const stateTeams = seriesState.games[0].teams;
+                             for (const t of stateTeams) {
+                                  if (teamIdMap[t.id]) {
+                                      teamEconomy[teamIdMap[t.id]] = t.loadoutValue;
+                                  }
+                             }
+                        }
+
+                        // Attach to round object
+                        currentRoundObj.teamSides = teamSides;
+                        currentRoundObj.teamEconomy = teamEconomy;
+                        
+                        console.log(`[Parser] Round ${event.roundNumber} Eco (Start): ${JSON.stringify(teamEconomy)}`);
+                    }
+
+                    // Refine Economy at Round Start (Barrier Drop)
+                    if (event.type === 'round-ended-freezetime' && currentRoundObj && seriesState && seriesState.games) {
+                         // Overwrite/Update Economy with post-buy values
+                         const stateTeams = seriesState.games[0]?.teams;
+                         if (stateTeams) {
+                             const teamEconomy = currentRoundObj.teamEconomy || {};
+                             for (const t of stateTeams) {
+                                  if (teamIdMap[t.id]) {
+                                      teamEconomy[teamIdMap[t.id]] = t.loadoutValue;
+                                  }
+                             }
+                             currentRoundObj.teamEconomy = teamEconomy;
+                             // console.log(`[Parser] Round ${currentRoundObj.roundNumber} Eco (Post-Buy): ${JSON.stringify(teamEconomy)}`);
+                         }
                     }
 
                     // Round End / Team Won
@@ -190,22 +240,39 @@ async function processJob(jobId) {
         console.log(`[Worker] Starting job ${jobId} for ${job.teamName}`);
         reportQueue.updateJob(jobId, { status: reportQueue.JOB_STATUS.PROCESSING, progress: 10 });
 
-        // 1. Get/Download Data
-        const filePath = await getMatchData(job.seriesId);
-        reportQueue.updateJob(jobId, { progress: 20 });
+        // 0. Check for Cached Digest
+        let digest = matchDataService.loadDigest(job.seriesId);
+        let matchData = null; // Only needed if no digest
 
-        // 2. Parse Data
-        const matchData = await parseMatchFile(filePath);
-        reportQueue.updateJob(jobId, { progress: 30 });
+        if (digest) {
+            console.log(`[Worker] Using cached DIGEST for ${job.seriesId}. Skipping Download/Parse.`);
+            reportQueue.updateJob(jobId, { 
+                progress: 50, 
+                stages: { ...job.stages, digest: 'completed', analyst: 'processing' },
+                intermediate: { digest }
+            });
+        } else {
+            // 1. Get/Download Data
+            const filePath = await getMatchData(job.seriesId);
+            reportQueue.updateJob(jobId, { progress: 20 });
 
-        // 3. Build Digest
-        reportQueue.updateJob(jobId, { stages: { ...job.stages, digest: 'processing' } });
-        const digest = digestBuilder.buildMatchDigest(matchData, job.teamName);
-        reportQueue.updateJob(jobId, { 
-            stages: { ...job.stages, digest: 'completed', analyst: 'processing' },
-            progress: 50,
-            intermediate: { digest } // Save formatted digest
-        });
+            // 2. Parse Data
+            matchData = await parseMatchFile(filePath);
+            reportQueue.updateJob(jobId, { progress: 30 });
+
+            // 3. Build Digest
+            reportQueue.updateJob(jobId, { stages: { ...job.stages, digest: 'processing' } });
+            digest = digestBuilder.buildMatchDigest(matchData, job.teamName);
+            
+            // SAVE DIGEST TO CACHE
+            matchDataService.saveDigest(job.seriesId, digest);
+
+            reportQueue.updateJob(jobId, { 
+                stages: { ...job.stages, digest: 'completed', analyst: 'processing' },
+                progress: 50,
+                intermediate: { digest } // Save formatted digest
+            });
+        }
 
         // 4. AI Analyst (Pass 1)
         const analysis = await aiAnalyst.analyzeMatch(digest);
@@ -217,7 +284,7 @@ async function processJob(jobId) {
         // 5. AI Writer (Pass 2)
         const report = await aiWriter.generateReport(analysis, {
             targetTeam: job.teamName,
-            map: matchData.mapName,
+            map: matchData ? matchData.mapName : digest.meta.map, // Use digest map if matchData is null
             date: new Date().toLocaleDateString() // approximate
         });
 
@@ -232,6 +299,12 @@ async function processJob(jobId) {
             }
         });
         
+        // 7. Optional Cleanup
+        if (process.env.KEEP_RAW_FILES === 'false') {
+            console.log(`[Worker] KEEP_RAW_FILES=false. Deleting raw data for ${job.seriesId}.`);
+            matchDataService.deleteRawData(job.seriesId);
+        }
+
         console.log(`[Worker] Job ${jobId} completed successfully.`);
 
     } catch (error) {
