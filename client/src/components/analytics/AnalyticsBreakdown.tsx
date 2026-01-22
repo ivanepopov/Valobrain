@@ -17,7 +17,6 @@
  */
 import type {Team} from "../../types/Team.ts";
 import PlayerStatisticsTable from "./PlayerStatisticsTable.tsx";
-import AgentStatistics from "./AgentStatistics.tsx";
 import MapPerformance from "./MapPerformance.tsx";
 import TeamLevelStatsOverview from "./TeamLevelStatsOverview.tsx";
 import WinConditionDistribution from "./WinConditionDistribution.tsx";
@@ -27,6 +26,7 @@ import type {SeriesStats} from "../../types/SeriesStats.ts";
 import { useState, useMemo } from "react";
 import MapFilter from "../ui/MapFilter.tsx";
 import HistoryFilter from "../ui/HistoryFilter.tsx";
+import LoadingPage from "../ui/LoadingPage.tsx";
 
 const timeOptions = [
     { value: "all", label: "All Time" },
@@ -46,18 +46,7 @@ const AnalyticsBreakdown = ({ team, stats, allSeriesData, isLoadingSeries }: Pro
     const [selectedMap, setSelectedMap] = useState<string>("All");
     const [timeRange, setTimeRange] = useState<string>("all");
 
-    if (!team || !stats || isLoadingSeries) {
-        return (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-24 bg-gray-900/50 border border-gray-800 rounded-xl animate-pulse" />
-                    ))}
-                </div>
-                <div className="hidden lg:block h-96 bg-gray-900/20 border border-gray-800 rounded-2xl animate-pulse" />
-            </div>
-        );
-    }
+    if (!team || !stats || isLoadingSeries) return <LoadingPage />;
 
     const filteredSeriesData = useMemo(() => {
         let filtered = [...allSeriesData];
@@ -134,11 +123,6 @@ const AnalyticsBreakdown = ({ team, stats, allSeriesData, isLoadingSeries }: Pro
                 team={team}
                 allSeriesData={filteredSeriesData}
                 selectedMap={selectedMap}
-            />
-
-            <AgentStatistics 
-                team={team}
-                allSeriesData={filteredSeriesData} 
             />
 
             <MapPerformance 
