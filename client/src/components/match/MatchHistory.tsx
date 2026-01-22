@@ -141,14 +141,14 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
                                             setSelectedGameIndex(0);
                                         }}
                                         className={`
-                                            group relative rounded-lg py-2 w-[100px] h-fit border transition-all duration-300 hover:scale-105 overflow-hidden cursor-pointer flex flex-col items-center justify-center gap-2
+                                            group relative rounded-lg py-2 w-[50px] border transition-all duration-300 hover:scale-105 overflow-hidden cursor-pointer flex flex-col items-center justify-center gap-2
                                             ${selectedMapTab === 'All Maps'
                                                 ? 'bg-blue-900/40 border-blue-400 ring-2 ring-blue-400 scale-105 shadow-lg shadow-blue-500/20'
                                                 : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10'
                                             }
                                         `}
                                     >
-                                        <span className="text-white font-bold text-sm">All Maps</span>
+                                        <span className="text-white font-bold text-sm">All</span>
 
                                     </div>
 
