@@ -87,6 +87,8 @@ class MatchDataService {
             } catch (fallbackError) {
                 console.error(`[MatchDataService] All download attempts failed for ${seriesId}`);
                 throw new Error(`Failed to download match ${seriesId}: ${fallbackError.message}`);
+            } finally {
+                if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
             }
         }
 
@@ -98,7 +100,6 @@ class MatchDataService {
         } catch (zipError) {
             throw new Error(`Failed to unzip file for ${seriesId}: ${zipError.message}`);
         } finally {
-            // Cleanup ZIP
             if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
         }
 
