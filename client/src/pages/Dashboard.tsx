@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, Clock, BarChart3, FileText } from "lucide-react";
+import { ArrowLeft, Clock, BarChart3, FileText, Calendar, TrendingUp } from "lucide-react";
 import MatchHistory from "../components/match/MatchHistory";
 import AnalyticsBreakdown from "../components/analytics/AnalyticsBreakdown";
 import ScoutingReport from "../components/report/ScoutingReport";
