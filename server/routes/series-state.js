@@ -63,6 +63,7 @@ router.get('/:seriesId', (req, res) => {
   
       fragment playerState on SegmentPlayerStateValorant {
         name
+        firstKill
         damageDealt
       }
     `;
