@@ -164,7 +164,7 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
                     </div>
                 </div>
                 <div className="space-y-6">
-                    {conditions.filter(c => c.wins > 0 || c.losses > 0).map((c, idx) => (
+                    {conditions.map((c, idx) => (
                         <div key={idx}>
                             {renderBarGroup(c.label, c.wins, c.losses, maxVal)}
                         </div>
