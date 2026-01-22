@@ -9,6 +9,7 @@ export type SegmentStats = {
         }[];
         players: {
             name: string;
+            firstKill: boolean;
             damageDealt: number;
         }[];
     }[];

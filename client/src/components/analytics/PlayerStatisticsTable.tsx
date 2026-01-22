@@ -43,7 +43,7 @@ type Props = {
                     
                         if (playerSegment) {
                             totalDamage += playerSegment.damageDealt || 0;
-                            if (playerSegment.firstKills) firstKills += playerSegment.firstKills;
+                            if (playerSegment.firstKill) firstKills += 1;
                         }
                     });
                 }
@@ -74,7 +74,9 @@ type Props = {
     const PlayerStatisticsTable = ({ team, roster, allSeriesData }: Props) => {
         if (!team) return <div className="p-4 text-blue-200/40 italic text-xs">Select a team to view player analytics</div>;
 
-        const playerStats = roster.map(player => computePlayerStats(player.nickname, allSeriesData));
+        const playerStats = roster
+            .map(player => computePlayerStats(player.nickname, allSeriesData))
+            .sort((a, b) => b.kills - a.kills);
 
         return (
             <motion.div
