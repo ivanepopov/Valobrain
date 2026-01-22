@@ -14,6 +14,7 @@ import type { SeriesStats } from "../../types/SeriesStats.ts";
 import { formatDuration, capitalize } from "../../utils/formatters.ts";
 import { getMapImage } from "../../utils/mapImages.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
+import LoadingPage from "../ui/LoadingPage.tsx";
 
 type Props = {
     team: Team | null;
@@ -45,18 +46,7 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
         setSelectedMapTab('All Maps');
     };
 
-    if (!team || !stats || isLoadingSeries) {
-        return (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-24 backdrop-blur-md bg-white/5 border border-white/10 rounded-xl animate-pulse" />
-                    ))}
-                </div>
-                <div className="lg:col-span-2 h-96 backdrop-blur-md bg-white/5 border border-white/10 rounded-xl animate-pulse" />
-            </div>
-        );
-    }
+    if (!team || !stats || isLoadingSeries) return <LoadingPage />;
 
     // Calculate series score
     const getSeriesScore = () => {

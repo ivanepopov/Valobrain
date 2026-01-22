@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Search, Brain, BarChart3, FileText } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion } from 'motion/react';
+import { Search, Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import getTeams from '../services/getTeams.ts';
 import type { Team } from '../types/Team.ts';
-
-import NeuralBackground from "../components/NeuralBackground";
+import FeaturedImagesCarousel from '../components/ui/FeaturedImagesCarousel.tsx';
+import NeuralNetworkBackground from '../components/ui/NeuralNetworkBackground.tsx';
+import FeaturedCards from "../components/ui/FeaturedCards.tsx";
 
 /**
  * Home Page
@@ -13,8 +14,6 @@ import NeuralBackground from "../components/NeuralBackground";
 const Home = () => {
   const navigate = useNavigate();
   const [teamName, setTeamName] = useState('');
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
   const [teamsDropdown, setTeamsDropdown] = useState<Team[]>([]);
 
 
@@ -74,8 +73,9 @@ const Home = () => {
   }, [matchImages.length, isPlaying]);
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 py-12 px-6 overflow-hidden">
-      <NeuralBackground />
+    <div className="relative min-h-screen bg-linear-to-b from-slate-950 via-blue-950 to-slate-900 py-12 px-6 overflow-hidden">
+      {/* Neural Network Background */}
+      <NeuralNetworkBackground />
 
       <div className="relative z-10 max-w-6xl mx-auto">
         {/* Header with Search */}
@@ -166,103 +166,11 @@ const Home = () => {
         </motion.div>
 
         {/* Feature Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="mb-16"
-        >
-          <div className="grid md:grid-cols-3 gap-6">
-            {features.map((feature, index) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
-              >
-                <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-lg p-8 hover:border-blue-400/50 hover:bg-white/10 transition-all duration-300 h-full">
-                  <div className="text-blue-400 mb-4 flex justify-center">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-xl font-semibold text-white mb-3 text-center">
-                    {feature.title}
-                  </h3>
-                  <p className="text-blue-200/80 text-center">
-                    {feature.description}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+        <FeaturedCards />
 
-        {/* Match Gallery Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-        >
-          <h2 className="text-2xl font-semibold text-white mb-6 text-center">Featured Matches</h2>
-          <div className="relative max-w-3xl mx-auto">
-            {/* Carousel Container */}
-            <div className="relative overflow-hidden rounded-3xl backdrop-blur-md bg-white/10 border border-white/10 p-4">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentSlide}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="relative aspect-video"
-                >
-                  <img
-                    src={matchImages[currentSlide]}
-                    alt={`VALORANT Match ${currentSlide + 1}`}
-                    className="w-full h-full object-cover rounded-2xl"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://via.placeholder.com/800x450?text=Match+Image';
-                    }}
-                  />
-                </motion.div>
-              </AnimatePresence>
-            </div>
+        {/* Feature Images Carousel */}
+        <FeaturedImagesCarousel />
 
-            {/* Bottom Controls */}
-            <div className="flex justify-center items-center gap-4 mt-6">
-              {/* Dots Indicator */}
-              <div className="flex gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full">
-                {matchImages.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentSlide(index)}
-                    className={`transition-all duration-300 rounded-full ${
-                      currentSlide === index 
-                        ? 'bg-blue-400 w-12 h-2' 
-                        : 'bg-white/30 hover:bg-white/50 w-2 h-2'
-                    }`}
-                  />
-                ))}
-              </div>
-
-              {/* Play/Pause Button */}
-              <button 
-                onClick={() => setIsPlaying(!isPlaying)}
-                className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full transition-all duration-300"
-                aria-label={isPlaying ? 'Pause carousel' : 'Play carousel'}
-              >
-                {isPlaying ? (
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
-                  </svg>
-                ) : (
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                )}
-              </button>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </div>
   );

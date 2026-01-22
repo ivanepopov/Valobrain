@@ -76,5 +76,3 @@ export function getAgentLogo(agentName: string): string | undefined {
     const normalizedName = agentName.toLowerCase().trim();
     return agentLogos[normalizedName];
 }
-
-export default agentLogos;

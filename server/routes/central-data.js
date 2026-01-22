@@ -63,32 +63,4 @@ router.get('/team/:id', (req, res) => {
     });
 });
 
-/**
- * Fetch a team's roster
- */
-router.get('/team/:id/roster', (req, res) => {
-    const id = req.params.id;
-    const rosterQuery = `
-      query GetTeamRoster {
-        players(filter: {teamIdFilter: {id: "${id}"}}) {
-          edges {
-            node {
-                id
-                nickname
-            }
-          }
-        }
-      }
-    `;
-
-    axios.post(centralDataAPI, { query: rosterQuery }, {
-        headers: { 'x-api-key': apiKey }
-    })
-    .then(response => res.json(response.data))
-    .catch(error => {
-        console.error('Error fetching roster:', error);
-        res.status(500).json({ error: 'Failed to fetch roster' });
-    });
-});
-
 module.exports = router;
