@@ -119,28 +119,50 @@ function buildTeamStats(rounds, roundSummaries, targetTeam) {
   };
 }
 
+const WEAPON_COSTS = {
+    'Vandal': 2900, 'Phantom': 2900, 'Operator': 4700, 'Odin': 3200, 'Judge': 1850,
+    'Spectre': 1600, 'Ares': 1600, 'Bulldog': 2050, 'Guardian': 2250, 'Marshal': 950,
+    'Sheriff': 800, 'Ghost': 500, 'Frenzy': 450, 'Shorty': 150, 'Bucky': 850, 'Stinger': 1100,
+    'Classic': 0, 'Melee': 0,
+    // ID-based / Lowercase Fallbacks
+    'vandal': 2900, 'phantom': 2900, 'operator': 4700, 'odin': 3200, 'judge': 1850,
+    'spectre': 1600, 'ares': 1600, 'bulldog': 2050, 'guardian': 2250, 'marshal': 950,
+    'sheriff': 800, 'ghost': 500, 'frenzy': 450, 'shorty': 150, 'bucky': 850, 'stinger': 1100,
+    'classic': 0, 'melee': 0, 'knife': 0
+};
+
 /**
  * Heuristic Economy Detection
- * Checks weapons used in kills to guess the buy type.
+ * Checks weapons used in kills to guess the buy type AND estimates value.
  */
 function deriveEconomy(kills, targetTeam) {
     const teamKills = kills.filter(k => k.killer?.teamName === targetTeam);
-    if (teamKills.length === 0) return 'Unknown'; // No kills to judge
     
-    const rifles = teamKills.filter(k => ['Vandal', 'Phantom', 'Operator', 'Odin'].includes(k.weapon)).length;
-    const pistols = teamKills.filter(k => ['Classic', 'Ghost', 'Sheriff', 'Frenzy', 'Shorty'].includes(k.weapon)).length;
-    const smgs = teamKills.filter(k => ['Spectre', 'Stinger', 'Judge', 'Bucky', 'Bulldog', 'Guardian', 'Marshal', 'Ares'].includes(k.weapon)).length;
+    // 1. Calculate Est. Loadout Value (of active killers)
+    let totalValue = 0;
+    let counted = 0;
+    
+    for (const k of teamKills) {
+        const w = k.weapon;
+        if (WEAPON_COSTS[w] !== undefined) {
+            totalValue += WEAPON_COSTS[w];
+            counted++;
+        }
+    }
+    
+    const avgValue = counted > 0 ? Math.round(totalValue / counted) : 0;
+    
+    // 2. Classify based on Average Weapon Value
+    let type = 'Unknown';
+    if (avgValue >= 2900) type = 'Full Buy';
+    else if (avgValue >= 1800) type = 'Force Buy'; // Guardian/Bulldog territory
+    else if (avgValue >= 800) type = 'Half Buy';   // Sheriff/Spectre
+    else type = 'Eco';
 
-    const total = teamKills.length;
-    
-    if (rifles / total > 0.6) return 'Full Buy';
-    if (pistols / total > 0.8) return 'Eco';
-    if (smgs / total > 0.5) return 'Force/Half Buy';
-    return 'Mixed/Save';
+    return { type, avgValue };
 }
 
 function summarizeRound(round, targetTeam, mapName) {
-  // ... (existing code start) ...
   const isTargetN = round.roundNumber;
   
   // Identify key events (existing)
@@ -155,10 +177,18 @@ function summarizeRound(round, targetTeam, mapName) {
     player: round.defuseInfo.player
   } : null;
 
-  const sampleKill = (round.kills || []).find(k => k.killer?.teamName === targetTeam || k.victim?.teamName === targetTeam);
-  const targetSide = sampleKill 
-    ? (sampleKill.killer?.teamName === targetTeam ? sampleKill.killer.side : sampleKill.victim.side)
-    : 'unknown';
+  // ROBUST SIDE DETECTION
+  // Use the explicit side extracted by parser, or fallback to heuristics if missing (old data)
+  let targetSide = 'unknown';
+  if (round.teamSides && round.teamSides[targetTeam]) {
+      targetSide = round.teamSides[targetTeam];
+  } else {
+      // Fallback (Legacy)
+      const sampleKill = (round.kills || []).find(k => k.killer?.teamName === targetTeam || k.victim?.teamName === targetTeam);
+      targetSide = sampleKill 
+        ? (sampleKill.killer?.teamName === targetTeam ? sampleKill.killer.side : sampleKill.victim.side)
+        : 'unknown';
+  }
 
   const result = round.winInfo?.winner === targetTeam ? 'WIN' : 'LOSS';
   const winType = round.winInfo?.type || 'elimination';
@@ -166,9 +196,9 @@ function summarizeRound(round, targetTeam, mapName) {
   const kills = (round.kills || []).sort((a, b) => a.time - b.time);
   const firstBlood = kills[0] ? {
     killer: kills[0].killer?.name,
-    killerAgent: kills[0].killer?.agent, // New
+    killerAgent: kills[0].killer?.agent, 
     victim: kills[0].victim?.name,
-    victimAgent: kills[0].victim?.agent, // New
+    victimAgent: kills[0].victim?.agent, 
     killerTeam: kills[0].killer?.teamName,
     time: kills[0].time,
     zone: kills[0].victim?.zone
@@ -177,7 +207,26 @@ function summarizeRound(round, targetTeam, mapName) {
   const tradeEvents = analyzeTrades(kills, targetTeam);
 
   // New: Economy & Ability Summary
-  const buyType = deriveEconomy(kills, targetTeam);
+  // const economy = deriveEconomy(kills, targetTeam); // Deprecated heuristic
+  
+  let loadoutVal = 0;
+  let buyType = 'Unknown';
+  
+  if (round.teamEconomy && round.teamEconomy[targetTeam] !== undefined) {
+      loadoutVal = round.teamEconomy[targetTeam];
+      // Classification based on Team Total (5 players)
+      // Full Buy: ~20k+ (4k avg)
+      // Force: ~12k+ (2.4k avg)
+      // Eco: < 10k (<2k avg)
+      if (loadoutVal >= 19000) buyType = 'Full Buy';
+      else if (loadoutVal >= 10000) buyType = 'Force/Half Buy';
+      else buyType = 'Eco';
+  } else {
+      // Fallback if data missing
+      const economy = deriveEconomy(kills, targetTeam);
+      buyType = economy.type;
+      loadoutVal = economy.avgValue * 5; // Approx team total
+  }
 
   const abilities = (round.abilityCasts || []).map(a => {
       let z = 'Unknown';
@@ -195,7 +244,8 @@ function summarizeRound(round, targetTeam, mapName) {
     side: targetSide,
     result,
     type: winType,
-    buy: buyType, 
+    buy: buyType,       // "Full Buy"
+    loadoutVal: loadoutVal, // Team Total
     keyEvents: {
       fb: firstBlood,
       plant,

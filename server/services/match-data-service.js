@@ -5,6 +5,7 @@ const AdmZip = require('adm-zip');
 
 // Configuration
 const MATCH_DATA_DIR = path.resolve(__dirname, "../match_data");
+const DIGEST_DIR = path.join(MATCH_DATA_DIR, "digests");
 const GRID_API_BASE = "https://api.grid.gg/file-download";
 const GRID_FILE_URL = process.env.GRID_FILE_URL || `${GRID_API_BASE}/events/grid/series`;
 const DOWNLOAD_TIMEOUT_MS = 60000; // 60s timeout for large files
@@ -15,11 +16,14 @@ class MatchDataService {
     }
 
     /**
-     * Ensure the data directory exists.
+     * Ensure the data directories exist.
      */
     ensureDataDir() {
         if (!fs.existsSync(MATCH_DATA_DIR)) {
             fs.mkdirSync(MATCH_DATA_DIR, { recursive: true });
+        }
+        if (!fs.existsSync(DIGEST_DIR)) {
+            fs.mkdirSync(DIGEST_DIR, { recursive: true });
         }
     }
 
@@ -35,6 +39,31 @@ class MatchDataService {
         const cached = files.find(f => f.includes(seriesId) && f.endsWith('.jsonl'));
         
         return cached ? path.join(MATCH_DATA_DIR, cached) : null;
+    }
+
+    /**
+     * Load a cached digest if it exists.
+     * @param {string} seriesId 
+     * @returns {Object|null}
+     */
+    loadDigest(seriesId) {
+        const p = path.join(DIGEST_DIR, `${seriesId}_digest.json`);
+        if (fs.existsSync(p)) {
+            console.log(`[MatchDataService] Cache Hit: Digest found for ${seriesId}`);
+            return JSON.parse(fs.readFileSync(p, 'utf8'));
+        }
+        return null;
+    }
+
+    /**
+     * Save a digest to cache.
+     * @param {string} seriesId 
+     * @param {Object} digest 
+     */
+    saveDigest(seriesId, digest) {
+        const p = path.join(DIGEST_DIR, `${seriesId}_digest.json`);
+        fs.writeFileSync(p, JSON.stringify(digest, null, 2));
+        console.log(`[MatchDataService] Digest saved for ${seriesId}`);
     }
 
     /**
@@ -137,6 +166,25 @@ class MatchDataService {
             writer.on('finish', resolve);
             writer.on('error', reject);
         });
+    }
+
+    /**
+     * Delete raw ZIP and JSONL files to save space.
+     * @param {string} seriesId 
+     */
+    deleteRawData(seriesId) {
+        try {
+            const files = fs.readdirSync(MATCH_DATA_DIR);
+            const targets = files.filter(f => f.includes(seriesId) && (f.endsWith('.jsonl') || f.endsWith('.zip')));
+            
+            for (const file of targets) {
+                const p = path.join(MATCH_DATA_DIR, file);
+                fs.unlinkSync(p);
+                console.log(`[MatchDataService] Deleted raw file: ${file}`);
+            }
+        } catch (e) {
+            console.error(`[MatchDataService] Failed to cleanup raw files for ${seriesId}: ${e.message}`);
+        }
     }
 }
 
