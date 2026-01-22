@@ -37,43 +37,10 @@ const Home = () => {
     setTeamsDropdown(teams);
   }
 
-  const features = [
-    {
-      icon: <BarChart3 className="w-8 h-8" />,
-      title: 'Match History',
-      description: 'Track and analyze all your team matches with detailed statistics',
-    },
-    {
-      icon: <Search className="w-8 h-8" />,
-      title: 'Analytics',
-      description: 'Deep dive into performance metrics and tactical insights',
-    },
-    {
-      icon: <FileText className="w-8 h-8" />,
-      title: 'Scouting Report',
-      description: 'Generate comprehensive reports on team strategies and patterns',
-    },
-  ];
 
-  const matchImages = [
-    '/DSC01465.JPG',
-    '/DSC01331.JPG',
-    '/DSC01412.JPG',
-    '/DSC01201.JPG',
-  ];
-
-  // Auto-play carousel
-  useEffect(() => {
-    if (!isPlaying) return;
-    
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % matchImages.length);
-    }, 3000);
-    return () => clearInterval(timer);
-  }, [matchImages.length, isPlaying]);
 
   return (
-    <div className="relative min-h-screen bg-linear-to-b from-slate-950 via-blue-950 to-slate-900 py-12 px-6 overflow-hidden">
+    <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 py-12 px-6 overflow-hidden">
       {/* Neural Network Background */}
       <NeuralNetworkBackground />
 
