@@ -80,13 +80,15 @@ type Props = {
 
         return (
             <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
                 className="mb-6"
             >
+                <h2 className="text-2xl font-bold text-white mb-4">Player Statistics</h2>
                 <GlassBox className="mt-4 !p-0 overflow-hidden border-white/5">
                     <div className="bg-white/5 px-4 py-2 border-b border-white/10 flex justify-between items-center">
-                        <h3 className="text-white text-[11px] font-black uppercase tracking-widest italic">Performance Matrix</h3>
+                        <h3 className="text-white text-[11px] font-black uppercase tracking-widest italic">Player Statistics</h3>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-[13px]">

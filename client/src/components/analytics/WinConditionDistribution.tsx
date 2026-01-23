@@ -2,6 +2,7 @@ import type { Team } from "../../types/Team.ts";
 import type { SeriesStats } from "../../types/SeriesStats.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
 import { useMemo } from "react";
+import { motion } from "motion/react";
 
 type WinTypes = {
     bomb: number;
@@ -175,12 +176,18 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
     };
 
     return (
-        <div className="mt-8">
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="mb-6"
+        >
+            <h2 className="text-2xl font-bold text-white mb-4">Win Condition Distribution</h2>
             <div className="flex flex-col gap-6 lg:flex-row">
                 {renderSideSection("Attack Win Conditions", stats.attack)}
                 {renderSideSection("Defense Win Conditions", stats.defense)}
             </div>
-        </div>
+        </motion.div>
     );
 };
 

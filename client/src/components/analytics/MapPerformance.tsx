@@ -3,6 +3,7 @@ import type { Team } from "../../types/Team.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
 import { capitalize } from "../../utils/formatters.ts";
 import { useMemo } from "react";
+import { motion } from "motion/react";
 
 type Props = {
     team: Team | null;
@@ -70,17 +71,23 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
     }, [allSeriesData, team, selectedMap]);
 
     return (
-        <GlassBox className="mt-8">
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="mb-6"
+        >
+            <h2 className="text-2xl font-bold text-white mb-4">Map Success</h2>
+            <GlassBox className="mt-8">
             <div className="flex justify-between items-center mb-10">
                 <div>
-                    <h3 className="text-white text-base font-black uppercase tracking-tighter italic">Map Performance Analytics</h3>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Regional Efficiency & Side Conversion</p>
+                    <h3 className="text-white text-base font-black uppercase tracking-tighter italic">Map Success</h3>
                 </div>
                 <div className="flex gap-6 bg-slate-950/40 p-3 rounded-xl border border-white/5">
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-linear-to-r from-blue-600 to-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.5)]" /><span className="text-[9px] font-black text-slate-300 uppercase">Match WR</span></div>
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-linear-to-r from-rose-600 to-rose-400 shadow-[0_0_8px_rgba(225,29,72,0.5)]" /><span className="text-[9px] font-black text-slate-300 uppercase">Atk WR</span></div>
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-linear-to-r from-emerald-600 to-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.5)]" /><span className="text-[9px] font-black text-slate-300 uppercase">Def WR</span></div>
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-linear-to-r from-slate-500 to-slate-300 shadow-[0_0_8px_rgba(148,163,184,0.5)]" /><span className="text-[9px] font-black text-slate-300 uppercase">Play Rate</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-linear-to-r from-green-600 to-green-400 shadow-[0_0_8px_rgba(34,197,94,0.5)]" /><span className="text-[9px] font-black text-slate-300 uppercase">Match Win Rate</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-linear-to-r from-red-600 to-red-400 shadow-[0_0_8px_rgba(239,68,68,0.5)]" /><span className="text-[9px] font-black text-slate-300 uppercase">Atk Win Rate</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-linear-to-r from-blue-600 to-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.5)]" /><span className="text-[9px] font-black text-slate-300 uppercase">Def Win Rate</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-linear-to-r from-purple-600 to-purple-400 shadow-[0_0_8px_rgba(147,51,234,0.5)]" /><span className="text-[9px] font-black text-slate-300 uppercase">Play Rate</span></div>
                 </div>
             </div>
         
@@ -91,7 +98,7 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
                             {/* Y-Axis: Map Name */}
                             <div className="w-28 shrink-0 pt-2">
                                 <span className="block text-white font-black text-sm uppercase italic tracking-tight group-hover:text-blue-400 transition-colors">{capitalize(map.name)}</span>
-                                <span className="block text-slate-500 text-[10px] font-mono font-bold mt-1 tracking-tighter">{map.record} Series</span>
+                                
                             </div>
 
                             {/* Chart Area */}
@@ -115,10 +122,10 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
                                 {/* Large Bars Group */}
                                 <div className="space-y-3 relative z-10 py-2">
                                     {[
-                                        { val: map.matchWinRate, color: "from-blue-600 to-blue-400 shadow-blue-500/20" },
-                                        { val: map.atkWinRate, color: "from-rose-600 to-rose-400 shadow-rose-500/20" },
-                                        { val: map.defWinRate, color: "from-emerald-600 to-emerald-400 shadow-emerald-500/20" },
-                                        { val: map.playRate, color: "from-slate-600 to-slate-400 shadow-slate-500/20" }
+                                        { val: map.matchWinRate, color: "from-green-600 to-green-400 shadow-green-500/20" },
+                                        { val: map.atkWinRate, color: "from-red-600 to-red-400 shadow-red-500/20" },
+                                        { val: map.defWinRate, color: "from-blue-600 to-blue-400 shadow-blue-500/20" },
+                                        { val: map.playRate, color: "from-purple-600 to-purple-400 shadow-purple-500/20" }
                                     ].map((bar, idx) => (
                                         <div key={idx} className="relative h-3 w-full bg-slate-900/80 rounded-sm overflow-hidden border border-white/5">
                                             <div 
@@ -143,7 +150,8 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
                     </div>
                 )}
             </div>
-        </GlassBox>
+            </GlassBox>
+        </motion.div>
     );
 };
 

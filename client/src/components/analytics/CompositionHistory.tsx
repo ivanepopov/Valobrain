@@ -3,6 +3,7 @@ import type { Team } from "../../types/Team.ts";
 import type { SeriesStats } from "../../types/SeriesStats.ts";
 import GlassBox from "../ui/GlassBox.tsx";
 import {getAgentLogo} from "../../utils/agentLogos.ts";
+import { motion } from "motion/react";
 
 type Props = {
     team: Team | null;
@@ -61,7 +62,14 @@ const CompositionHistory = ({ team, allSeriesData, selectedMap }: Props) => {
     if (compositionStats.length === 0) return null;
 
     return (
-        <GlassBox className="mb-6">
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mb-6"
+        >
+            <h2 className="text-2xl font-bold text-white mb-4">Agent Usage & Composition</h2>
+            <GlassBox className="mb-6">
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h3 className="text-sm font-black text-white uppercase tracking-tighter italic">Composition Analysis</h3>
@@ -121,7 +129,8 @@ const CompositionHistory = ({ team, allSeriesData, selectedMap }: Props) => {
                     </div>
                 ))}
             </div>
-        </GlassBox>
+            </GlassBox>
+        </motion.div>
     );
 };
 
