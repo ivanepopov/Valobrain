@@ -48,6 +48,7 @@ class AiWriterService {
             // Construct the user message
             const prompt = `
 Generate a scouting report for team "${metadata.targetTeam}".
+Tournament: ${metadata.tournament || 'Unknown Tournament'}
 Map: ${metadata.map}
 Date: ${metadata.date}
 

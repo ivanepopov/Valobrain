@@ -26,10 +26,17 @@ JSON OUTPUT STRUCTURE:
       "impact": "High" | "Medium" | "Low"
     }
   ],
-  "formation_usage": {
-      "attack_defaults": ["1-3-1", "Deathball"], 
-      "defense_setups": ["Sentinel Anchor", "Gambling"]
+  "pistol_round_analysis": {
+      "attack_pistol": "Summary of strat (e.g., '5-man rush B')",
+      "defense_pistol": "Summary of setup (e.g., 'Retake A setup')",
+      "key_takeaway": "Insight on their pistol proficiency."
   },
+  "formation_usage": {
+      "attack_defaults": ["1-3-1", "Deathball", "Split"], 
+      "defense_setups": ["Sentinel Anchor", "Gambling", "Aggressive Info"]
+  },
+
+### REQUIREMENT: FIND AT LEAST 3 DISTINCT PATTERNS PER PHASE (ATTACK / DEFENSE).
 
 ### 3. STRATEGIC FORMATIONS (Deduced from Kill Flow)
 Analyze the `killFlow` locations (`kz` = Killer Zone, `vz` = Victim Zone) of the first 2-3 kills in each round to identify the strategy.

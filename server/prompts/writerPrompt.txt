@@ -25,27 +25,35 @@ Use the following structure:
 ---
 
 ## ⚔️ Attack Protocols
-**Formations Used:**
-[List key formations from `formation_usage.attack_defaults`]
+**Default Phase (Early Round):**
+[How do they default? Do they value map control or rush?]
+
+**Execute Phase (Site Hit):**
+[How do they burst onto site? What utility do they rely on?]
 
 **Key Tendencies:**
-- [Bold Pattern Name]: [Description of pattern. Why do they do it?]
 - [Bold Pattern Name]: [Description]
-
-**Macro Strategy:**
-[Comment on their pacing, default behavior, and how they handle space.]
+- [Bold Pattern Name]: [Description]
+- [Bold Pattern Name]: [Description]
 
 ---
 
 ## 🛡️ Defense Setups
-**Common Setups:**
+**Standard Setups:**
 [List key setups from `formation_usage.defense_setups`]
 
-**Key Tendencies:**
-- [Bold Pattern Name]: [Description of specific setups or aggression.]
+**Aggressive Micro-Plays:**
+[How do they fight for space early?]
 
-**Retake & Rotations:**
-[Insight into their rotation speed and retake coordination.]
+**Key Tendencies:**
+- [Bold Pattern Name]: [Description]
+- [Bold Pattern Name]: [Description]
+- [Bold Pattern Name]: [Description]
+
+---
+
+## 🔫 Pistol & Economy Analysis
+[Synthesize the `pistol_round_analysis` here. Are they rehearsed or puggy?]
 
 ---
 
@@ -60,10 +68,14 @@ Use the following structure:
 ## 🧠 Counter-Strat Playbook (Win Conditions)
 > [!TIP]
 > **Priority 1: [Name of Exploit]**
-> [Actionable advice on how to punish their weakness.]
+> [Actionable advice.]
 
 > [!TIP]
 > **Priority 2: [Name of Exploit]**
+> [Actionable advice.]
+
+> [!TIP]
+> **Priority 3: [Name of Exploit]**
 > [Actionable advice.]
 
 ---

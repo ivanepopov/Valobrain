@@ -35,6 +35,8 @@ function buildMatchDigest(matchData, targetTeam) {
     meta: {
       map: mapName,
       targetTeam,
+      tournament: matchData.tournamentName || 'Unknown Tournament',
+      date: matchData.seriesDate || new Date().toISOString(),
       roster: players, // Name -> Agent map
       totalRounds: rounds.length,
       generatedAt: new Date().toISOString()
