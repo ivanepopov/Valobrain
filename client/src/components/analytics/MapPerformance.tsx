@@ -2,7 +2,8 @@ import type { SeriesStats } from "../../types/SeriesStats.ts";
 import type { Team } from "../../types/Team.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
 import { capitalize } from "../../utils/formatters.ts";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { motion } from "motion/react";
 
 type Props = {
     team: Team | null;
@@ -12,6 +13,20 @@ type Props = {
 
 const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => {
     if (!team) return null;
+
+    const [visibleMetrics, setVisibleMetrics] = useState({
+        matchWinRate: true,
+        atkWinRate: true,
+        defWinRate: true,
+        playRate: true
+    });
+
+    const toggleMetric = (metric: keyof typeof visibleMetrics) => {
+        setVisibleMetrics(prev => ({
+            ...prev,
+            [metric]: !prev[metric]
+        }));
+    };
 
     const mapStats = useMemo(() => {
         const stats: Record<string, {
@@ -70,80 +85,115 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
     }, [allSeriesData, team, selectedMap]);
 
     return (
-        <GlassBox className="mt-8">
-            <div className="flex justify-between items-center mb-10">
-                <div>
-                    <h3 className="text-white text-base font-black uppercase tracking-tighter italic">Map Performance Analytics</h3>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Regional Efficiency & Side Conversion</p>
-                </div>
-                <div className="flex gap-6 bg-slate-950/40 p-3 rounded-xl border border-white/5">
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-linear-to-r from-blue-600 to-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.5)]" /><span className="text-[9px] font-black text-slate-300 uppercase">Match WR</span></div>
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-linear-to-r from-rose-600 to-rose-400 shadow-[0_0_8px_rgba(225,29,72,0.5)]" /><span className="text-[9px] font-black text-slate-300 uppercase">Atk WR</span></div>
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-linear-to-r from-emerald-600 to-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.5)]" /><span className="text-[9px] font-black text-slate-300 uppercase">Def WR</span></div>
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-linear-to-r from-slate-500 to-slate-300 shadow-[0_0_8px_rgba(148,163,184,0.5)]" /><span className="text-[9px] font-black text-slate-300 uppercase">Play Rate</span></div>
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="mb-6"
+        >
+            <h2 className="text-2xl font-bold text-white drop-shadow-md mb-6">Map Success</h2>
+            <GlassBox className="mt-4 border-white/10">
+            <div className="flex justify-end items-center mb-8">
+                <div className="flex gap-4 bg-gradient-to-r from-slate-950/60 to-slate-900/60 p-3.5 rounded-xl border border-white/10 backdrop-blur-sm">
+                    <button 
+                        onClick={() => toggleMetric('matchWinRate')}
+                        className={`flex items-center gap-2.5 transition-all duration-300 cursor-pointer hover:scale-105 ${visibleMetrics.matchWinRate ? 'opacity-100' : 'opacity-40'}`}
+                    >
+                        <div className="w-3.5 h-3.5 rounded-md bg-green-400 shadow-lg shadow-green-400/40" />
+                        <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Match Win Rate</span>
+                    </button>
+                    <button 
+                        onClick={() => toggleMetric('atkWinRate')}
+                        className={`flex items-center gap-2.5 transition-all duration-300 cursor-pointer hover:scale-105 ${visibleMetrics.atkWinRate ? 'opacity-100' : 'opacity-40'}`}
+                    >
+                        <div className="w-3.5 h-3.5 rounded-md bg-red-400 shadow-lg shadow-red-400/40" />
+                        <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Atk Win Rate</span>
+                    </button>
+                    <button 
+                        onClick={() => toggleMetric('defWinRate')}
+                        className={`flex items-center gap-2.5 transition-all duration-300 cursor-pointer hover:scale-105 ${visibleMetrics.defWinRate ? 'opacity-100' : 'opacity-40'}`}
+                    >
+                        <div className="w-3.5 h-3.5 rounded-md bg-blue-400 shadow-lg shadow-blue-400/40" />
+                        <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Def Win Rate</span>
+                    </button>
+                    <button 
+                        onClick={() => toggleMetric('playRate')}
+                        className={`flex items-center gap-2.5 transition-all duration-300 cursor-pointer hover:scale-105 ${visibleMetrics.playRate ? 'opacity-100' : 'opacity-40'}`}
+                    >
+                        <div className="w-3.5 h-3.5 rounded-md bg-purple-400 shadow-lg shadow-purple-400/40" />
+                        <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Play Rate</span>
+                    </button>
                 </div>
             </div>
         
-            <div className="space-y-12">
+            <div className="px-2">
                 {mapStats.length > 0 ? (
-                    mapStats.map((map) => (
-                        <div key={map.name} className="flex gap-8 items-start group">
-                            {/* Y-Axis: Map Name */}
-                            <div className="w-28 shrink-0 pt-2">
-                                <span className="block text-white font-black text-sm uppercase italic tracking-tight group-hover:text-blue-400 transition-colors">{capitalize(map.name)}</span>
-                                <span className="block text-slate-500 text-[10px] font-mono font-bold mt-1 tracking-tighter">{map.record} Series</span>
+                    <div className="relative pt-2">
+                        {/* Y-Axis Labels */}
+                        <div className="absolute left-0 top-0 h-80 flex flex-col justify-between w-12 text-right pr-1">
+                            {[100, 75, 50, 25, 0].map((v) => (
+                                <span key={v} className="text-[10px] font-bold text-blue-200/50 -translate-y-2">{v}%</span>
+                            ))}
+                        </div>
+
+                        {/* Chart Container */}
+                        <div className="ml-12">
+                            {/* Horizontal Grid Lines */}
+                            <div className="absolute left-12 right-0 h-80 flex flex-col justify-between pointer-events-none">
+                                {[0, 1, 2, 3, 4].map((i) => (
+                                    <div key={i} className="w-full border-t border-white/5" />
+                                ))}
                             </div>
 
-                            {/* Chart Area */}
-                            <div className="flex-1 relative">
-                                {/* X-Axis Scale Markers (Only show for first item) */}
-                                {map === mapStats[0] && (
-                                    <div className="absolute -top-6 inset-x-0 flex justify-between px-0.5">
-                                        {[0, 25, 50, 75, 100].map((v) => (
-                                            <span key={v} className="text-[8px] font-black text-slate-200 uppercase tracking-widest">{v}%</span>
-                                        ))}
-                                    </div>
-                                )}
-
-                                {/* Grid Lines (High Contrast) */}
-                                <div className="absolute inset-0 flex justify-between pointer-events-none px-0.5 z-0">
-                                    {[0, 25, 50, 75, 100].map((v) => (
-                                        <div key={v} className="h-full w-px bg-white/10" />
-                                    ))}
-                                </div>
-
-                                {/* Large Bars Group */}
-                                <div className="space-y-3 relative z-10 py-2">
-                                    {[
-                                        { val: map.matchWinRate, color: "from-blue-600 to-blue-400 shadow-blue-500/20" },
-                                        { val: map.atkWinRate, color: "from-rose-600 to-rose-400 shadow-rose-500/20" },
-                                        { val: map.defWinRate, color: "from-emerald-600 to-emerald-400 shadow-emerald-500/20" },
-                                        { val: map.playRate, color: "from-slate-600 to-slate-400 shadow-slate-500/20" }
-                                    ].map((bar, idx) => (
-                                        <div key={idx} className="relative h-3 w-full bg-slate-900/80 rounded-sm overflow-hidden border border-white/5">
-                                            <div 
-                                                className={`h-full bg-linear-to-r ${bar.color} transition-all duration-1000 ease-out rounded-r-sm shadow-[2px_0_10px_rgba(0,0,0,0.5)]`}
-                                                style={{ width: `${bar.val}%` }}
-                                            />
-                                            {/* Glow overlay for low values visibility */}
-                                            {bar.val > 0 && (
-                                                <div 
-                                                    className="absolute inset-y-0 left-0 w-1 bg-white/20 blur-[1px]" 
-                                                />
-                                            )}
+                            {/* Bars */}
+                            <div className="flex gap-6 items-end h-80 relative">
+                                {mapStats.map((map) => (
+                                    <div key={map.name} className="flex-1 flex flex-col items-center gap-2 min-w-0">
+                                        {/* Bars Container */}
+                                        <div className="flex-1 w-full flex items-end justify-center gap-1.5">
+                                            {[
+                                                { val: map.matchWinRate, color: "bg-green-400", shadow: "shadow-green-400/40", key: 'matchWinRate' as const },
+                                                { val: map.atkWinRate, color: "bg-red-400", shadow: "shadow-red-400/40", key: 'atkWinRate' as const },
+                                                { val: map.defWinRate, color: "bg-blue-400", shadow: "shadow-blue-400/40", key: 'defWinRate' as const },
+                                                { val: map.playRate, color: "bg-purple-400", shadow: "shadow-purple-400/40", key: 'playRate' as const }
+                                            ].filter(bar => visibleMetrics[bar.key]).map((bar) => {
+                                                const heightPx = (bar.val / 100) * 290; // 320px = h-80
+                                                return (
+                                                    <div 
+                                                        key={bar.key} 
+                                                        className={`w-full flex-1 ${bar.color} rounded-t-lg border border-white/10 hover:border-white/20 hover:brightness-110 cursor-pointer transition-all duration-300 relative overflow-visible min-w-[12px] max-w-[40px] group/bar`}
+                                                        style={{ height: `${heightPx}px` }}
+                                                    >
+                                                        {/* Tooltip */}
+                                                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover/bar:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                                                            <div className="bg-slate-900 border border-white/20 rounded-lg px-2 py-1 shadow-xl">
+                                                                <span className="text-white text-xs font-bold whitespace-nowrap">{bar.val.toFixed(1)}%</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
-                                    ))}
-                                </div>
+
+                                        {/* Map Name */}
+                                        <div className="text-center w-full">
+                                            <span className="block text-white font-bold text-sm tracking-tight hover:text-blue-400 transition-all duration-300">
+                                                {capitalize(map.name)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
-                    ))
+                    </div>
                 ) : (
-                    <div className="py-20 text-center border-2 border-dashed border-white/5 rounded-3xl">
-                        <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">No Match Data Found For This Filter</p>
+                    <div className="py-20 text-center border-2 border-dashed border-white/10 rounded-2xl bg-slate-900/30">
+                        <p className="text-blue-200/40 italic text-sm">No match data found for this filter</p>
                     </div>
                 )}
             </div>
-        </GlassBox>
+            </GlassBox>
+        </motion.div>
     );
 };
 

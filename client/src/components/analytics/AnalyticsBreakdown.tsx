@@ -24,16 +24,10 @@ import CompositionHistory from "./CompositionHistory.tsx";
 import type {TeamStats} from "../../types/TeamStats.ts";
 import type {SeriesStats} from "../../types/SeriesStats.ts";
 import { useState, useMemo } from "react";
-import MapFilter from "../ui/MapFilter.tsx";
-import HistoryFilter from "../ui/HistoryFilter.tsx";
+import { motion } from "motion/react";
 import LoadingPage from "../ui/LoadingPage.tsx";
+import { GlassBox } from "../ui/GlassBox.tsx";
 
-const timeOptions = [
-    { value: "all", label: "All Time" },
-    { value: "30", label: "Last 30 Days" },
-    { value: "60", label: "Last 60 Days" },
-    { value: "90", label: "Last 90 Days" },
-];
 
 type Props = {
     team: Team | null;
@@ -89,30 +83,71 @@ const AnalyticsBreakdown = ({ team, stats, allSeriesData, isLoadingSeries }: Pro
     });
     const roster = Array.from(playersMap.values());
 
-    return (
-        <div className="p-6">
-            {/* Filters Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-slate-900/50 border border-slate-800 p-4 rounded-2xl backdrop-blur-sm">
-                <div className="flex flex-wrap gap-4 items-center">
-                    {/* Time Range Filter */}
-                    <HistoryFilter
-                        label="Timeframe"
-                        value={timeRange} 
-                        onChange={setTimeRange} 
-                        options={timeOptions} 
-                    />
+    const maps = ['All', 'Abyss', 'Ascent', 'Bind', 'Breeze', 'Corrode', 'Fracture', 'Haven', 'Icebox', 'Lotus', 'Pearl', 'Split', 'Sunset'];
+    const timeFilters = ['All', 'Last 30 Days', 'Last 60 Days', 'Last 90 Days'];
 
+    return (
+        <div>
+            {/* Filters Header */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="mb-6"
+            >
+                <GlassBox>
                     {/* Map Filter */}
-                    <MapFilter selectedMap={selectedMap} setSelectedMap={setSelectedMap} />
-                </div>
-                
-                <div className="text-right">
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Showing Data From</p>
-                    <p className="text-sm font-black text-blue-400 uppercase italic">
-                        {filteredSeriesData.length} Matches Found
-                    </p>
-                </div>
-            </div>
+                    <div className="mb-6">
+                        <label className="text-blue-200 text-sm mb-2 block">Filter by Map</label>
+                        <div className="flex gap-2 flex-wrap">
+                            {maps.map((map) => (
+                                <button
+                                    key={map}
+                                    onClick={() => setSelectedMap(map)}
+                                    className={`
+                                        px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
+                                        ${selectedMap === map
+                                            ? 'bg-blue-900 text-white'
+                                            : 'bg-white/5 text-blue-200 hover:bg-white/10'
+                                        }
+                                    `}
+                                >
+                                    {map}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Timeframe Filter */}
+                    <div>
+                        <label className="text-blue-200 text-sm mb-2 block">Filter by Timeframe</label>
+                        <div className="flex gap-2 flex-wrap">
+                            {timeFilters.map((timeframe) => (
+                                <button
+                                    key={timeframe}
+                                    onClick={() => setTimeRange(
+                                        timeframe === 'All' ? 'all' :
+                                        timeframe === 'Last 30 Days' ? '30' :
+                                        timeframe === 'Last 60 Days' ? '60' : '90'
+                                    )}
+                                    className={`
+                                        px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
+                                        ${(timeframe === 'All' && timeRange === 'all') ||
+                                          (timeframe === 'Last 30 Days' && timeRange === '30') ||
+                                          (timeframe === 'Last 60 Days' && timeRange === '60') ||
+                                          (timeframe === 'Last 90 Days' && timeRange === '90')
+                                            ? 'bg-blue-900 text-white'
+                                            : 'bg-white/5 text-blue-200 hover:bg-white/10'
+                                        }
+                                    `}
+                                >
+                                    {timeframe}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </GlassBox>
+            </motion.div>
 
             <TeamLevelStatsOverview 
                 team={team}
@@ -124,6 +159,12 @@ const AnalyticsBreakdown = ({ team, stats, allSeriesData, isLoadingSeries }: Pro
                 allSeriesData={filteredSeriesData}
                 selectedMap={selectedMap}
             />
+            
+            <PlayerStatisticsTable 
+                team={team}
+                roster={roster} 
+                allSeriesData={filteredSeriesData}
+            />
 
             <MapPerformance 
                 team={team}
@@ -132,12 +173,6 @@ const AnalyticsBreakdown = ({ team, stats, allSeriesData, isLoadingSeries }: Pro
 
             <WinConditionDistribution 
                 team={team}
-                allSeriesData={filteredSeriesData}
-            />
-            
-            <PlayerStatisticsTable 
-                team={team}
-                roster={roster} 
                 allSeriesData={filteredSeriesData}
             />
         </div>

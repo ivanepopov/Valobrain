@@ -1,7 +1,9 @@
 import type { Team } from "../../types/Team.ts";
 import type { SeriesStats } from "../../types/SeriesStats.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { motion } from "motion/react";
+import { Target, Shield } from "lucide-react";
 
 type WinTypes = {
     bomb: number;
@@ -100,40 +102,64 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
 
     if (!team) return null;
 
-    const renderBarGroup = (label: string, winVal: number, lossVal: number, max: number) => {
+    const [visibility, setVisibility] = useState({
+        attack: { wins: true, losses: true },
+        defense: { wins: true, losses: true }
+    });
+
+    const toggle = (side: 'attack' | 'defense', type: 'wins' | 'losses') => {
+        setVisibility(prev => ({
+            ...prev,
+            [side]: {
+                ...prev[side],
+                [type]: !prev[side][type]
+            }
+        }));
+    };
+
+    const renderBarGroup = (label: string, winVal: number, lossVal: number, max: number, winColor: string, lossColor: string, winShadow: string, lossShadow: string, showWins: boolean, showLosses: boolean) => {
         const winPct = max > 0 ? (winVal / max) * 100 : 0;
         const lossPct = max > 0 ? (lossVal / max) * 100 : 0;
 
         return (
-            <div className="group space-y-1.5">
-                <div className="flex justify-between items-end">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</span>
-                    <div className="flex gap-3 text-[10px] font-mono font-bold">
-                        <span className="text-blue-400">W: {winVal}</span>
-                        <span className="text-rose-400">L: {lossVal}</span>
+            <div className="group space-y-2">
+                <div className="flex justify-between items-center">
+                    <span className="text-sm text-white font-semibold">{label}</span>
+                    <div className="flex gap-4 text-xs font-bold">
+                        {showWins && <span className="text-blue-300">W: {winVal}</span>}
+                        {showLosses && <span className="text-rose-300">L: {lossVal}</span>}
                     </div>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-2">
                     {/* Wins Bar */}
-                    <div className="relative h-2 bg-slate-900/50 rounded-sm overflow-hidden border border-white/5">
-                        <div 
-                            className="h-full bg-linear-to-r from-blue-600 to-blue-400 transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(59,130,246,0.2)]"
-                            style={{ width: `${winPct}%` }}
-                        />
-                    </div>
+                    {showWins && (
+                        <div className="relative h-2.5 bg-slate-900/70 rounded-lg overflow-hidden border border-white/10 group-hover:border-white/20 transition-all duration-300">
+                            <div 
+                                className={`h-full ${winColor} transition-all duration-700 ease-out rounded-r-lg shadow-lg ${winShadow} relative overflow-hidden hover:brightness-110 cursor-pointer`}
+                                style={{ width: `${winPct}%` }}
+                            >
+                                
+                            </div>
+                        </div>
+                    )}
                     {/* Losses Bar */}
-                    <div className="relative h-2 bg-slate-900/50 rounded-sm overflow-hidden border border-white/5">
-                        <div 
-                            className="h-full bg-linear-to-r from-rose-900 to-rose-600 transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(225,29,72,0.2)]"
-                            style={{ width: `${lossPct}%` }}
-                        />
-                    </div>
+                    {showLosses && (
+                        <div className="relative h-2.5 bg-slate-900/70 rounded-lg overflow-hidden border border-white/10 group-hover:border-white/20 transition-all duration-300">
+                            <div 
+                                className={`h-full ${lossColor} transition-all duration-700 ease-out rounded-r-lg shadow-lg ${lossShadow} relative overflow-hidden hover:brightness-110 cursor-pointer`}
+                                style={{ width: `${lossPct}%` }}
+                            >
+                                
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         );
     };
 
-    const renderSideSection = (title: string, sideData: SideStats) => {
+    const renderSideSection = (title: string, sideData: SideStats, winColor: string, lossColor: string, winShadow: string, lossShadow: string, legendWinColor: string, legendLossColor: string, side: 'attack' | 'defense') => {
+        const { wins: showWins, losses: showLosses } = visibility[side];
 
         const conditions = [
             { label: 'Bomb Detonation', wins: sideData.wins.bomb, losses: sideData.losses.bomb },
@@ -143,30 +169,38 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
             { label: 'Time Expired', wins: sideData.wins.timeExpired, losses: sideData.losses.timeExpired }
         ];
 
-        const maxVal = Math.max(...conditions.map(c => Math.max(c.wins, c.losses)), 1);
+        const maxVal = Math.max(...conditions.map(c => Math.max(showWins ? c.wins : 0, showLosses ? c.losses : 0)), 1);
 
         return (
-            <GlassBox className="flex-1">
-                <div className="flex justify-between items-center mb-6">
-                    <div>
-                        <h3 className="text-white text-sm font-black uppercase italic tracking-tighter">{title}</h3>
-                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-[0.2em]">Team Performance Breakdown</p>
-                    </div>
-                    <div className="flex gap-4">
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 rounded-full bg-blue-500" />
-                            <span className="text-[9px] font-bold text-slate-400 uppercase">Rounds Won</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 rounded-full bg-rose-500/50" />
-                            <span className="text-[9px] font-bold text-slate-400 uppercase">Rounds Lost</span>
+            <GlassBox className="flex-1 border-white/10">
+                <div className="mb-6 pb-4 border-b border-white/10">
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-white text-lg font-bold flex items-center gap-2">
+                            {title.includes('Attack') ? <Target className="w-5 h-5 text-red-400" /> : <Shield className="w-5 h-5 text-blue-400" />}
+                            {title}
+                        </h3>
+                        <div className="flex gap-4 bg-gradient-to-r from-slate-950/60 to-slate-900/60 p-2.5 rounded-lg border border-white/10 backdrop-blur-sm">
+                            <button 
+                                onClick={() => toggle(side, 'wins')}
+                                className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 cursor-pointer ${showWins ? 'opacity-100' : 'opacity-40'}`}
+                            >
+                                <div className={`w-3.5 h-3.5 rounded-md ${legendWinColor} shadow-lg ${winShadow}`} />
+                                <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">{title.includes('Attack') ? 'Attacking' : 'Defending'} Wins</span>
+                            </button>
+                            <button 
+                                onClick={() => toggle(side, 'losses')}
+                                className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 cursor-pointer ${showLosses ? 'opacity-100' : 'opacity-40'}`}
+                            >
+                                <div className={`w-3.5 h-3.5 rounded-md ${legendLossColor} shadow-lg ${lossShadow}`} />
+                                <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">{title.includes('Attack') ? 'Attacking' : 'Defending'} Losses</span>
+                            </button>
                         </div>
                     </div>
                 </div>
-                <div className="space-y-6">
+                <div className="space-y-5">
                     {conditions.map((c, idx) => (
                         <div key={idx}>
-                            {renderBarGroup(c.label, c.wins, c.losses, maxVal)}
+                            {renderBarGroup(c.label, c.wins, c.losses, maxVal, winColor, lossColor, winShadow, lossShadow, showWins, showLosses)}
                         </div>
                     ))}
                 </div>
@@ -175,12 +209,18 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
     };
 
     return (
-        <div className="mt-8">
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="mb-6"
+        >
+            <h2 className="text-2xl font-bold text-white mb-4">Win Condition Distribution</h2>
             <div className="flex flex-col gap-6 lg:flex-row">
-                {renderSideSection("Attack Win Conditions", stats.attack)}
-                {renderSideSection("Defense Win Conditions", stats.defense)}
+                {renderSideSection("Attack Win Conditions", stats.attack, "bg-red-400", "bg-red-400/20", "shadow-red-400/40", "shadow-none", "bg-red-400", "bg-red-400/30", "attack")}
+                {renderSideSection("Defense Win Conditions", stats.defense, "bg-blue-400", "bg-blue-400/20", "shadow-blue-400/40", "shadow-none", "bg-blue-400", "bg-blue-400/30", "defense")}
             </div>
-        </div>
+        </motion.div>
     );
 };
 

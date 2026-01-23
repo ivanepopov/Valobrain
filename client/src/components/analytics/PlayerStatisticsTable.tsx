@@ -80,64 +80,57 @@ type Props = {
 
         return (
             <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
                 className="mb-6"
             >
+                <h2 className="text-2xl font-bold text-white drop-shadow-md mb-6">Player Statistics</h2>
                 <GlassBox className="mt-4 !p-0 overflow-hidden border-white/5">
-                    <div className="bg-white/5 px-4 py-2 border-b border-white/10 flex justify-between items-center">
-                        <h3 className="text-white text-[11px] font-black uppercase tracking-widest italic">Performance Matrix</h3>
-                    </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-[13px]">
                             <thead>
-                                <tr className="text-blue-200/50 uppercase text-[10px] font-bold tracking-tighter">
-                                    <th className="text-left py-2 px-4">Player</th>
-                                    <th className="text-left py-2 px-2">Agents</th>
-                                    <th className="text-center py-2 px-2">K</th>
-                                    <th className="text-center py-2 px-2">D</th>
-                                    <th className="text-center py-2 px-2">A</th>
-                                    <th className="text-center py-2 px-2">+/-</th>
-                                    <th className="text-center py-2 px-2">KD</th>
-                                    <th className="text-center py-2 px-2">ADR</th>
-                                    <th className="text-center py-2 px-4">FK</th>
+                                <tr className="border-b border-white/10">
+                                    <th className="text-left py-3 px-4 text-blue-200 font-semibold">Player</th>
+                                    <th className="text-left py-3 px-4 text-blue-200 font-semibold">Agents</th>
+                                    <th className="text-center py-3 px-4 text-blue-200 font-semibold">K</th>
+                                    <th className="text-center py-3 px-4 text-blue-200 font-semibold">D</th>
+                                    <th className="text-center py-3 px-4 text-blue-200 font-semibold">A</th>
+                                    <th className="text-center py-3 px-4 text-blue-200 font-semibold">+/-</th>
+                                    <th className="text-center py-3 px-4 text-blue-200 font-semibold">KD</th>
+                                    <th className="text-center py-3 px-4 text-blue-200 font-semibold">ADR</th>
+                                    <th className="text-center py-3 px-4 text-blue-200 font-semibold">FK</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {playerStats.map((player, index) => (
                                     <tr 
                                         key={index} 
-                                        className={`
-                                            border-b border-white/5 transition-colors
-                                            ${index % 2 === 0 
-                                                ? 'bg-gradient-to-r from-transparent via-blue-500/5 to-transparent' 
-                                                : 'bg-gradient-to-r from-transparent via-purple-500/5 to-transparent'}
-                                            hover:via-white/10
-                                        `}
+                                        className="border-b border-white/5 hover:bg-white/5 transition-colors"
                                     >
-                                        <td className="py-2 px-4 text-white font-bold whitespace-nowrap">{player.player}</td>
-                                        <td className="py-2 px-2">
-                                            <div className="flex -space-x-1.5">
+                                        <td className="py-3 px-4 text-white font-semibold whitespace-nowrap">{player.player}</td>
+                                        <td className="py-3 px-4">
+                                            <div className="flex items-center gap-1">
                                                 {player.agents.map((agent, i) => (
                                                     <img
                                                         key={i}
                                                         src={getAgentLogo(agent)}
                                                         alt={agent}
-                                                        className="w-10 h-10 rounded-full border border-white/20 object-cover bg-slate-900"
+                                                        className="w-8 h-8 rounded border border-white/10 object-cover"
                                                         title={capitalize(agent)}
                                                     />
                                                 ))}
                                             </div>
                                         </td>
-                                        <td className="py-2 px-2 text-center text-blue-100/80">{player.kills}</td>
-                                        <td className="py-2 px-2 text-center text-blue-100/80">{player.deaths}</td>
-                                        <td className="py-2 px-2 text-center text-blue-100/80">{player.assists}</td>
-                                        <td className={`py-2 px-2 text-center font-mono font-bold ${Number(player.kdDiff) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                        <td className="py-3 px-4 text-center text-blue-100">{player.kills}</td>
+                                        <td className="py-3 px-4 text-center text-blue-100">{player.deaths}</td>
+                                        <td className="py-3 px-4 text-center text-blue-100">{player.assists}</td>
+                                        <td className={`py-3 px-4 text-center font-mono font-bold ${Number(player.kdDiff) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                             {player.kdDiff}
                                         </td>
-                                        <td className="py-2 px-2 text-center text-white font-medium">{player.kd}</td>
-                                        <td className="py-2 px-2 text-center text-blue-100/80">{player.adr}</td>
-                                        <td className="py-2 px-4 text-center text-orange-400 font-bold">{player.fk}</td>
+                                        <td className="py-3 px-4 text-center text-blue-100">{player.kd}</td>
+                                        <td className="py-3 px-4 text-center text-blue-100">{player.adr}</td>
+                                        <td className="py-3 px-4 text-center text-blue-100">{player.fk}</td>
                                     </tr>
                                 ))}
                             </tbody>

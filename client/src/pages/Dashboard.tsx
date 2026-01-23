@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, Clock, BarChart3, FileText } from "lucide-react";
+import { ArrowLeft, Clock, BarChart3, FileText, Calendar, TrendingUp } from "lucide-react";
 import MatchHistory from "../components/match/MatchHistory";
 import AnalyticsBreakdown from "../components/analytics/AnalyticsBreakdown";
 import ScoutingReport from "../components/report/ScoutingReport";
@@ -103,13 +103,13 @@ const Dashboard = () => {
     }, [teamId]);
 
     const tabs = [
-        { id: "history", label: "Match History", icon: Clock },
-        { id: "analytics", label: "Analytics", icon: BarChart3 },
+        { id: "history", label: "Match History", icon: Calendar },
+        { id: "analytics", label: "Analytics", icon: TrendingUp },
         { id: "scouting", label: "Scouting Report", icon: FileText },
     ];
 
     return (
-        <div className="relative min-h-screen bg-linear-to-b from-slate-950 via-blue-950 to-slate-900 text-white p-8 overflow-hidden">
+        <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 text-white p-8 overflow-hidden">
             {/* Neural Network Background */}
             <NeuralNetworkBackground />
 

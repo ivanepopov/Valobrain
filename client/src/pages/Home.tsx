@@ -16,6 +16,7 @@ const Home = () => {
   const [teamName, setTeamName] = useState('');
   const [teamsDropdown, setTeamsDropdown] = useState<Team[]>([]);
 
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (teamName.trim() && teamsDropdown.length > 0) {
@@ -36,8 +37,10 @@ const Home = () => {
     setTeamsDropdown(teams);
   }
 
+
+
   return (
-    <div className="relative min-h-screen bg-linear-to-b from-slate-950 via-blue-950 to-slate-900 py-12 px-6 overflow-hidden">
+    <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 py-12 px-6 overflow-hidden">
       {/* Neural Network Background */}
       <NeuralNetworkBackground />
 
