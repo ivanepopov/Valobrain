@@ -106,28 +106,34 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
         const lossPct = max > 0 ? (lossVal / max) * 100 : 0;
 
         return (
-            <div className="group space-y-1.5">
-                <div className="flex justify-between items-end">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</span>
-                    <div className="flex gap-3 text-[10px] font-mono font-bold">
-                        <span className="text-blue-400">W: {winVal}</span>
-                        <span className="text-rose-400">L: {lossVal}</span>
+            <div className="group space-y-2">
+                <div className="flex justify-between items-center">
+                    <span className="text-sm text-white font-semibold">{label}</span>
+                    <div className="flex gap-4 text-xs font-bold">
+                        <span className="text-blue-300">W: {winVal}</span>
+                        <span className="text-rose-300">L: {lossVal}</span>
                     </div>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-2">
                     {/* Wins Bar */}
-                    <div className="relative h-2 bg-slate-900/50 rounded-sm overflow-hidden border border-white/5">
+                    <div className="relative h-2.5 bg-slate-900/70 rounded-lg overflow-hidden border border-white/10 group-hover:border-white/20 transition-all duration-300">
                         <div 
-                            className="h-full bg-linear-to-r from-blue-600 to-blue-400 transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(59,130,246,0.2)]"
+                            className="h-full bg-gradient-to-r from-blue-500 via-blue-500 to-blue-600 transition-all duration-700 ease-out rounded-r-lg shadow-lg shadow-blue-500/40 relative overflow-hidden"
                             style={{ width: `${winPct}%` }}
-                        />
+                        >
+                            {/* Shine effect */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+                        </div>
                     </div>
                     {/* Losses Bar */}
-                    <div className="relative h-2 bg-slate-900/50 rounded-sm overflow-hidden border border-white/5">
+                    <div className="relative h-2.5 bg-slate-900/70 rounded-lg overflow-hidden border border-white/10 group-hover:border-white/20 transition-all duration-300">
                         <div 
-                            className="h-full bg-linear-to-r from-rose-900 to-rose-600 transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(225,29,72,0.2)]"
+                            className="h-full bg-gradient-to-r from-rose-500 via-rose-500 to-rose-600 transition-all duration-700 ease-out rounded-r-lg shadow-lg shadow-rose-500/40 relative overflow-hidden"
                             style={{ width: `${lossPct}%` }}
-                        />
+                        >
+                            {/* Shine effect */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -147,24 +153,23 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
         const maxVal = Math.max(...conditions.map(c => Math.max(c.wins, c.losses)), 1);
 
         return (
-            <GlassBox className="flex-1">
-                <div className="flex justify-between items-center mb-6">
-                    <div>
-                        <h3 className="text-white text-sm font-black uppercase italic tracking-tighter">{title}</h3>
-                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-[0.2em]">Team Performance Breakdown</p>
-                    </div>
-                    <div className="flex gap-4">
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 rounded-full bg-blue-500" />
-                            <span className="text-[9px] font-bold text-slate-400 uppercase">Rounds Won</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 rounded-full bg-rose-500/50" />
-                            <span className="text-[9px] font-bold text-slate-400 uppercase">Rounds Lost</span>
+            <GlassBox className="flex-1 border-white/10">
+                <div className="mb-6 pb-4 border-b border-white/10">
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-white text-lg font-bold">{title}</h3>
+                        <div className="flex gap-4 bg-gradient-to-r from-slate-950/60 to-slate-900/60 p-2.5 rounded-lg border border-white/10 backdrop-blur-sm">
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-md bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30" />
+                                <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Rounds Won</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-md bg-gradient-to-br from-rose-500 to-rose-600 shadow-lg shadow-rose-500/30" />
+                                <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Rounds Lost</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div className="space-y-6">
+                <div className="space-y-5">
                     {conditions.map((c, idx) => (
                         <div key={idx}>
                             {renderBarGroup(c.label, c.wins, c.losses, maxVal)}
