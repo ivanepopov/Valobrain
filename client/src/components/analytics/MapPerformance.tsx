@@ -99,28 +99,28 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
                         onClick={() => toggleMetric('matchWinRate')}
                         className={`flex items-center gap-2.5 transition-all duration-300 cursor-pointer hover:scale-105 ${visibleMetrics.matchWinRate ? 'opacity-100' : 'opacity-40'}`}
                     >
-                        <div className="w-3.5 h-3.5 rounded-md bg-gradient-to-br from-green-500 to-green-600 shadow-lg shadow-green-500/30" />
+                        <div className="w-3.5 h-3.5 rounded-md bg-green-400 shadow-lg shadow-green-400/40" />
                         <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Match Win Rate</span>
                     </button>
                     <button 
                         onClick={() => toggleMetric('atkWinRate')}
                         className={`flex items-center gap-2.5 transition-all duration-300 cursor-pointer hover:scale-105 ${visibleMetrics.atkWinRate ? 'opacity-100' : 'opacity-40'}`}
                     >
-                        <div className="w-3.5 h-3.5 rounded-md bg-gradient-to-br from-red-500 to-red-600 shadow-lg shadow-red-500/30" />
+                        <div className="w-3.5 h-3.5 rounded-md bg-red-400 shadow-lg shadow-red-400/40" />
                         <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Atk Win Rate</span>
                     </button>
                     <button 
                         onClick={() => toggleMetric('defWinRate')}
                         className={`flex items-center gap-2.5 transition-all duration-300 cursor-pointer hover:scale-105 ${visibleMetrics.defWinRate ? 'opacity-100' : 'opacity-40'}`}
                     >
-                        <div className="w-3.5 h-3.5 rounded-md bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30" />
+                        <div className="w-3.5 h-3.5 rounded-md bg-blue-400 shadow-lg shadow-blue-400/40" />
                         <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Def Win Rate</span>
                     </button>
                     <button 
                         onClick={() => toggleMetric('playRate')}
                         className={`flex items-center gap-2.5 transition-all duration-300 cursor-pointer hover:scale-105 ${visibleMetrics.playRate ? 'opacity-100' : 'opacity-40'}`}
                     >
-                        <div className="w-3.5 h-3.5 rounded-md bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg shadow-purple-500/30" />
+                        <div className="w-3.5 h-3.5 rounded-md bg-purple-400 shadow-lg shadow-purple-400/40" />
                         <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Play Rate</span>
                     </button>
                 </div>
@@ -152,16 +152,16 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
                                         {/* Bars Container */}
                                         <div className="flex-1 w-full flex items-end justify-center gap-1.5">
                                             {[
-                                                { val: map.matchWinRate, color: "from-green-500 via-green-500 to-green-600", shadow: "shadow-green-500/40", key: 'matchWinRate' as const },
-                                                { val: map.atkWinRate, color: "from-red-500 via-red-500 to-red-600", shadow: "shadow-red-500/40", key: 'atkWinRate' as const },
-                                                { val: map.defWinRate, color: "from-blue-500 via-blue-500 to-blue-600", shadow: "shadow-blue-500/40", key: 'defWinRate' as const },
-                                                { val: map.playRate, color: "from-purple-500 via-purple-500 to-purple-600", shadow: "shadow-purple-500/40", key: 'playRate' as const }
+                                                { val: map.matchWinRate, color: "bg-green-400", shadow: "shadow-green-400/40", key: 'matchWinRate' as const },
+                                                { val: map.atkWinRate, color: "bg-red-400", shadow: "shadow-red-400/40", key: 'atkWinRate' as const },
+                                                { val: map.defWinRate, color: "bg-blue-400", shadow: "shadow-blue-400/40", key: 'defWinRate' as const },
+                                                { val: map.playRate, color: "bg-purple-400", shadow: "shadow-purple-400/40", key: 'playRate' as const }
                                             ].filter(bar => visibleMetrics[bar.key]).map((bar) => {
                                                 const heightPx = (bar.val / 100) * 290; // 320px = h-80
                                                 return (
                                                     <div 
                                                         key={bar.key} 
-                                                        className={`w-full flex-1 bg-gradient-to-t ${bar.color} rounded-t-lg shadow-lg ${bar.shadow} border border-white/10 hover:border-white/20 transition-all duration-300 relative overflow-visible min-w-[12px] max-w-[40px] group/bar`}
+                                                        className={`w-full flex-1 ${bar.color} rounded-t-lg shadow-lg ${bar.shadow} border border-white/10 hover:border-white/20 transition-all duration-300 relative overflow-visible min-w-[12px] max-w-[40px] group/bar`}
                                                         style={{ height: `${heightPx}px` }}
                                                     >
                                                         {/* Tooltip */}
@@ -170,8 +170,6 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
                                                                 <span className="text-white text-xs font-bold whitespace-nowrap">{bar.val.toFixed(1)}%</span>
                                                             </div>
                                                         </div>
-                                                        {/* Shine effect */}
-                                                        <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent animate-pulse" />
                                                     </div>
                                                 );
                                             })}
