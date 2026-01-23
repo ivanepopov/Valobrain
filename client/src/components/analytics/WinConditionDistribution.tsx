@@ -3,6 +3,7 @@ import type { SeriesStats } from "../../types/SeriesStats.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
+import { Target, Shield } from "lucide-react";
 
 type WinTypes = {
     bomb: number;
@@ -174,7 +175,10 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
             <GlassBox className="flex-1 border-white/10">
                 <div className="mb-6 pb-4 border-b border-white/10">
                     <div className="flex justify-between items-center">
-                        <h3 className="text-white text-lg font-bold">{title}</h3>
+                        <h3 className="text-white text-lg font-bold flex items-center gap-2">
+                            {title.includes('Attack') ? <Target className="w-5 h-5 text-red-400" /> : <Shield className="w-5 h-5 text-blue-400" />}
+                            {title}
+                        </h3>
                         <div className="flex gap-4 bg-gradient-to-r from-slate-950/60 to-slate-900/60 p-2.5 rounded-lg border border-white/10 backdrop-blur-sm">
                             <button 
                                 onClick={() => toggle(side, 'wins')}
@@ -213,8 +217,8 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
         >
             <h2 className="text-2xl font-bold text-white mb-4">Win Condition Distribution</h2>
             <div className="flex flex-col gap-6 lg:flex-row">
-                {renderSideSection("Attack Win Conditions", stats.attack, "bg-red-500", "bg-red-500/20", "shadow-red-500/40", "shadow-none", "bg-red-500", "bg-red-500/30", "attack")}
-                {renderSideSection("Defense Win Conditions", stats.defense, "bg-blue-500", "bg-blue-500/20", "shadow-blue-500/40", "shadow-none", "bg-blue-500", "bg-blue-500/30", "defense")}
+                {renderSideSection("Attack Win Conditions", stats.attack, "bg-red-400", "bg-red-400/20", "shadow-red-400/40", "shadow-none", "bg-red-400", "bg-red-400/30", "attack")}
+                {renderSideSection("Defense Win Conditions", stats.defense, "bg-blue-400", "bg-blue-400/20", "shadow-blue-400/40", "shadow-none", "bg-blue-400", "bg-blue-400/30", "defense")}
             </div>
         </motion.div>
     );

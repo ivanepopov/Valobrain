@@ -65,7 +65,7 @@ const TeamLevelStatsOverview = ({ team, allSeriesData }: Props) => {
                         <Trophy className="w-5 h-5 text-green-400" />
                         <p className="text-blue-200 text-sm">Overall Match Win Rate</p>
                     </div>
-                    <p className="text-3xl font-bold text-white">{matchWinRate.toFixed(1)}%</p>
+                    <p className="text-2xl font-bold text-white">{matchWinRate.toFixed(1)}%</p>
                     <div className="mt-2 w-full bg-white/10 rounded-full h-2">
                         <div className="bg-green-400 h-2 rounded-full" style={{ width: `${matchWinRate}%` }}></div>
                     </div>
@@ -76,7 +76,7 @@ const TeamLevelStatsOverview = ({ team, allSeriesData }: Props) => {
                         <Target className="w-5 h-5 text-red-400" />
                         <p className="text-blue-200 text-sm">Attack Round Win Rate</p>
                     </div>
-                    <p className="text-3xl font-bold text-white">{attackWinRate.toFixed(1)}%</p>
+                    <p className="text-2xl font-bold text-white">{attackWinRate.toFixed(1)}%</p>
                     <div className="mt-2 w-full bg-white/10 rounded-full h-2">
                         <div className="bg-red-400 h-2 rounded-full" style={{ width: `${attackWinRate}%` }}></div>
                     </div>
@@ -87,7 +87,7 @@ const TeamLevelStatsOverview = ({ team, allSeriesData }: Props) => {
                         <Shield className="w-5 h-5 text-blue-400" />
                         <p className="text-blue-200 text-sm">Defense Round Win Rate</p>
                     </div>
-                    <p className="text-3xl font-bold text-white">{defenseWinRate.toFixed(1)}%</p>
+                    <p className="text-2xl font-bold text-white">{defenseWinRate.toFixed(1)}%</p>
                     <div className="mt-2 w-full bg-white/10 rounded-full h-2">
                         <div className="bg-blue-400 h-2 rounded-full" style={{ width: `${defenseWinRate}%` }}></div>
                     </div>

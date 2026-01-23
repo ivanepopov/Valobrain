@@ -4,6 +4,7 @@ import type { SeriesStats } from "../../types/SeriesStats.ts";
 import GlassBox from "../ui/GlassBox.tsx";
 import {getAgentLogo} from "../../utils/agentLogos.ts";
 import { motion } from "motion/react";
+import { Users } from "lucide-react";
 
 type Props = {
     team: Team | null;
@@ -80,13 +81,13 @@ const CompositionHistory = ({ team, allSeriesData, selectedMap }: Props) => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="mb-6"
         >
-            <h2 className="text-2xl font-bold text-white mb-4">Comps</h2>
+            <h2 className="text-2xl font-bold text-white drop-shadow-md mb-6">Comps</h2>
             <GlassBox className="mb-6 border-white/10">
                 <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
-                    <div>
-                        <h3 className="text-white text-lg font-bold">Composition Analysis</h3>
-                        <p className="text-blue-200 text-sm">Most played agent combinations on {selectedMap}</p>
-                    </div>
+                    <h3 className="text-white text-lg font-bold flex items-center gap-2">
+                        <Users className="w-5 h-5 text-blue-400" />
+                        {selectedMap} Comps
+                    </h3>
                     <div className="flex gap-4 bg-gradient-to-r from-slate-950/60 to-slate-900/60 p-2.5 rounded-lg border border-white/10 backdrop-blur-sm">
                         <button 
                             onClick={() => toggle('pickRate')}
