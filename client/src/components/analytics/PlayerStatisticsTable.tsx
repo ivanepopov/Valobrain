@@ -85,7 +85,7 @@ type Props = {
                 transition={{ duration: 0.5, delay: 0.8 }}
                 className="mb-6"
             >
-                <h2 className="text-2xl font-bold text-white mb-4">Player Statistics</h2>
+                <h2 className="text-2xl font-bold text-white drop-shadow-md mb-6">Player Statistics</h2>
                 <GlassBox className="mt-4 !p-0 overflow-hidden border-white/5">
                     <div className="overflow-x-auto">
                         <table className="w-full text-[13px]">

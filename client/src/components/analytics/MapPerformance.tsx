@@ -91,8 +91,8 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
             transition={{ duration: 0.5, delay: 0.4 }}
             className="mb-6"
         >
-            <h2 className="text-2xl font-bold text-white mb-4">Map Success</h2>
-            <GlassBox className="mt-8 border-white/10">
+            <h2 className="text-2xl font-bold text-white drop-shadow-md mb-6">Map Success</h2>
+            <GlassBox className="mt-4 border-white/10">
             <div className="flex justify-end items-center mb-8">
                 <div className="flex gap-4 bg-gradient-to-r from-slate-950/60 to-slate-900/60 p-3.5 rounded-xl border border-white/10 backdrop-blur-sm">
                     <button 
@@ -130,16 +130,16 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
                 {mapStats.length > 0 ? (
                     <div className="relative pt-2">
                         {/* Y-Axis Labels */}
-                        <div className="absolute left-0 top-0 h-80 flex flex-col justify-between w-12 text-right pr-3">
+                        <div className="absolute left-0 top-0 h-80 flex flex-col justify-between w-12 text-right pr-1">
                             {[100, 75, 50, 25, 0].map((v) => (
                                 <span key={v} className="text-[10px] font-bold text-blue-200/50 -translate-y-2">{v}%</span>
                             ))}
                         </div>
 
                         {/* Chart Container */}
-                        <div className="ml-14">
+                        <div className="ml-12">
                             {/* Horizontal Grid Lines */}
-                            <div className="absolute left-14 right-0 h-80 flex flex-col justify-between pointer-events-none">
+                            <div className="absolute left-12 right-0 h-80 flex flex-col justify-between pointer-events-none">
                                 {[0, 1, 2, 3, 4].map((i) => (
                                     <div key={i} className="w-full border-t border-white/5" />
                                 ))}
@@ -148,7 +148,7 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
                             {/* Bars */}
                             <div className="flex gap-6 items-end h-80 relative">
                                 {mapStats.map((map) => (
-                                    <div key={map.name} className="flex-1 flex flex-col items-center gap-3 min-w-0">
+                                    <div key={map.name} className="flex-1 flex flex-col items-center gap-2 min-w-0">
                                         {/* Bars Container */}
                                         <div className="flex-1 w-full flex items-end justify-center gap-1.5">
                                             {[

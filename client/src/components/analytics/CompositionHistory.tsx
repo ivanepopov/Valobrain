@@ -80,7 +80,7 @@ const CompositionHistory = ({ team, allSeriesData, selectedMap }: Props) => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="mb-6"
         >
-            <h2 className="text-2xl font-bold text-white mb-4">Top Compositions</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">Comps</h2>
             <GlassBox className="mb-6 border-white/10">
                 <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
                     <div>
