@@ -45,10 +45,13 @@ async function parseMatchFile(filePath) {
 
     const rounds = [];
     const players = {};
+    const teamIdMap = {}; // { '99': 'Cloud9' } - Persist across lines
     let mapName = "Unknown";
+    let matchData = { tournamentName: "Unknown", seriesDate: null };
     
     // Temp storage for current round
     let currentRoundObj = null;
+    let startTime = null;
 
     return new Promise((resolve, reject) => {
         rl.on('line', (line) => {
@@ -58,28 +61,68 @@ async function parseMatchFile(filePath) {
                 // Handle case where line is a wrapper containing 'events' array
                 const events = Array.isArray(lineJson.events) ? lineJson.events : [lineJson];
                 const seriesState = lineJson.seriesState; // Capture Wrapper State
-
-                let teamIdMap = {}; // { '99': 'Cloud9' }
+                const lineTime = lineJson.occurredAt; // Capture Wrapper Timestamp
+                
+                // let teamIdMap = {}; // REMOVED: Moved to outer scope
 
                 for (const event of events) {
                     if (!event || !event.type) continue;
 
+                    const eventTimeVal = event.occurredAt || lineTime;
+                    
                     // Normalize Timestamp
                     if (!startTime && event.type === 'game-started-round' && event.roundNumber === 1) {
-                        startTime = new Date(event.occurredAt).getTime();
+                        startTime = new Date(eventTimeVal).getTime();
+                    }
+
+                    // Series / Tournament Meta
+                    if (event.type === 'tournament-started-series') {
+                        if (event.tournament?.name) matchData.tournamentName = event.tournament.name;
+                        if (event.series?.startedAt) matchData.seriesDate = event.series.startedAt;
                     }
                     
-                    // Map Info
+                    // Map Info & Game 2 Detection
+                    if (event.type === 'series-started-game') {
+                        const gameState = event.target?.state;
+                        
+                        // Capture Date from Series State (Reliable)
+                        if (event.seriesState?.startedAt) {
+                            matchData.seriesDate = event.seriesState.startedAt;
+                        }
+
+                        // Check for Game 2+
+                        if (gameState?.sequenceNumber > 1) {
+                            console.log(`[Parser] Detected Game ${gameState.sequenceNumber}. Stopping parse to isolate Game 1.`);
+                            fileStream.destroy();
+                            rl.close();
+                            return;
+                        }
+
+                        if (gameState?.map?.name) {
+                             // Capitalize: split -> Split
+                             mapName = gameState.map.name.charAt(0).toUpperCase() + gameState.map.name.slice(1);
+                             console.log(`[Parser] Explicit Map Detected: ${mapName}`);
+                        }
+                    }
+
                     if (event.type === 'map-started' || event.type === 'game-started') {
-                        if (event.map?.name) mapName = event.map.name;
+                        // Fallback map detection
+                        if (event.map?.name && mapName === 'Unknown') {
+                             mapName = event.map.name.charAt(0).toUpperCase() + event.map.name.slice(1);
+                        }
                     }
 
                     // Round Start - Capture Players & Agents
                     if (event.type === 'game-started-round') {
+                        // ROUND 1 CHECK REMOVED (Replaced by Sequence Number check above) --
+                        // actually, keeping a safety check effectively isn't bad, but let's rely on Sequence Number 
+                        // as it's cleaner. If Sequence check fails (no event), we might mix data.
+                        // But Grid data is reliable with structure.
+
                         if (currentRoundObj) rounds.push(currentRoundObj);
                         currentRoundObj = {
                             roundNumber: event.roundNumber || (rounds.length + 1),
-                            startTime: new Date(event.occurredAt).getTime(),
+                            startTime: new Date(eventTimeVal).getTime(),
                             kills: [],
                             plantInfo: null,
                             defuseInfo: null,
@@ -89,7 +132,7 @@ async function parseMatchFile(filePath) {
 
                         // Extract Rosters (Name -> Agent) AND Side Logic
                         const teams = event.actor?.state?.teams || [];
-                        console.log(`[Parser] Round ${event.roundNumber} - Teams found: ${teams.length}`); 
+                        // console.log(`[Parser] Round ${event.roundNumber} - Teams found: ${teams.length}`); 
                         
                         // New: Capture Side AND Economy
                         const teamSides = {}; 
@@ -125,7 +168,7 @@ async function parseMatchFile(filePath) {
                         currentRoundObj.teamSides = teamSides;
                         currentRoundObj.teamEconomy = teamEconomy;
                         
-                        console.log(`[Parser] Round ${event.roundNumber} Eco (Start): ${JSON.stringify(teamEconomy)}`);
+                        // console.log(`[Parser] Round ${event.roundNumber} Eco (Start): ${JSON.stringify(teamEconomy)}`);
                     }
 
                     // Refine Economy at Round Start (Barrier Drop)
@@ -158,15 +201,20 @@ async function parseMatchFile(filePath) {
                         if (event.type === 'player-killed-player') {
                             const killerName = event.actor?.state?.name || event.actor?.id; 
                             const victimName = event.target?.state?.name || event.target?.id;
-                            const killerTeam = event.actor?.state?.teamID || 'Unknown'; 
+                            const killerTeamID = event.actor?.state?.teamId;
+                            const victimTeamID = event.target?.state?.teamId;
                             
+                            const resolvedKillerTeam = teamIdMap[killerTeamID] || killerTeamID || 'Unknown';
+                            const resolvedVictimTeam = teamIdMap[victimTeamID] || victimTeamID || 'Unknown';
+
+
                             const kPos = event.actor?.state?.game?.position;
                             const vPos = event.target?.state?.game?.position;
 
                             const kill = {
-                                time: new Date(event.occurredAt).getTime() - currentRoundObj.startTime,
-                                killer: { name: killerName, teamName: killerTeam, agent: players[killerName] || 'Unknown' },
-                                victim: { name: victimName, teamName: 'Unknown', agent: players[victimName] || 'Unknown' }, 
+                                time: new Date(eventTimeVal).getTime() - currentRoundObj.startTime,
+                                killer: { name: killerName, teamName: resolvedKillerTeam, agent: players[killerName] || 'Unknown' },
+                                victim: { name: victimName, teamName: resolvedVictimTeam, agent: players[victimName] || 'Unknown' }, 
                                 weapon: event.actor?.state?.inventory?.find(i => i.equipped)?.name || 'Unknown',
                                 killerPos: kPos,
                                 victimPos: vPos
@@ -219,7 +267,13 @@ async function parseMatchFile(filePath) {
             
             fs.appendFileSync('worker-debug.log', `[Parser] Finished. Rounds: ${rounds.length}\n`);
             
-            resolve({ rounds, players, mapName });
+            resolve({ 
+                rounds, 
+                players, 
+                mapName,
+                tournamentName: matchData.tournamentName,
+                seriesDate: matchData.seriesDate
+            });
         });
 
         rl.on('error', (err) => {
@@ -285,7 +339,8 @@ async function processJob(jobId) {
         const report = await aiWriter.generateReport(analysis, {
             targetTeam: job.teamName,
             map: matchData ? matchData.mapName : digest.meta.map, // Use digest map if matchData is null
-            date: new Date().toLocaleDateString() // approximate
+            date: digest.meta.date ? new Date(digest.meta.date).toLocaleDateString() : new Date().toLocaleDateString(),
+            tournament: digest.meta.tournament
         });
 
         // 6. Complete
