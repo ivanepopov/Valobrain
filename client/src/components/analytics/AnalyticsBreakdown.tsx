@@ -153,17 +153,17 @@ const AnalyticsBreakdown = ({ team, stats, allSeriesData, isLoadingSeries }: Pro
                 team={team}
                 allSeriesData={filteredSeriesData}
             />
-            
-            <PlayerStatisticsTable 
-                team={team}
-                roster={roster} 
-                allSeriesData={filteredSeriesData}
-            />
 
             <CompositionHistory
                 team={team}
                 allSeriesData={filteredSeriesData}
                 selectedMap={selectedMap}
+            />
+            
+            <PlayerStatisticsTable 
+                team={team}
+                roster={roster} 
+                allSeriesData={filteredSeriesData}
             />
 
             <MapPerformance 

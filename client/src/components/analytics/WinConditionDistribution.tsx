@@ -134,11 +134,10 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
                     {showWins && (
                         <div className="relative h-2.5 bg-slate-900/70 rounded-lg overflow-hidden border border-white/10 group-hover:border-white/20 transition-all duration-300">
                             <div 
-                                className={`h-full ${winColor} transition-all duration-700 ease-out rounded-r-lg shadow-lg ${winShadow} relative overflow-hidden`}
+                                className={`h-full ${winColor} transition-all duration-700 ease-out rounded-r-lg shadow-lg ${winShadow} relative overflow-hidden hover:brightness-110 cursor-pointer`}
                                 style={{ width: `${winPct}%` }}
                             >
-                                {/* Shine effect */}
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+                                
                             </div>
                         </div>
                     )}
@@ -146,11 +145,10 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
                     {showLosses && (
                         <div className="relative h-2.5 bg-slate-900/70 rounded-lg overflow-hidden border border-white/10 group-hover:border-white/20 transition-all duration-300">
                             <div 
-                                className={`h-full ${lossColor} transition-all duration-700 ease-out rounded-r-lg shadow-lg ${lossShadow} relative overflow-hidden`}
+                                className={`h-full ${lossColor} transition-all duration-700 ease-out rounded-r-lg shadow-lg ${lossShadow} relative overflow-hidden hover:brightness-110 cursor-pointer`}
                                 style={{ width: `${lossPct}%` }}
                             >
-                                {/* Shine effect */}
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+                                
                             </div>
                         </div>
                     )}

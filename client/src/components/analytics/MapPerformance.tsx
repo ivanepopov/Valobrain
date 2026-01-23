@@ -161,7 +161,7 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
                                                 return (
                                                     <div 
                                                         key={bar.key} 
-                                                        className={`w-full flex-1 ${bar.color} rounded-t-lg shadow-lg ${bar.shadow} border border-white/10 hover:border-white/20 transition-all duration-300 relative overflow-visible min-w-[12px] max-w-[40px] group/bar`}
+                                                        className={`w-full flex-1 ${bar.color} rounded-t-lg border border-white/10 hover:border-white/20 hover:brightness-110 cursor-pointer transition-all duration-300 relative overflow-visible min-w-[12px] max-w-[40px] group/bar`}
                                                         style={{ height: `${heightPx}px` }}
                                                     >
                                                         {/* Tooltip */}

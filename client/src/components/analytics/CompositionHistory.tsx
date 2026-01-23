@@ -12,9 +12,20 @@ type Props = {
 }
 
 const CompositionHistory = ({ team, allSeriesData, selectedMap }: Props) => {
-    if (selectedMap === "All" || !team) return null;
+    const [visibility, setVisibility] = React.useState({
+        pickRate: true,
+        winRate: true
+    });
 
+    const toggle = (metric: keyof typeof visibility) => {
+        setVisibility(prev => ({
+            ...prev,
+            [metric]: !prev[metric]
+        }));
+    };
     const compositionStats = React.useMemo(() => {
+        if (selectedMap === "All" || !team) return [];
+
         const comps: Record<string, { agents: string[]; totalRoundsWon: number; totalRoundsPlayed: number; totalGames: number }> = {};
         let totalGamesOnMap = 0;
 
@@ -52,13 +63,14 @@ const CompositionHistory = ({ team, allSeriesData, selectedMap }: Props) => {
         return Object.values(comps)
             .map(c => ({
                 ...c,
-                pickRate: (c.totalGames / totalGamesOnMap) * 100,
+                pickRate: c.totalGames > 0 ? (c.totalGames / totalGamesOnMap) * 100 : 0,
                 winRate: c.totalRoundsPlayed > 0 ? (c.totalRoundsWon / c.totalRoundsPlayed) * 100 : 0
             }))
             .sort((a, b) => b.totalGames - a.totalGames)
             .slice(0, 5);
     }, [allSeriesData, team, selectedMap]);
 
+    if (selectedMap === "All" || !team) return null;
     if (compositionStats.length === 0) return null;
 
     return (
@@ -68,67 +80,91 @@ const CompositionHistory = ({ team, allSeriesData, selectedMap }: Props) => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="mb-6"
         >
-            <h2 className="text-2xl font-bold text-white mb-4">Agent Usage & Composition</h2>
-            <GlassBox className="mb-6">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-tighter italic">Composition Analysis</h3>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Top Meta Pick & Win Rates</p>
-                </div>
-                <div className="flex gap-4">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-blue-500" />
-                        <span className="text-[9px] font-bold text-slate-400 uppercase">Pick Rate</span>
+            <h2 className="text-2xl font-bold text-white mb-4">Top Compositions</h2>
+            <GlassBox className="mb-6 border-white/10">
+                <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
+                    <div>
+                        <h3 className="text-white text-lg font-bold">Composition Analysis</h3>
+                        <p className="text-blue-200 text-sm">Most played agent combinations on {selectedMap}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                        <span className="text-[9px] font-bold text-slate-400 uppercase">Win Rate (Rounds)</span>
+                    <div className="flex gap-4 bg-gradient-to-r from-slate-950/60 to-slate-900/60 p-2.5 rounded-lg border border-white/10 backdrop-blur-sm">
+                        <button 
+                            onClick={() => toggle('pickRate')}
+                            className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 cursor-pointer ${visibility.pickRate ? 'opacity-100' : 'opacity-40'}`}
+                        >
+                            <div className="w-3.5 h-3.5 rounded-md bg-purple-400" />
+                            <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Pick Rate</span>
+                        </button>
+                        <button 
+                            onClick={() => toggle('winRate')}
+                            className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 cursor-pointer ${visibility.winRate ? 'opacity-100' : 'opacity-40'}`}
+                        >
+                            <div className="w-3.5 h-3.5 rounded-md bg-green-400" />
+                            <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Win Rate</span>
+                        </button>
                     </div>
                 </div>
-            </div>
 
-            <div className="space-y-4">
-                {compositionStats.map((comp, idx) => (
-                    <div key={idx} className="flex items-center gap-6 group">
-                        {/* 2 Horizontal Bars on the left */}
-                        <div className="flex-1 space-y-2">
-                            <div className="relative h-3 bg-slate-800/50 rounded-full overflow-hidden border border-slate-700/30">
-                                <div
-                                    className="absolute inset-y-0 left-0 bg-blue-500 transition-all duration-1000 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-                                    style={{ width: `${comp.pickRate}%` }}
-                                />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-white drop-shadow-md">
-                                    {comp.pickRate.toFixed(0)}%
-                                </span>
+                <div className="space-y-6">
+                    {compositionStats.map((comp, idx) => (
+                        <div key={idx} className="flex items-center gap-6 group">
+                            {/* 5 Agent Images */}
+                            <div className="flex gap-2 shrink-0">
+                                {comp.agents.map((agent, aIdx) => (
+                                    <div key={aIdx} className="relative w-8 h-8 rounded border border-white/10 overflow-hidden bg-slate-800 transition-transform duration-300 group-hover:translate-y-[-2px] hover:shadow-xl group-hover:z-10">
+                                        <img
+                                            src={getAgentLogo(agent)}
+                                            alt={agent}
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => (e.currentTarget.src = "/assets/agents/placeholder.png")}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
+                                    </div>
+                                ))}
                             </div>
-                            <div className="relative h-3 bg-slate-800/50 rounded-full overflow-hidden border border-slate-700/30">
-                                <div
-                                    className="absolute inset-y-0 left-0 bg-emerald-500 transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
-                                    style={{ width: `${comp.winRate}%` }}
-                                />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-white drop-shadow-md">
-                                    {comp.winRate.toFixed(0)}%
-                                </span>
+
+                            {/* 2 Horizontal Bars on the right */}
+                            <div className="flex-1 space-y-2.5">
+                                {visibility.pickRate && (
+                                    <div className="relative h-2.5 bg-slate-900/70 rounded-lg overflow-visible border border-white/10 hover:border-white/20 transition-all duration-300">
+                                        <div
+                                            className="absolute inset-y-0 left-0 bg-purple-400 rounded-lg transition-all duration-300 ease-out group/bar hover:brightness-110 cursor-pointer"
+                                            style={{ width: `${comp.pickRate}%` }}
+                                        >
+                                            {/* Tooltip */}
+                                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover/bar:opacity-100 transition-opacity duration-200 pointer-events-none z-20">
+                                                <div className="bg-slate-900 border border-white/20 rounded-lg px-2 py-1 shadow-xl">
+                                                    <span className="text-white text-xs font-bold whitespace-nowrap">{comp.pickRate.toFixed(1)}%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-white z-10 leading-none pointer-events-none">
+                                            {comp.pickRate.toFixed(0)}%
+                                        </span>
+                                    </div>
+                                )}
+                                {visibility.winRate && (
+                                    <div className="relative h-2.5 bg-slate-900/70 rounded-lg overflow-visible border border-white/10 hover:border-white/20 transition-all duration-300">
+                                        <div
+                                            className="absolute inset-y-0 left-0 bg-green-400 rounded-lg transition-all duration-300 ease-out group/bar hover:brightness-110 cursor-pointer"
+                                            style={{ width: `${comp.winRate}%` }}
+                                        >
+                                            {/* Tooltip */}
+                                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover/bar:opacity-100 transition-opacity duration-200 pointer-events-none z-20">
+                                                <div className="bg-slate-900 border border-white/20 rounded-lg px-2 py-1 shadow-xl">
+                                                    <span className="text-white text-xs font-bold whitespace-nowrap">{comp.winRate.toFixed(1)}%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-white z-10 leading-none pointer-events-none">
+                                            {comp.winRate.toFixed(0)}%
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         </div>
-
-                        {/* 5 Agent Images */}
-                        <div className="flex -space-x-2 shrink-0">
-                            {comp.agents.map((agent, aIdx) => (
-                                <div key={aIdx} className="relative w-12 h-12 rounded-lg border-2 border-slate-900 overflow-hidden bg-slate-800 group-hover:translate-y-[-2px] transition-transform shadow-lg">
-                                    <img
-                                        src={getAgentLogo(agent)}
-                                        alt={agent}
-                                        className="w-full h-full object-cover scale-110"
-                                        onError={(e) => (e.currentTarget.src = "/assets/agents/placeholder.png")}
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent" />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
             </GlassBox>
         </motion.div>
     );
