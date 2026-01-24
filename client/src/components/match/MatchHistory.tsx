@@ -66,9 +66,7 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             {/* Left Column: Series List */}
             <div className="space-y-3 max-h-[calc(100vh-320px)] overflow-y-auto pr-2 custom-scrollbar">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-blue-200 mb-4 px-1">
-                    Match Timeline
-                </h3>
+                
                 {allSeriesData.length === 0 ? (
                     <GlassBox className="p-8 text-center">
                         <p className="text-blue-200/60 font-medium italic">No match history available</p>
@@ -178,18 +176,13 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
                                                     backgroundPosition: 'center',
                                                 }}
                                             >
-                                                {/* Dark overlay */}
                                                 <div className="absolute inset-0 bg-black/40"></div>
-                                                
-                                                {/* Tint overlay - shows on hover */}
                                                 <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isWin ? 'bg-green-900/50' : 'bg-red-900/50'}`}></div>
+                                                <span className="absolute bottom-1 right-2 text-[12px] font-bold text-white/60 z-10">{idx + 1}</span>
                                                 
-                                                {/* Map number badge */}
-                                                <span className="absolute bottom-1 right-2 text-[10px] font-bold text-white/60 z-10">{idx + 1}</span>
-                                                
-                                                {/* Content */}
+                                               
                                                 <div className="relative z-10 flex flex-col items-center gap-1">
-                                                    <span className="text-white font-semibold text-sm drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{capitalize(game.map.name)}</span>
+                                                    <span className="text-white font-semibold text-15 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{capitalize(game.map.name)}</span>
                                                     <span className={`text-lg font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${isWin ? 'text-green-400' : 'text-red-400'}`}>
                                                         {teamRoundsWon}-{opponentRoundsWon}
                                                     </span>

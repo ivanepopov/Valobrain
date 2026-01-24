@@ -124,7 +124,7 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
         return (
             <div className="group space-y-2">
                 <div className="flex justify-between items-center">
-                    <span className="text-sm text-white font-semibold">{label}</span>
+                    <span className="text-lg text-white font-semibold">{label}</span>
                     <div className="flex gap-4 text-xs font-bold">
                         {showWins && <span className="text-blue-300">W: {winVal}</span>}
                         {showLosses && <span className="text-rose-300">L: {lossVal}</span>}
