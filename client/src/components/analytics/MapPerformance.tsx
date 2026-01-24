@@ -177,7 +177,7 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
 
                                         {/* Map Name */}
                                         <div className="text-center w-full">
-                                            <span className="block text-white font-bold text-sm tracking-tight hover:text-blue-400 transition-all duration-300">
+                                            <span className="block text-white font-bold text-lg tracking-tight hover:text-blue-400 transition-all duration-300">
                                                 {capitalize(map.name)}
                                             </span>
                                         </div>

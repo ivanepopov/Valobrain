@@ -23,7 +23,7 @@ const StatsTable: React.FC<{
         </h3>
 
         <div className="backdrop-blur-sm bg-white/5 rounded-xl overflow-hidden border border-white/5">
-            <table className="w-full text-left border-collapse table-fixed text-[13px]">
+            <table className="w-full text-lg">
                 <thead>
                     <tr className="border-b border-white/10">
                         <th className="text-left py-3 px-4 text-blue-200 font-semibold w-[20%]">Player</th>

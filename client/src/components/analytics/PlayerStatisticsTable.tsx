@@ -88,7 +88,7 @@ type Props = {
                 <h2 className="text-2xl font-bold text-white drop-shadow-md mb-6">Player Statistics</h2>
                 <GlassBox className="mt-4 !p-0 overflow-hidden border-white/5">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-[13px]">
+                        <table className="w-full text-lg">
                             <thead>
                                 <tr className="border-b border-white/10">
                                     <th className="text-left py-3 px-4 text-blue-200 font-semibold">Player</th>
