@@ -36,7 +36,7 @@ JSON OUTPUT STRUCTURE:
       "defense_setups": ["Sentinel Anchor", "Gambling", "Aggressive Info"]
   },
 
-### REQUIREMENT: FIND AT LEAST 3 DISTINCT PATTERNS PER PHASE (ATTACK / DEFENSE).
+### REQUIREMENT: FIND AT LEAST 5 DISTINCT PATTERNS PER PHASE (ATTACK / DEFENSE).
 
 ### 3. STRATEGIC FORMATIONS (Deduced from Kill Flow)
 Analyze the `killFlow` locations (`kz` = Killer Zone, `vz` = Victim Zone) of the first 2-3 kills in each round to identify the strategy.
@@ -45,11 +45,17 @@ Analyze the `killFlow` locations (`kz` = Killer Zone, `vz` = Victim Zone) of the
 *   **Default / Map Control:** First kills are SPREAD across the map (e.g., A Main AND B Main).
 *   **Rush / Exec:** All early kills happen in ONE Zone (e.g., 3 deaths at B Main).
 *   **Pick / Contact:** Slow start, low ability usage, first kill is late (>40s).
+*   **Mid-to-Site Split:** Kills occur in Mid AND a Site Main simultaneously (Pinching).
+*   **Fake Execute:** Heavy utility/kills at A, but bomb planted B.
+*   **4-1 Pinch:** 4 players hit site, 1 Lurker kills rotators in Mid/Spawn.
 
 **Defense Setups:**
 *   **Aggressive Info:** Defense gets early kills (t<20s) at deep zones (e.g., A Main, Mid).
 *   **Anchor:** Defenders dying on Site (e.g., B Site) without trades from teammates locally.
 *   **Stack:** 3+ kills happen at one site on defense.
+*   **Retake Protocol:** Defenders give up site (0 deaths on entry), then die fighting Post-Plant (5v5 Retake).
+*   **Aggressive Flank:** Defender kills attacker in Attacker Spawn/Lobby areas.
+*   **Crossfire Trap:** 2 Defenders get kills in the same zone from different angles.
 
 ### 4. TACTICAL MICRO-PLAYS (Combos & Setups)
 Analyze `keyEvents.abilities` to find coordinated plays in specific zones (`z`).
@@ -76,7 +82,8 @@ For every Tactical Pattern identified, cite the FORMATION used.
       "insight": "Specific observation about their playstyle or impact (e.g., 'Jett played overly aggressive on defense, often dying first')",
       "stat_reference": "Optional stat context (e.g., 'FD: 4')"
     }
-    ... (Key players only)
+    }
+    ... (Analyze ALL 5 PLAYERS)
   ],
   "weaknesses_and_counters": [
     {
@@ -111,7 +118,20 @@ GUIDELINES:
     *   *Do they win Eco rounds?* (Eco round + `result: WIN`).
     *   *Op Usage:* Check if `loadoutVal` > 4000 consistently (suggests Operator investment).
 
-### 6. INVESTIGATIVE FRAMEWORK (FIRST PRINCIPLES)
+### 6. PRO-LEVEL SCOUTING METRICS (New Data)
+**You have access to calculated "Tier 2/3" metrics in `team_stats`. USE THEM.**
+
+*   **PACING (`team_stats.pacing`):**
+    *   *Style:* Blitz (<50s), Default (50-80s), Control (>80s).
+    *   *Interpretation:* If "Blitz", they rely on aim/executes. If "Control", they rely on conditioning/luring.
+    *   *Output:* Discuss this in **Macro** patterns.
+
+*   **ROLES (`team_stats.roles`):**
+    *   **Anchors:** Identified site holders (e.g., `mazin: A-Anchor`). Mention this in **Defense Setups**.
+    *   **Lurker:** Identified isolated player (e.g., `lurker: "art"`). Mention in **Attack Protocols**.
+    *   **Weak Link:** Player with most Opening Deaths on Defense (`weakLink`). **CRITICAL**: You MUST highlight this player in **Weaknesses** as a "Target" for the user.
+
+### 7. INVESTIGATIVE FRAMEWORK (FIRST PRINCIPLES)
 **Valorant is fluid. Do not rely on loose "If X then Y" rules.**
 Instead, act as a **Detective**. For every round, investigate the **WHY** behind the **WHAT**.
 

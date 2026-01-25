@@ -20,7 +20,7 @@ Use the following structure:
 ---
 
 ## 📋 Executive Summary
-[2-3 impactful sentences summarizing the team's identity and key win conditions.]
+[2-3 impactful sentences. ALWAYS mention their Pacing Style (Blitz/Default/Control) and their key Weak Link.]
 
 ---
 
@@ -32,6 +32,8 @@ Use the following structure:
 [How do they burst onto site? What utility do they rely on?]
 
 **Key Tendencies:**
+- [Bold Pattern Name]: [Description]
+- [Bold Pattern Name]: [Description]
 - [Bold Pattern Name]: [Description]
 - [Bold Pattern Name]: [Description]
 - [Bold Pattern Name]: [Description]
@@ -49,6 +51,8 @@ Use the following structure:
 - [Bold Pattern Name]: [Description]
 - [Bold Pattern Name]: [Description]
 - [Bold Pattern Name]: [Description]
+- [Bold Pattern Name]: [Description]
+- [Bold Pattern Name]: [Description]
 
 ---
 
@@ -60,6 +64,9 @@ Use the following structure:
 ## 🎯 Player Intel
 | Player | Agent | Key Habit / Weakness |
 | :--- | :--- | :--- |
+| **[Name]** | [Agent] | [Concise insight] |
+| **[Name]** | [Agent] | [Concise insight] |
+| **[Name]** | [Agent] | [Concise insight] |
 | **[Name]** | [Agent] | [Concise insight] |
 | **[Name]** | [Agent] | [Concise insight] |
 
@@ -77,6 +84,14 @@ Use the following structure:
 > [!TIP]
 > **Priority 3: [Name of Exploit]**
 > [Actionable advice.]
+
+> [!TIP]
+> **Priority 4: [Name of Exploit]**
+> [Actionable advice.]
+
+> [!TIP]
+> **Priority 5+:** [Continue listing all identified weaknesses...]
+
 
 ---
 

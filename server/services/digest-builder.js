@@ -109,12 +109,123 @@ function buildTeamStats(rounds, roundSummaries, targetTeam) {
 
   const tradeEfficiency = totalDeaths > 0 ? Math.round((totalTraded / totalDeaths) * 100) : 0;
   
+  // 3. Tempo & Pacing Aggregation
+  let totalPlantTime = 0;
+  let plantCount = 0;
+  let totalTTFK = 0;
+  let ttfkCount = 0;
+
+  for (const s of roundSummaries) {
+      if (s.metrics?.plantTime !== null && s.metrics?.plantTime !== undefined) {
+          totalPlantTime += s.metrics.plantTime;
+          plantCount++;
+      }
+      if (s.metrics?.ttfk) {
+          totalTTFK += s.metrics.ttfk;
+          ttfkCount++;
+      }
+  }
+
+  const avgPlantTime = plantCount > 0 ? Math.round(totalPlantTime / plantCount) : 0;
+  const avgTTFK = ttfkCount > 0 ? Math.round(totalTTFK / ttfkCount) : 0;
+
+  let pacingStyle = 'Balanced';
+  if (avgPlantTime > 0) {
+      if (avgPlantTime < 50) pacingStyle = 'Blitz / Fast';
+      else if (avgPlantTime > 80) pacingStyle = 'Slow / Control';
+      else pacingStyle = 'Standard Default';
+  }
+
+  // 4. Role Aggregation (Lurk & Anchor)
+  const lurkCounts = {};
+  const anchorCounts = {}; // { PlayerName: { A: 2, B: 5, Mid: 1 } }
+  
+  for (const s of roundSummaries) {
+      if (s.metrics?.lurker) {
+          const p = s.metrics.lurker.player;
+          lurkCounts[p] = (lurkCounts[p] || 0) + 1;
+      }
+      
+      if (s.metrics?.anchors) {
+          Object.entries(s.metrics.anchors).forEach(([player, site]) => {
+              if (!anchorCounts[player]) anchorCounts[player] = { total: 0 };
+              anchorCounts[player][site] = (anchorCounts[player][site] || 0) + 1;
+              anchorCounts[player].total++;
+          });
+      }
+  }
+  
+  let topLurker = 'None';
+  let maxLurks = 0;
+  Object.entries(lurkCounts).forEach(([player, count]) => {
+      if (count > maxLurks) {
+          maxLurks = count;
+          topLurker = player;
+      }
+  });
+  
+  // Resolve Anchors
+  const roles = {
+      lurker: maxLurks >= 2 ? topLurker : 'None',
+      lurkRounds: maxLurks,
+      anchors: {}
+  };
+  
+  Object.entries(anchorCounts).forEach(([player, sites]) => {
+      if (sites.total < 3) return; // Need at least 3 defense rounds detected
+      
+      let maxSite = 'Flex';
+      let maxCount = 0;
+      
+      ['A', 'B', 'C', 'Mid'].forEach(site => {
+          const count = sites[site] || 0;
+          if (count > maxCount) {
+              maxCount = count;
+              maxSite = site;
+          }
+      });
+      
+      const pct = maxCount / sites.total;
+      if (pct >= 0.6) {
+          roles.anchors[player] = `${maxSite}-Anchor`;
+      } else {
+          roles.anchors[player] = 'Rotator/Flex';
+      }
+  });
+
+  // Resolve Weak Link (Most First Deaths on Defense)
+  const fdCounts = {};
+  for (const s of roundSummaries) {
+      if (s.metrics?.openingDeath) {
+          const p = s.metrics.openingDeath;
+          fdCounts[p] = (fdCounts[p] || 0) + 1;
+      }
+  }
+  
+  let weakLink = 'None';
+  let maxFD = 0;
+  Object.entries(fdCounts).forEach(([player, count]) => {
+      if (count > maxFD) {
+          maxFD = count;
+          weakLink = player;
+      }
+  });
+  
+  roles.weakLink = maxFD >= 2 ? weakLink : 'None';
+  roles.defenseFDs = maxFD;
+
   return {
     targetTeam,
     totalRounds: rounds.length,
     wins,
     winRate: Math.round((wins / rounds.length) * 100),
     tradeEfficiency: `${tradeEfficiency}% (${totalTraded}/${totalDeaths})`,
+    pacing: {
+        style: pacingStyle,
+        avgPlantTime: `${avgPlantTime}s`,
+        avgFirstContact: `${avgTTFK}s`
+    },
+    roles: roles,
     pistolRounds: rounds.filter(r => [1, 13].includes(r.roundNumber))
       .map(r => ({ round: r.roundNumber, winner: r.winInfo?.winner })),
     siteSequence // ["A", "A", "B", ...]
@@ -196,12 +307,18 @@ function summarizeRound(round, targetTeam, mapName) {
   const winType = round.winInfo?.type || 'elimination';
 
   const kills = (round.kills || []).sort((a, b) => a.time - b.time);
+  
+  // METRIC: Time To First Kill (TTFK)
+  const ttfk = kills.length > 0 ? Math.round(kills[0].time / 1000) : null;
+  const plantTime = round.plantInfo ? Math.round(round.plantInfo.time / 1000) : null;
+
   const firstBlood = kills[0] ? {
     killer: kills[0].killer?.name,
     killerAgent: kills[0].killer?.agent, 
     victim: kills[0].victim?.name,
     victimAgent: kills[0].victim?.agent, 
     killerTeam: kills[0].killer?.teamName,
+    victimTeam: kills[0].victim?.teamName, // ADDED THIS
     time: kills[0].time,
     zone: kills[0].victim?.zone
   } : null;
@@ -241,6 +358,140 @@ function summarizeRound(round, targetTeam, mapName) {
       };
   });
 
+  // 4. Lurk Detection (Event Cluster Logic)
+  let lurkerInfo = null;
+  const teamEvents = []; // { player, x, y }
+
+  // Collect Kills
+  (round.kills || []).forEach(k => {
+      if (k.killer?.teamName === targetTeam && k.killerPos) {
+          teamEvents.push({ player: k.killer.name, x: k.killerPos.x, y: k.killerPos.y });
+      }
+  });
+
+  // Collect Abilities
+  (round.abilityCasts || []).forEach(a => {
+      // Ability casts don't always have teamName attached directly in my current parser object (just agent/player name)
+      // I need to filter by targetTeam players.
+      // Since I don't have a fast roster map here, I'll rely on the fact that `abilityCasts` usually filtered effectively or I check roster map in digest?
+      // Actually, `summarizeRound` doesn't strictly know if `a.agent` belongs to targetTeam easily without checking roster.
+      // BUT `round.teamSides` map might help if I map Player -> Team.
+      // Use `players` map passed or derived?
+      // The parser `players` map is Name->Agent.
+      // Let's assume for now we trust `kills` most, and maybe skip abilities if ambiguous, OR rely on `teamIdMap` if I passed it.
+      // Simplified: Just use Kills + Plant for now to be safe, as Kills have explicit TeamName.
+      // Wait, I can try to match player name against `round.teamSides`? No, that's Team->Side.
+      // Let's stick to Kills + Plant for high confidence.
+  });
+  
+  // Collect Plant
+  if (round.plantInfo && round.plantInfo.player && round.plantInfo.site) { // If *we* planted? 
+     // We don't know the team of the planter explicitly in round.plantInfo? It just has player name.
+     // But usually we can assume if we won by bomb or if we are Attack side...
+     // Let's safe check: if `targetSide` is Attack, then the planter is likely us (unless defuse... wait defuse is separate).
+     // Actually, let's keep it simple: Kills are the strongest signal of "Fighting".
+  }
+
+  // Calculate Centroid
+  if (teamEvents.length >= 2) {
+      const avgX = teamEvents.reduce((s, e) => s + e.x, 0) / teamEvents.length;
+      const avgY = teamEvents.reduce((s, e) => s + e.y, 0) / teamEvents.length;
+      
+      const playerDists = {}; // { PlayerName: [distances] }
+      
+      teamEvents.forEach(e => {
+          const dist = Math.sqrt(Math.pow(e.x - avgX, 2) + Math.pow(e.y - avgY, 2));
+           if (!playerDists[e.player]) playerDists[e.player] = [];
+           playerDists[e.player].push(dist);
+      });
+
+      // Find Max Outlier
+      let maxAvgDist = 0;
+      let maxPlayer = null;
+
+      Object.keys(playerDists).forEach(p => {
+          const dists = playerDists[p];
+          const typeAvg = dists.reduce((a, b) => a + b, 0) / dists.length;
+          if (typeAvg > maxAvgDist) {
+              maxAvgDist = typeAvg;
+              maxPlayer = p;
+          }
+      });
+
+      // Threshold: 5500 units (~55m)
+      if (maxAvgDist > 5500 && maxPlayer) {
+          lurkerInfo = { player: maxPlayer, dist: Math.round(maxAvgDist) };
+      }
+  }
+
+
+  // 5. Defense Anchoring (Site Hold)
+  let anchors = {}; // { PlayerName: "A" }
+  if (targetSide === 'defender') {
+      // Find where each player played this round
+      // Priority 1: First Kill/Death (Engagement)
+      // Priority 2: First Ability Cast (Setup)
+      
+      const playersSeen = new Set();
+      
+      // Check Kills
+      (round.kills || []).forEach(k => {
+          // If Target Team Player was Killer
+          if (k.killer?.teamName === targetTeam && !playersSeen.has(k.killer.name)) {
+             const z = k.killerPos ? zoneEngine.getZone(mapName, k.killerPos.x, k.killerPos.y) : null;
+             if (z) {
+                 anchors[k.killer.name] = zoneEngine.getMacroSite(z);
+                 playersSeen.add(k.killer.name);
+             }
+          }
+          // If Target Team Player was Victim (died holding)
+          if (k.victim?.teamName === targetTeam && !playersSeen.has(k.victim.name)) {
+             const z = k.victimPos ? zoneEngine.getZone(mapName, k.victimPos.x, k.victimPos.y) : null;
+             if (z) {
+                 anchors[k.victim.name] = zoneEngine.getMacroSite(z);
+                 playersSeen.add(k.victim.name);
+             }
+          }
+      });
+
+      // Check Abilities (for those not seen in kills)
+      (round.abilityCasts || []).forEach(a => {
+          // We assume ability actor is player name.
+          // We need to filter by team, but `summarizeRound` lacks roster.
+          // Heuristic: If we haven't seen this player in kills (likely meaning alive or no contact), 
+          // and name matches a known player from `round` roster...
+          // For now, let's just leniently accept if we haven't seen them.
+          if (!playersSeen.has(a.agent)) { // a.agent is Name or Agent? 
+             // Parser line 236: agent: agent (Name -> Agent map value). 
+             // Actually parser line 236: `agent: agent` WHERE `agent` was looked up from `players`.
+             // Wait, `scouting-worker.js`: `const agent = players[event.actor.state.name] || 'Unknown'`.
+             // So `a.agent` is 'Jett'. `a.agent` is NOT the player name.
+             // This is a problem. Code says `a.agent` is agent name.
+             // But `round.abilityCasts` (line 234 parser) pushes `{ agent: agent, ability: ability }`. It does NOT push player name.
+             // ERROR IN PARSER logic if I want to track by Player Name.
+             
+             // BUT `round.kills` has player name.
+             // I can map Agent -> PlayerName using `digest.meta.roster`? No, digest is being built.
+             // `matchData.players` has Name->Agent. I can reverse it if 1:1.
+             // But typically duplicate agents are impossible in Pro play.
+             // So Agent Name is a proxy key.
+             
+             // Let's stick to KILLS for now (Engagement Anchoring). It's safer.
+             // Ability anchoring requires fixing parser to include Player Name in abilityCasts.
+          }
+      });
+  }
+
+
+
+  // 6. First Blood Vulnerability (Defense)
+  let openingDeath = null;
+  if (targetSide === 'defender' && firstBlood) {
+      if (firstBlood.victimTeam === targetTeam) {
+          openingDeath = firstBlood.victim; // Name of player who died first
+      }
+  }
+
   return {
     round: round.roundNumber,
     side: targetSide,
@@ -248,6 +499,7 @@ function summarizeRound(round, targetTeam, mapName) {
     type: winType,
     buy: buyType,       // "Full Buy"
     loadoutVal: loadoutVal, // Team Total
+    metrics: { ttfk, plantTime, lurker: lurkerInfo, anchors: anchors, openingDeath }, // NEW: FD Vulnerability
     keyEvents: {
       fb: firstBlood,
       plant,

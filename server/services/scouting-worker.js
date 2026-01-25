@@ -204,8 +204,15 @@ async function parseMatchFile(filePath) {
                             const killerTeamID = event.actor?.state?.teamId;
                             const victimTeamID = event.target?.state?.teamId;
                             
+                            
                             const resolvedKillerTeam = teamIdMap[killerTeamID] || killerTeamID || 'Unknown';
                             const resolvedVictimTeam = teamIdMap[victimTeamID] || victimTeamID || 'Unknown';
+
+                            // DEBUG: Check for full team state
+                            console.log(`[Parser] Kill State Keys: ${Object.keys(event.actor?.state || {})}`); 
+                            if (event.actor?.state?.teams) {
+                                console.log(`[Parser] FULL TEAM DATA AVAILABLE IN KILL!`);
+                            }
 
 
                             const kPos = event.actor?.state?.game?.position;
@@ -241,9 +248,10 @@ async function parseMatchFile(filePath) {
 
                         // Plant
                         if (event.type === 'team-completed-plantBomb' || event.type === 'player-completed-plantBomb') {
+                            // console.log(`[Parser] Plant Detected Round ${currentRoundObj.roundNumber} by ${event.actor?.state?.name}`);
                             currentRoundObj.plantInfo = {
                                 site: 'Unknown', 
-                                time: new Date(event.occurredAt).getTime() - currentRoundObj.startTime,
+                                time: new Date(eventTimeVal).getTime() - currentRoundObj.startTime,
                                 player: event.actor?.state?.name
                             };
                         }

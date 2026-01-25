@@ -116,6 +116,20 @@ function getZoneInfo(mapName, zoneName) {
   return zoneDefinitions[mapName].zones[zoneName] || null;
 }
 
+// ================== MACRO HELPERS ==================
+
+/**
+ * Maps granular zone name (e.g., "A-Main") to Macro Site ("A", "B", "C", "Mid")
+ */
+function getMacroSite(zoneName) {
+  if (!zoneName) return 'Unknown';
+  if (zoneName.startsWith('A-')) return 'A';
+  if (zoneName.startsWith('B-')) return 'B';
+  if (zoneName.startsWith('C-')) return 'C';
+  if (zoneName.startsWith('Mid')) return 'Mid';
+  return 'Other';
+}
+
 // ================== CHECKPOINT SYSTEM ==================
 
 const CHECKPOINT_TIMES = {
@@ -329,6 +343,7 @@ module.exports = {
   initialize,
   getZone,
   getZoneInfo,
+  getMacroSite,
   getPhase,
   processRound,
   CHECKPOINT_TIMES,
