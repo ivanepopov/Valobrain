@@ -214,6 +214,41 @@ function buildTeamStats(rounds, roundSummaries, targetTeam) {
   roles.weakLink = maxFD >= 2 ? weakLink : 'None';
   roles.defenseFDs = maxFD;
 
+  // 7. Site Success Rate (Where do they win?) & Opening Duel Strength
+  const siteStats = { A: {w:0, t:0}, B: {w:0, t:0}, C: {w:0, t:0} };
+  const openingWins = {};
+
+  for (const s of roundSummaries) {
+      if (s.metrics.openingKiller) {
+          const k = s.metrics.openingKiller;
+          openingWins[k] = (openingWins[k] || 0) + 1;
+      }
+      
+      // Check Plant Site Success
+      if (s.keyEvents?.plant?.site) {
+          const site = s.keyEvents.plant.site; // "A" or "B"
+          if (siteStats[site]) {
+              siteStats[site].t++;
+              if (s.result === 'WIN') siteStats[site].w++;
+          }
+      }
+  }
+
+  // Format Site Success
+  const siteSuccess = {};
+  Object.keys(siteStats).forEach(site => {
+      if (siteStats[site].t > 0) {
+          const winPct = Math.round((siteStats[site].w / siteStats[site].t) * 100);
+          siteSuccess[site] = `${winPct}% (${siteStats[site].w}/${siteStats[site].t})`;
+      }
+  });
+
+  // Format Opening Win Leaders (Top 2)
+  const duelLeaders = Object.entries(openingWins)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 2)
+      .map(([p, c]) => `${p}: ${c} First Kills`);
+
   return {
     targetTeam,
     totalRounds: rounds.length,
@@ -226,6 +261,8 @@ function buildTeamStats(rounds, roundSummaries, targetTeam) {
         avgFirstContact: `${avgTTFK}s`
     },
     roles: roles,
+    siteSuccess: siteSuccess, // NEW
+    openingDuelWins: duelLeaders, // NEW
     pistolRounds: rounds.filter(r => [1, 13].includes(r.roundNumber))
       .map(r => ({ round: r.roundNumber, winner: r.winInfo?.winner })),
     siteSequence // ["A", "A", "B", ...]
@@ -484,11 +521,16 @@ function summarizeRound(round, targetTeam, mapName) {
 
 
 
-  // 6. First Blood Vulnerability (Defense)
+  // 6. First Blood Vulnerability (Defense) & Opening Duel Strength
   let openingDeath = null;
-  if (targetSide === 'defender' && firstBlood) {
-      if (firstBlood.victimTeam === targetTeam) {
-          openingDeath = firstBlood.victim; // Name of player who died first
+  let openingKiller = null;
+  
+  if (firstBlood) {
+      if (firstBlood.victimTeam === targetTeam && targetSide === 'defender') {
+          openingDeath = firstBlood.victim; // Weak Link (Died first on Defense)
+      }
+      if (firstBlood.killerTeam === targetTeam) {
+          openingKiller = firstBlood.killer; // Star Player (Got first kill)
       }
   }
 
@@ -499,7 +541,7 @@ function summarizeRound(round, targetTeam, mapName) {
     type: winType,
     buy: buyType,       // "Full Buy"
     loadoutVal: loadoutVal, // Team Total
-    metrics: { ttfk, plantTime, lurker: lurkerInfo, anchors: anchors, openingDeath }, // NEW: FD Vulnerability
+    metrics: { ttfk, plantTime, lurker: lurkerInfo, anchors: anchors, openingDeath, openingKiller }, // NEW: Opponent Killer
     keyEvents: {
       fb: firstBlood,
       plant,
