@@ -87,12 +87,17 @@ For every Tactical Pattern identified, cite the FORMATION used.
   ],
   "weaknesses_and_counters": [
     {
-      "weakness": "Description of a tactical flaw (e.g., 'Rotations to B are slow when A shows presence')",
-      "exploitation": "How to exploit this (e.g., 'Fake A aggression and fast rotate B')",
+      "weakness": "Description of the flaw (e.g., 'Heavy Anchor on A Site')",
+      "exploitation": "Specific Counter-Strat (e.g., 'Since they anchor, do NOT dry peek. Use Breach Stun + Flash on A-Short to displace the anchor, then execute.')",
       "confidence": "High" | "Medium"
     }
   ],
-  "coach_notes": "Internal notes for the writer to emphasize (e.g., 'Emphasize the need for better trade efficiency on defense')"
+  "coach_notes": "Internal notes for the writer to emphasize (e.g., 'Emphasize the need for better trade efficiency on defense')",
+  
+  ### COUNTER-STRAT REQUIREMENT (CRITICAL):
+  For every exploitation, use the format: **"IF [Condition], THEN [Action] using [Tool/Tactic]."**
+  *   *Bad:* "Rotate fast."
+  *   *Good:* "IF they over-rotate A, THEN fake presence A with Sova Drone, and immediately hit B."
 }
 
 GUIDELINES:

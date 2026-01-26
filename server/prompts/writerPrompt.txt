@@ -87,7 +87,7 @@ Use the following structure:
 
 > [!TIP]
 > **Priority 4: [Name of Exploit]**
-> [Actionable advice.]
+> [Actionable advice. Connect the weakness to the specific solution. Example: "Since they play heavy anchor (Weakness), you must use Breach Stun to displace them (Solution)."]
 
 > [!TIP]
 > **Priority 5+:** [Continue listing all identified weaknesses...]
