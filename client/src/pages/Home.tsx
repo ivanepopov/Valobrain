@@ -10,6 +10,7 @@ import FeaturedCards from "../components/ui/FeaturedCards.tsx";
 import Header from '../components/ui/Header.tsx';
 import HowItWorks from '../components/ui/HowItWorks.tsx';
 import Footer from '../components/ui/Footer.tsx';
+import CTASection from '../components/ui/CTASection.tsx';
 
 /**
  * Home Page
@@ -84,7 +85,7 @@ const Home = () => {
                 />
                 <button
                   type="submit"
-                  className="px-8 py-3 bg-blue-900 hover:bg-white/5 text-white font-semibold rounded-xl transition-all duration-300"
+                  className="px-8 py-3 bg-blue-900 hover:bg-white/5 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105"
                 >
                   Search
                 </button>
@@ -138,14 +139,17 @@ const Home = () => {
           </motion.div>
         </motion.div>
 
-        {/* How It Works */}
-        <HowItWorks />
-
         {/* Feature Cards */}
         <FeaturedCards />
 
+        {/* How It Works */}
+        <HowItWorks />
+
         {/* Feature Images Carousel */}
         <FeaturedImagesCarousel />
+
+        {/* CTA Section */}
+        <CTASection />
 
       </div>
 
