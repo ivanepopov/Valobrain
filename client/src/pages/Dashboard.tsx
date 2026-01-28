@@ -23,6 +23,7 @@ const Dashboard = () => {
     const [activeTab, setActiveTab] = useState<"history" | "analytics" | "scouting" | "ai-insight">("history");
     const [stats, setStats] = useState<TeamStats | null>(null);
     const [allSeriesData, setAllSeriesData] = useState<SeriesStats[]>([]);
+    const [validSeriesIds, setValidSeriesIds] = useState<string[]>([]);
     const [isFetchingSeries, setIsFetchingSeries] = useState(false);
     
     // Scouting states
@@ -46,13 +47,23 @@ const Dashboard = () => {
                     setIsFetchingSeries(true);
                     const seriesPromises = statsData.aggregationSeriesIds.map(id => getSeriesStats(id));
                     const results = await Promise.all(seriesPromises);
-                    const validResults = results.filter((s): s is SeriesStats =>
-                        s !== null &&
-                        s.seriesState?.format !== undefined &&
-                        Array.isArray(s.seriesState?.teams) &&
-                        Array.isArray(s.seriesState?.games)
-                    );
+
+                    // Filter valid results AND keep track of corresponding IDs
+                    const validResults: SeriesStats[] = [];
+                    const matchingIds: string[] = [];
+
+                    results.forEach((s, index) => {
+                        if (s !== null &&
+                            s.seriesState?.format !== undefined &&
+                            Array.isArray(s.seriesState?.teams) &&
+                            Array.isArray(s.seriesState?.games)) {
+                            validResults.push(s);
+                            matchingIds.push(statsData.aggregationSeriesIds[index]);
+                        }
+                    });
+
                     setAllSeriesData(validResults);
+                    setValidSeriesIds(matchingIds);
                     setIsFetchingSeries(false);
 
                     // Start Scouting Background Fetch
@@ -224,7 +235,7 @@ const Dashboard = () => {
                                 <AIInsightTab
                                     teamName={team?.name || ""}
                                     seriesData={allSeriesData}
-                                    seriesIds={stats?.aggregationSeriesIds || []}
+                                    seriesIds={validSeriesIds}
                                 />
                             )}
                         </motion.div>

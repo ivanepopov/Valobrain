@@ -1,0 +1,3 @@
+{
+  "ignore": ["match_data/*", "*.log", "worker-debug.log"]
+}

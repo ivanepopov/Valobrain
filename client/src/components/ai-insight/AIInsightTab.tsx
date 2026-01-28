@@ -66,6 +66,10 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
   const [availableSeries, setAvailableSeries] = useState<Record<string, boolean>>({});
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(true);
 
+  // Track actual maps from JSONL files (not Statistics API)
+  const [actualSeriesMaps, setActualSeriesMaps] = useState<Record<string, string[]>>({});
+  const [isLoadingMaps, setIsLoadingMaps] = useState(false);
+
   const maps = ['All', 'Abyss', 'Ascent', 'Bind', 'Breeze', 'Fracture', 'Haven', 'Icebox', 'Lotus', 'Pearl', 'Split', 'Sunset'];
 
   // Check which series have downloadable match data
@@ -114,8 +118,8 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
       const now = new Date();
       const daysAgo = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
-      // Use the corresponding seriesId from the seriesIds array
       const seriesId = seriesIds[index] || state.games[0]?.id?.split('-')[0] || String(index);
+      console.log(`[AI Insight] Series ${index}: ID=${seriesId}, opponent=${opponent?.name}, date=${startDate.toLocaleDateString()}`);
 
       return {
         id: seriesId,
@@ -129,12 +133,8 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
     });
   }, [seriesData, seriesIds, teamName]);
 
-  // Filter series based on selected filters AND availability
   const filteredSeries = useMemo(() => {
-    // First filter to only available series
     let filtered = transformedSeries.filter(s => availableSeries[s.id] === true);
-
-    // Filter by map
     if (selectedMap !== 'All') {
       filtered = filtered.filter(s => s.maps.includes(selectedMap));
     }
@@ -286,6 +286,52 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (selectedSeries) {
+      setActualSeriesMaps(prev => {
+        const newMaps = { ...prev };
+        delete newMaps[selectedSeries.id];
+        return newMaps;
+      });
+      setSelectedReportMap('all');
+    }
+  }, [selectedSeries?.id]);
+
+  useEffect(() => {
+    const fetchActualMaps = async () => {
+      if (!selectedSeries) return;
+      if (actualSeriesMaps[selectedSeries.id]) return;
+
+      setIsLoadingMaps(true);
+      try {
+        console.log('[AI Insight] Fetching maps for series:', selectedSeries.id);
+        const response = await axios.get(`/api/advanced-stats/${selectedSeries.id}/available-maps`);
+        const maps = response.data.maps || [];
+        console.log('[AI Insight] API returned maps:', maps);
+
+        setActualSeriesMaps(prev => ({
+          ...prev,
+          [selectedSeries.id]: maps
+        }));
+      } catch (err) {
+        console.error('[AI Insight] Failed to fetch actual maps:', err);
+        setActualSeriesMaps(prev => ({
+          ...prev,
+          [selectedSeries.id]: selectedSeries.maps
+        }));
+      } finally {
+        setIsLoadingMaps(false);
+      }
+    };
+
+    fetchActualMaps();
+  }, [selectedSeries, actualSeriesMaps]);
+
+  const getSeriesMaps = (): string[] => {
+    if (!selectedSeries) return [];
+    return actualSeriesMaps[selectedSeries.id] || selectedSeries.maps;
+  };
 
   const handleGenerateReport = async () => {
     if (!selectedSeries) return;
@@ -562,39 +608,46 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
             {/* Map Selection */}
             <div className="flex items-center gap-3 flex-wrap">
               <span className="text-blue-200 text-sm">Generate report for:</span>
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  onClick={() => setSelectedReportMap('all')}
-                  disabled={isGenerating}
-                  className={`
-                    px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
-                    ${selectedReportMap === 'all'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-white/10 text-blue-300 hover:bg-white/20'
-                    }
-                    ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}
-                  `}
-                >
-                  All Maps
-                </button>
-                {selectedSeries.maps.map((map, i) => (
+              {isLoadingMaps ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
+                  <span className="text-blue-300 text-sm">Loading maps...</span>
+                </div>
+              ) : (
+                <div className="flex gap-2 flex-wrap">
                   <button
-                    key={i}
-                    onClick={() => setSelectedReportMap(map)}
+                    onClick={() => setSelectedReportMap('all')}
                     disabled={isGenerating}
                     className={`
                       px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
-                      ${selectedReportMap === map
+                      ${selectedReportMap === 'all'
                         ? 'bg-blue-500 text-white'
                         : 'bg-white/10 text-blue-300 hover:bg-white/20'
                       }
                       ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                   >
-                    Map {i + 1}: {map}
+                    All Maps
                   </button>
-                ))}
-              </div>
+                  {getSeriesMaps().map((map, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedReportMap(map)}
+                      disabled={isGenerating}
+                      className={`
+                        px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
+                        ${selectedReportMap === map
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-white/10 text-blue-300 hover:bg-white/20'
+                        }
+                        ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}
+                      `}
+                    >
+                      Map {i + 1}: {map}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Progress Bar */}

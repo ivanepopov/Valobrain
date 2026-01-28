@@ -632,6 +632,115 @@ router.post("/check-availability", async (req, res) => {
   }
 });
 
+// GET /api/advanced-stats/:seriesId/available-maps
+// Returns the actual maps available in the JSONL file for a series
+// Only includes maps that were actually played (have round data)
+router.get("/:seriesId/available-maps", async (req, res) => {
+  try {
+    const { seriesId } = req.params;
+
+    // Validate seriesId format
+    if (!isValidSeriesId(seriesId)) {
+      return res.status(400).json({
+        error: "Invalid seriesId format",
+        hint: "SeriesId should be 5-10 digits",
+      });
+    }
+
+    // Use Service to get Data (downloads if not cached)
+    const jsonlFile = await matchDataService.getMatchData(seriesId);
+    console.log(`[AvailableMaps] Processing: ${jsonlFile}`);
+
+    // Quick parse to extract map names AND verify they have actual rounds
+    const filePath = jsonlFile;
+    const fileStream = fs.createReadStream(filePath);
+    const rl = readline.createInterface({
+      input: fileStream,
+      crlfDelay: Infinity,
+    });
+
+    // Track all games and which ones have actual rounds
+    const gameInfo = {}; // { gameSequence: { map: 'Lotus', hasRounds: false } }
+    let currentGameSequence = 0;
+
+    for await (const line of rl) {
+      if (!line.trim()) continue;
+
+      let wrapper;
+      try {
+        wrapper = JSON.parse(line);
+      } catch (e) {
+        continue;
+      }
+
+      if (!wrapper.events) continue;
+
+      for (const event of wrapper.events) {
+        // Track game starts with their map names
+        if (event.type === "series-started-game") {
+          const gameState = event.target?.state;
+          const gameSequence = gameState?.sequenceNumber || 1;
+          const mapName = gameState?.map?.name;
+
+          if (gameSequence > currentGameSequence && mapName) {
+            currentGameSequence = gameSequence;
+            const formattedMap = mapName.charAt(0).toUpperCase() + mapName.slice(1);
+            gameInfo[gameSequence] = {
+              map: formattedMap,
+              hasRounds: false,
+            };
+          }
+        }
+
+        // Track if a game has actual rounds (meaning it was played)
+        if (event.type === "game-started-round") {
+          // Get game sequence from the event or wrapper
+          const roundGameSequence = event.actor?.state?.sequenceNumber ||
+                                    wrapper.seriesState?.games?.[0]?.sequenceNumber ||
+                                    currentGameSequence;
+
+          if (gameInfo[roundGameSequence]) {
+            gameInfo[roundGameSequence].hasRounds = true;
+          } else if (currentGameSequence > 0 && gameInfo[currentGameSequence]) {
+            // Fallback: assign to current game sequence
+            gameInfo[currentGameSequence].hasRounds = true;
+          }
+        }
+      }
+    }
+
+    // Filter to only games that were actually played (have rounds)
+    const playedMaps = Object.entries(gameInfo)
+      .filter(([_, info]) => info.hasRounds)
+      .map(([seq, info]) => ({
+        gameNumber: parseInt(seq),
+        map: info.map,
+      }))
+      .sort((a, b) => a.gameNumber - b.gameNumber);
+
+    console.log(`[AvailableMaps] Found ${Object.keys(gameInfo).length} games, ${playedMaps.length} actually played`);
+
+    res.json({
+      seriesId,
+      maps: playedMaps.map(m => m.map),
+      gamesInfo: playedMaps,
+    });
+  } catch (error) {
+    if (error.code === "ECONNABORTED") {
+      return res.status(504).json({ error: "Download timed out, try again" });
+    }
+    if (error.message.includes("not found")) {
+      return res.status(404).json({ error: "Match not found in GRID or Cache" });
+    }
+
+    console.error("Error getting available maps:", error.message);
+    res.status(500).json({
+      error: error.message,
+      hint: "Check if the seriesId is valid",
+    });
+  }
+});
+
 // GET /api/advanced-stats/:seriesId
 // Returns player stats, round results, zone heatmap data, and match insights
 router.get("/:seriesId", async (req, res) => {

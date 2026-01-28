@@ -39,12 +39,28 @@ class AiAnalystService {
     async analyzeMatch(matchDigest) {
         try {
             const systemPrompt = await this.loadPrompt();
-            
-            // Construct the final prompt
+
+            // Build explicit roster list to prevent AI hallucination
+            const targetTeam = matchDigest.meta?.targetTeam || 'Unknown Team';
+            const roster = matchDigest.meta?.roster || {};
+            const rosterList = Object.entries(roster)
+                .map(([name, agent]) => `  - ${name}: ${agent}`)
+                .join('\n');
+
+            // Construct the final prompt with explicit roster enforcement
             const prompt = `
 ${systemPrompt}
 
 ---
+## CRITICAL: PLAYER ROSTER FOR ${targetTeam}
+The following is the EXACT player-agent mapping for this match. You MUST use these EXACT names and agents.
+DO NOT guess, infer, or hallucinate different agents. Use ONLY these mappings:
+
+${rosterList || '  (No roster data available)'}
+
+When generating player_analysis, use ONLY the players and agents listed above.
+---
+
 MATCH DIGEST DATA:
 ${JSON.stringify(matchDigest, null, 2)}
 ---
