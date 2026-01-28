@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, Clock, BarChart3, FileText, Calendar, TrendingUp } from "lucide-react";
+import { ArrowLeft, FileText, Calendar, TrendingUp, Sparkles } from "lucide-react";
 import MatchHistory from "../components/match/MatchHistory";
 import AnalyticsBreakdown from "../components/analytics/AnalyticsBreakdown";
 import ScoutingReport from "../components/report/ScoutingReport";
+import AIInsightTab from "../components/ai-insight/AIInsightTab";
 import getTeam from "../services/getTeam";
 import getTeamStats from "../services/getTeamStats";
 import getSeriesStats from "../services/getSeriesStats";
@@ -19,9 +20,10 @@ const Dashboard = () => {
     const navigate = useNavigate();
     
     const [team, setTeam] = useState<Team | null>(null);
-    const [activeTab, setActiveTab] = useState<"history" | "analytics" | "scouting">("history");
+    const [activeTab, setActiveTab] = useState<"history" | "analytics" | "scouting" | "ai-insight">("history");
     const [stats, setStats] = useState<TeamStats | null>(null);
     const [allSeriesData, setAllSeriesData] = useState<SeriesStats[]>([]);
+    const [validSeriesIds, setValidSeriesIds] = useState<string[]>([]);
     const [isFetchingSeries, setIsFetchingSeries] = useState(false);
     
     // Scouting states
@@ -45,13 +47,23 @@ const Dashboard = () => {
                     setIsFetchingSeries(true);
                     const seriesPromises = statsData.aggregationSeriesIds.map(id => getSeriesStats(id));
                     const results = await Promise.all(seriesPromises);
-                    const validResults = results.filter((s): s is SeriesStats =>
-                        s !== null &&
-                        s.seriesState?.format !== undefined &&
-                        Array.isArray(s.seriesState?.teams) &&
-                        Array.isArray(s.seriesState?.games)
-                    );
+
+                    // Filter valid results AND keep track of corresponding IDs
+                    const validResults: SeriesStats[] = [];
+                    const matchingIds: string[] = [];
+
+                    results.forEach((s, index) => {
+                        if (s !== null &&
+                            s.seriesState?.format !== undefined &&
+                            Array.isArray(s.seriesState?.teams) &&
+                            Array.isArray(s.seriesState?.games)) {
+                            validResults.push(s);
+                            matchingIds.push(statsData.aggregationSeriesIds[index]);
+                        }
+                    });
+
                     setAllSeriesData(validResults);
+                    setValidSeriesIds(matchingIds);
                     setIsFetchingSeries(false);
 
                     // Start Scouting Background Fetch
@@ -106,6 +118,7 @@ const Dashboard = () => {
         { id: "history", label: "Match History", icon: Calendar },
         { id: "analytics", label: "Analytics", icon: TrendingUp },
         { id: "scouting", label: "Scouting Report", icon: FileText },
+        { id: "ai-insight", label: "AI Insight", icon: Sparkles },
     ];
 
     return (
@@ -169,7 +182,7 @@ const Dashboard = () => {
                                     return (
                                         <button
                                             key={tab.id}
-                                            onClick={() => setActiveTab(tab.id as "history" | "analytics" | "scouting")}
+                                            onClick={() => setActiveTab(tab.id as "history" | "analytics" | "scouting" | "ai-insight")}
                                             className={`
                                                 flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300
                                                 ${activeTab === tab.id 
@@ -216,6 +229,13 @@ const Dashboard = () => {
                                     isLoading={isScoutingLoading}
                                     progress={scoutingProgress}
                                     error={scoutingError}
+                                />
+                            )}
+                            {activeTab === "ai-insight" && (
+                                <AIInsightTab
+                                    teamName={team?.name || ""}
+                                    seriesData={allSeriesData}
+                                    seriesIds={validSeriesIds}
                                 />
                             )}
                         </motion.div>

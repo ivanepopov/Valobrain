@@ -6,19 +6,22 @@ const scoutingWorker = require('../services/scouting-worker');
 /**
  * POST /api/scouting/:seriesId/report
  * Initiates a new report generation job.
- * Query Params: ?team=TeamName
+ * Query Params: ?team=TeamName&map=MapName (map is optional)
  */
 router.post('/:seriesId/report', async (req, res) => {
     const { seriesId } = req.params;
-    const { team } = req.query;
+    const { team, map } = req.query;
 
     if (!team) {
         return res.status(400).json({ error: "Team parameter is required (?team=TeamName)" });
     }
 
+    // Normalize map parameter (null if not provided or 'all')
+    const targetMap = (map && map.toLowerCase() !== 'all') ? map : null;
+
     try {
-        // Enqueue Job
-        const jobId = reportQueue.addJob(seriesId, team);
+        // Enqueue Job with optional map parameter
+        const jobId = reportQueue.addJob(seriesId, team, targetMap);
         const job = reportQueue.getJob(jobId);
 
         // Trigger Worker (Fire and Forget)
