@@ -7,6 +7,7 @@ import type { Team } from '../types/Team.ts';
 import FeaturedImagesCarousel from '../components/ui/FeaturedImagesCarousel.tsx';
 import NeuralNetworkBackground from '../components/ui/NeuralNetworkBackground.tsx';
 import FeaturedCards from "../components/ui/FeaturedCards.tsx";
+import Header from '../components/ui/Header.tsx';
 
 /**
  * Home Page
@@ -41,10 +42,13 @@ const Home = () => {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 py-12 px-6 overflow-hidden">
+      {/* Header */}
+      <Header />
+      
       {/* Neural Network Background */}
       <NeuralNetworkBackground />
 
-      <div className="relative z-10 max-w-6xl mx-auto">
+      <div className="relative z-10 max-w-6xl mx-auto pt-20">
         {/* Header with Search */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

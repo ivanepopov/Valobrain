@@ -13,6 +13,7 @@ import type { Team } from "../types/Team";
 import type { TeamStats } from "../types/TeamStats";
 import type { SeriesStats } from "../types/SeriesStats";
 import NeuralNetworkBackground from "../components/ui/NeuralNetworkBackground.tsx";
+import Header from "../components/ui/Header.tsx";
 
 const Dashboard = () => {
     const { teamId } = useParams<{ teamId: string }>();
@@ -109,11 +110,14 @@ const Dashboard = () => {
     ];
 
     return (
-        <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 text-white p-8 overflow-hidden">
+        <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 text-white py-12 px-6 overflow-hidden">
+            {/* Header */}
+            <Header />
+            
             {/* Neural Network Background */}
             <NeuralNetworkBackground />
 
-            <div className="relative z-10 max-w-7xl mx-auto">
+            <div className="relative z-10 max-w-7xl mx-auto pt-20">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
