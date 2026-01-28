@@ -53,6 +53,7 @@ interface ReportSections {
 export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabProps) {
   const [selectedMap, setSelectedMap] = useState<string>('All');
   const [selectedSeries, setSelectedSeries] = useState<TransformedSeries | null>(null);
+  const [selectedReportMap, setSelectedReportMap] = useState<string>('all'); // Which map from series to generate report for
   const [isGenerating, setIsGenerating] = useState(false);
   const [reportGenerated, setReportGenerated] = useState(false);
   const [reportData, setReportData] = useState<ReportSections | null>(null);
@@ -307,9 +308,10 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
 
     try {
       // 1. Start report generation
-      console.log('[AI Insight] Starting report for series:', selectedSeries.id, 'team:', teamName);
+      const mapParam = selectedReportMap !== 'all' ? `&map=${encodeURIComponent(selectedReportMap)}` : '';
+      console.log('[AI Insight] Starting report for series:', selectedSeries.id, 'team:', teamName, 'map:', selectedReportMap);
       const response = await axios.post(
-        `/api/scouting/${selectedSeries.id}/report?team=${encodeURIComponent(teamName)}`
+        `/api/scouting/${selectedSeries.id}/report?team=${encodeURIComponent(teamName)}${mapParam}`
       );
       const { jobId } = response.data;
       console.log('[AI Insight] Job created:', jobId);
@@ -444,6 +446,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                   key={series.id}
                   onClick={() => {
                     setSelectedSeries(series);
+                    setSelectedReportMap('all'); // Reset to all maps when selecting new series
                     setReportGenerated(false);
                     setReportData(null);
                     setError(null);
@@ -517,13 +520,13 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
           transition={{ duration: 0.3 }}
         >
           <GlassBox>
-            <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
               <div>
                 <h3 className="text-lg font-bold text-white mb-1">
                   Selected Series: vs {selectedSeries.opponent}
                 </h3>
                 <p className="text-blue-300 text-sm">
-                  {selectedSeries.date} • {selectedSeries.score} • {selectedSeries.maps.join(', ')}
+                  {selectedSeries.date} • {selectedSeries.score}
                 </p>
               </div>
               <div className="flex items-center gap-4">
@@ -553,6 +556,44 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                     </>
                   )}
                 </button>
+              </div>
+            </div>
+
+            {/* Map Selection */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-blue-200 text-sm">Generate report for:</span>
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={() => setSelectedReportMap('all')}
+                  disabled={isGenerating}
+                  className={`
+                    px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
+                    ${selectedReportMap === 'all'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white/10 text-blue-300 hover:bg-white/20'
+                    }
+                    ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}
+                  `}
+                >
+                  All Maps
+                </button>
+                {selectedSeries.maps.map((map, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedReportMap(map)}
+                    disabled={isGenerating}
+                    className={`
+                      px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
+                      ${selectedReportMap === map
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-white/10 text-blue-300 hover:bg-white/20'
+                      }
+                      ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}
+                    `}
+                  >
+                    Map {i + 1}: {map}
+                  </button>
+                ))}
               </div>
             </div>
 
