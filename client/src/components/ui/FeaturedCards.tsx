@@ -38,7 +38,8 @@ const FeaturedCards = () => {
             {/* Feature Cards */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="mb-6"
             >
@@ -47,7 +48,8 @@ const FeaturedCards = () => {
                         <motion.div
                             key={feature.title}
                             initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
                             transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
                         >
                             <button
@@ -76,7 +78,8 @@ const FeaturedCards = () => {
             {/* Preview Image Section */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.5 }}
                 className="relative max-w-4xl mx-auto"
             >
