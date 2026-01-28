@@ -550,7 +550,87 @@ const generateTempoStats = (rounds, teamName = null) => {
   };
 };
 
-// --- Route ---
+// --- Routes ---
+
+// POST /api/advanced-stats/check-availability
+// Check which series have downloadable match data
+router.post("/check-availability", async (req, res) => {
+  try {
+    const { seriesIds } = req.body;
+
+    if (!Array.isArray(seriesIds) || seriesIds.length === 0) {
+      return res.status(400).json({ error: "seriesIds array is required" });
+    }
+
+    // Limit to prevent abuse
+    if (seriesIds.length > 50) {
+      return res.status(400).json({ error: "Maximum 50 series IDs per request" });
+    }
+
+    const results = {};
+    const apiKey = process.env.API_KEY;
+    const FILE_DOWNLOAD_API = "https://api.grid.gg/file-download";
+
+    // Check each series in parallel (with concurrency limit)
+    const checkAvailability = async (seriesId) => {
+      if (!isValidSeriesId(seriesId)) {
+        return { seriesId, available: false, reason: "invalid_id" };
+      }
+
+      // First check if we have it cached
+      const cachedPath = matchDataService.findCachedFile(seriesId);
+      if (cachedPath) {
+        return { seriesId, available: true, source: "cache" };
+      }
+
+      // Check the GRID API
+      try {
+        const listUrl = `${FILE_DOWNLOAD_API}/list/${seriesId}`;
+        const response = await require("axios").get(listUrl, {
+          headers: { "x-api-key": apiKey },
+          timeout: 10000,
+        });
+
+        const hasEventFile = response.data?.files?.some(
+          (f) => f.id === "events-grid-compressed"
+        );
+
+        return {
+          seriesId,
+          available: hasEventFile,
+          source: hasEventFile ? "api" : "no_events_file",
+        };
+      } catch (error) {
+        const status = error.response?.status;
+        return {
+          seriesId,
+          available: false,
+          reason: status === 403 ? "restricted" : "error",
+        };
+      }
+    };
+
+    // Process in batches of 5 to avoid rate limiting
+    const batchSize = 5;
+    for (let i = 0; i < seriesIds.length; i += batchSize) {
+      const batch = seriesIds.slice(i, i + batchSize);
+      const batchResults = await Promise.all(batch.map(checkAvailability));
+      batchResults.forEach((r) => {
+        results[r.seriesId] = r.available;
+      });
+
+      // Small delay between batches to avoid rate limiting
+      if (i + batchSize < seriesIds.length) {
+        await new Promise((r) => setTimeout(r, 200));
+      }
+    }
+
+    res.json({ availability: results });
+  } catch (error) {
+    console.error("Error checking availability:", error.message);
+    res.status(500).json({ error: "Failed to check availability" });
+  }
+});
 
 // GET /api/advanced-stats/:seriesId
 // Returns player stats, round results, zone heatmap data, and match insights
