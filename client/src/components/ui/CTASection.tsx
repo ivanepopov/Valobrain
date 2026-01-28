@@ -21,11 +21,11 @@ const CTASection = () => {
 
                 <div className="relative z-10 text-center max-w-3xl mx-auto">
                     <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                        Ready to Elevate Your Team Analysis?
+                        Ready to Elevate Your Brain?
                     </h2>
 
                     <p className="text-lg text-blue-200/70 mb-8">
-                        Start analyzing your favorite Valorant teams with AI-powered insights and comprehensive statistics
+                        Start finding counters to teams with AI-powered insights and comprehensive statistics
                     </p>
 
                     <button

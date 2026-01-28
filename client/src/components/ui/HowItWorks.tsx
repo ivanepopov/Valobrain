@@ -7,13 +7,13 @@ const HowItWorks = () => {
             number: "01",
             icon: <Search className="w-10 h-10" />,
             title: "Search Your Team",
-            description: "Enter any Valorant team name to get started with comprehensive analytics",
+            description: "Enter any Valorant team name to get started",
         },
         {
             number: "02",
             icon: <BarChart3 className="w-10 h-10" />,
             title: "Analyze Performance",
-            description: "View detailed match history, statistics, and performance metrics",
+            description: "View detailed match history, analytics, and overall performance metrics",
         },
         {
             number: "03",

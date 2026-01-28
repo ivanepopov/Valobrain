@@ -9,13 +9,13 @@ const FeaturedCards = () => {
         {
             icon: <BarChart3 className="w-8 h-8" />,
             title: 'Match History',
-            description: 'Track and analyze all your team matches',
+            description: 'Track and analyze team matches',
             previewImage: '/featured/match-history-preview.png',
         },
         {
             icon: <Search className="w-8 h-8" />,
             title: 'Analytics',
-            description: 'Deep dive into performance metrics and insights',
+            description: 'Deep dive into performance metrics and overall team stats',
             previewImage: '/featured/analytics-preview.png',
         },
         {
@@ -28,20 +28,34 @@ const FeaturedCards = () => {
         {
             icon: <Sparkles className="w-8 h-8" />,
             title: 'AI Insights',
-            description: 'Generate AI driven insights to enhance team performance',
+            description: 'Generate AI driven insights to enhance in-game performance',
             previewImage: '/featured/ai-insights-preview.png',
         },
     ];
 
     return (
         <div className="mb-24">
+            {/* Header */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="text-center mb-12"
+            >
+                <h2 className="text-4xl font-bold text-white mb-4">Features</h2>
+                <p className="text-blue-200/70 text-lg">
+                    Explore the features that ValoBrain offers
+                </p>
+            </motion.div>
+
             {/* Feature Cards */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="mb-6"
+                className="mb-12"
             >
                 <div className="grid md:grid-cols-4 gap-4">
                     {features.map((feature, index) => (

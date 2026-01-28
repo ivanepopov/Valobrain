@@ -11,6 +11,7 @@ import Header from '../components/ui/Header.tsx';
 import HowItWorks from '../components/ui/HowItWorks.tsx';
 import Footer from '../components/ui/Footer.tsx';
 import CTASection from '../components/ui/CTASection.tsx';
+import ProPlayersCarousel from '../components/ui/ProPlayersCarousel.tsx';
 
 /**
  * Home Page
@@ -60,11 +61,12 @@ const Home = () => {
           className="text-center mb-24"
         >
           <div className="flex items-center justify-center gap-3 mb-6">
-            <Brain className="w-12 h-12 text-blue-400" />
-            <h1 className="text-6xl font-bold text-white">ValoBrain</h1>
+            {/* <Brain className="w-12 h-12 text-blue-400" /> */}
+            <h1 className="text-6xl font-bold text-white" style={{ textShadow: '0 0 30px rgba(59, 130, 246, 0.8), 0 0 60px rgba(59, 130, 246, 0.4)' }}>Level up your Valorant IQ.</h1>
+            {/* Grow your Valorant IQ with ValoBrain */}
           </div>
           <p className="text-xl text-blue-200 mb-8">
-            AI-powered match analysis and tactical insights for Valorant teams
+            Use ValoBrain to discover how teams play, where they excel, and how to counter their strategies with AI-powered match analytics and tactical reports.
           </p>
 
           {/* Search Bar */}
@@ -80,7 +82,7 @@ const Home = () => {
                       setTeamName(e.target.value);
                       fetchTeams(e.target.value);
                     }}
-                    placeholder="Enter team name..."
+                    placeholder="Search for a team name..."
                     className="flex-1 bg-transparent text-white placeholder-blue-200/50 outline-none text-lg py-3"
                 />
                 <button
@@ -91,7 +93,11 @@ const Home = () => {
                 </button>
               </div>
             </div>
-
+            
+            <p className="text-blue-200/70 text-sm mt-4">
+              Try searching: Sentinels, Team Liquid, FNATIC, or any team name
+            </p>
+              
             {/* Dropdown */}
             {teamsDropdown.length > 0 && (
                 <div
@@ -133,11 +139,14 @@ const Home = () => {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="mt-4"
           >
-            <p className="text-blue-200/60 text-sm">
-              Try searching: Sentinels, Team Liquid, FNATIC, or any team name
-            </p>
+            
           </motion.div>
         </motion.div>
+
+        {/* Pro Players Carousel */}
+        <div className="mb-16">
+          <ProPlayersCarousel />
+        </div>
 
         {/* Feature Cards */}
         <FeaturedCards />
