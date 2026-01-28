@@ -8,6 +8,8 @@ import FeaturedImagesCarousel from '../components/ui/FeaturedImagesCarousel.tsx'
 import NeuralNetworkBackground from '../components/ui/NeuralNetworkBackground.tsx';
 import FeaturedCards from "../components/ui/FeaturedCards.tsx";
 import Header from '../components/ui/Header.tsx';
+import HowItWorks from '../components/ui/HowItWorks.tsx';
+import Footer from '../components/ui/Footer.tsx';
 
 /**
  * Home Page
@@ -139,10 +141,16 @@ const Home = () => {
         {/* Feature Cards */}
         <FeaturedCards />
 
+        {/* How It Works */}
+        <HowItWorks />
+
         {/* Feature Images Carousel */}
         <FeaturedImagesCarousel />
 
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
