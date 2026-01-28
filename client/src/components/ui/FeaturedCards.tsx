@@ -34,7 +34,20 @@ const FeaturedCards = () => {
     ];
 
     return (
-        <div className="mb-12">
+        <div className="mb-24">
+            {/* Heading */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="text-center mb-12"
+            >
+                <h2 className="text-4xl font-bold text-white mb-4">Features</h2>
+                <p className="text-blue-200/70 text-lg">
+                    Powerful tools to analyze and improve team performance
+                </p>
+            </motion.div>
+
             {/* Feature Cards */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}

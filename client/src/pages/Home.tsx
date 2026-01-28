@@ -56,7 +56,7 @@ const Home = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-24"
         >
           <div className="flex items-center justify-center gap-3 mb-6">
             <Brain className="w-12 h-12 text-blue-400" />
@@ -138,11 +138,11 @@ const Home = () => {
           </motion.div>
         </motion.div>
 
-        {/* Feature Cards */}
-        <FeaturedCards />
-
         {/* How It Works */}
         <HowItWorks />
+
+        {/* Feature Cards */}
+        <FeaturedCards />
 
         {/* Feature Images Carousel */}
         <FeaturedImagesCarousel />
