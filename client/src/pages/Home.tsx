@@ -61,7 +61,7 @@ const Home = () => {
             <h1 className="text-6xl font-bold text-white">ValoBrain</h1>
           </div>
           <p className="text-xl text-blue-200 mb-8">
-            Advanced Valorant Team Analytics & Intelligence
+            AI-powered match analysis and tactical insights for Valorant teams
           </p>
 
           {/* Search Bar */}
