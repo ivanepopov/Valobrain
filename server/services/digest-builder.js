@@ -31,13 +31,31 @@ function buildMatchDigest(matchData, targetTeam) {
   // 2. Build stats using the summaries (for trade aggregation) and raw rounds (for wins)
   const stats = buildTeamStats(rounds, roundSummaries, targetTeam);
 
+  // Normalize roster to include team info and filter to target team's players
+  const normalizedRoster = {};
+  const targetTeamRoster = {};
+  for (const [playerName, playerInfo] of Object.entries(players)) {
+    // Handle both old format (string) and new format (object with agent and teamName)
+    if (typeof playerInfo === 'object' && playerInfo.agent) {
+      normalizedRoster[playerName] = playerInfo;
+      // Filter target team's roster
+      if (playerInfo.teamName?.toLowerCase() === targetTeam?.toLowerCase()) {
+        targetTeamRoster[playerName] = playerInfo.agent;
+      }
+    } else {
+      // Old format - just agent name
+      normalizedRoster[playerName] = { agent: playerInfo, teamName: 'Unknown' };
+    }
+  }
+
   const digest = {
     meta: {
       map: mapName,
       targetTeam,
       tournament: matchData.tournamentName || 'Unknown Tournament',
       date: matchData.seriesDate || new Date().toISOString(),
-      roster: players, // Name -> Agent map
+      roster: targetTeamRoster, // Target team's Name -> Agent map (simplified)
+      fullRoster: normalizedRoster, // All players with team info
       totalRounds: rounds.length,
       generatedAt: new Date().toISOString()
     },

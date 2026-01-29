@@ -38,14 +38,20 @@ class AiWriterService {
     /**
      * generateReport
      * @param {Object} analystOutput - The structured JSON from the AiAnalystService.
-     * @param {Object} metadata - Extra info (team names, map, date) to fill in headers.
+     * @param {Object} metadata - Extra info (team names, map, date, roster) to fill in headers.
      * @returns {String} - The final Markdown report.
      */
     async generateReport(analystOutput, metadata) {
         try {
             const systemPrompt = await this.loadPrompt();
-            
-            // Construct the user message
+
+            // Build roster list if available
+            const roster = metadata.roster || {};
+            const rosterList = Object.entries(roster)
+                .map(([name, agent]) => `  - ${name}: ${agent}`)
+                .join('\n');
+
+            // Construct the user message with explicit roster
             const prompt = `
 Generate a scouting report for team "${metadata.targetTeam}".
 Tournament: ${metadata.tournament || 'Unknown Tournament'}
@@ -53,6 +59,13 @@ Map: ${metadata.map}
 Date: ${metadata.date}
 
 ---
+## CRITICAL: PLAYER ROSTER FOR ${metadata.targetTeam}
+Use ONLY these EXACT player-agent mappings for the Player Intel table:
+${rosterList || '(No roster data available)'}
+
+DO NOT use any other player names or agents. Use EXACTLY what is listed above.
+---
+
 ANALYST REPORT (JSON):
 ${JSON.stringify(analystOutput, null, 2)}
 ---

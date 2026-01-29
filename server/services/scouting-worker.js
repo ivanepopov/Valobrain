@@ -23,14 +23,16 @@ async function getMatchData(seriesId) {
 
 /**
  * Parses JSONL into structured Rounds/Players object.
+ * @param {string} filePath - Path to the JSONL file
+ * @param {string|null} targetMap - Specific map to parse (null = Game 1 only)
  * Reuses logic from legacy scouting.js.
  */
-async function parseMatchFile(filePath) {
-    console.log(`[Parser] Reading file: ${filePath}`);
+async function parseMatchFile(filePath, targetMap = null) {
+    console.log(`[Parser] Reading file: ${filePath}${targetMap ? ` (targeting map: ${targetMap})` : ''}`);
     if (fs.existsSync(filePath)) {
         const stats = fs.statSync(filePath);
         console.log(`[Parser] File size: ${stats.size} bytes`);
-        fs.appendFileSync('worker-debug.log', `[Parser] Reading ${filePath} (${stats.size} bytes)\n`);
+        fs.appendFileSync('worker-debug.log', `[Parser] Reading ${filePath} (${stats.size} bytes)${targetMap ? ` [Map: ${targetMap}]` : ''}\n`);
     } else {
         console.error(`[Parser] File does not exist: ${filePath}`);
         fs.appendFileSync('worker-debug.log', `[Parser] File missing: ${filePath}\n`);
@@ -48,30 +50,35 @@ async function parseMatchFile(filePath) {
     const teamIdMap = {}; // { '99': 'Cloud9' } - Persist across lines
     let mapName = "Unknown";
     let matchData = { tournamentName: "Unknown", seriesDate: null };
-    
+
     // Temp storage for current round
     let currentRoundObj = null;
     let startTime = null;
+
+    // Track which game we're currently parsing
+    let currentGameSequence = 0;
+    let isParsingTargetGame = false;
+    let foundTargetMap = false;
 
     return new Promise((resolve, reject) => {
         rl.on('line', (line) => {
             try {
                 const lineJson = JSON.parse(line);
-                
+
                 // Handle case where line is a wrapper containing 'events' array
                 const events = Array.isArray(lineJson.events) ? lineJson.events : [lineJson];
                 const seriesState = lineJson.seriesState; // Capture Wrapper State
                 const lineTime = lineJson.occurredAt; // Capture Wrapper Timestamp
-                
+
                 // let teamIdMap = {}; // REMOVED: Moved to outer scope
 
                 for (const event of events) {
                     if (!event || !event.type) continue;
 
                     const eventTimeVal = event.occurredAt || lineTime;
-                    
+
                     // Normalize Timestamp
-                    if (!startTime && event.type === 'game-started-round' && event.roundNumber === 1) {
+                    if (!startTime && event.type === 'game-started-round' && event.roundNumber === 1 && isParsingTargetGame) {
                         startTime = new Date(eventTimeVal).getTime();
                     }
 
@@ -80,45 +87,80 @@ async function parseMatchFile(filePath) {
                         if (event.tournament?.name) matchData.tournamentName = event.tournament.name;
                         if (event.series?.startedAt) matchData.seriesDate = event.series.startedAt;
                     }
-                    
-                    // Map Info & Game 2 Detection
+
+                    // Map Info & Game Detection
                     if (event.type === 'series-started-game') {
                         const gameState = event.target?.state;
-                        
+                        const gameSequence = gameState?.sequenceNumber || 1;
+                        const gameMapName = gameState?.map?.name;
+
                         // Capture Date from Series State (Reliable)
                         if (event.seriesState?.startedAt) {
                             matchData.seriesDate = event.seriesState.startedAt;
                         }
 
-                        // Check for Game 2+
-                        if (gameState?.sequenceNumber > 1) {
-                            console.log(`[Parser] Detected Game ${gameState.sequenceNumber}. Stopping parse to isolate Game 1.`);
-                            fileStream.destroy();
-                            rl.close();
-                            return;
+                        // If we were parsing a game and hit a new one, check if we should stop
+                        if (currentGameSequence > 0 && gameSequence > currentGameSequence) {
+                            if (isParsingTargetGame) {
+                                // We finished parsing our target game
+                                console.log(`[Parser] Finished parsing target game ${currentGameSequence}. Stopping.`);
+                                fileStream.destroy();
+                                rl.close();
+                                return;
+                            }
                         }
 
-                        if (gameState?.map?.name) {
-                             // Capitalize: split -> Split
-                             mapName = gameState.map.name.charAt(0).toUpperCase() + gameState.map.name.slice(1);
-                             console.log(`[Parser] Explicit Map Detected: ${mapName}`);
+                        currentGameSequence = gameSequence;
+
+                        // Determine if this is the game we want to parse
+                        if (targetMap) {
+                            // Targeting a specific map - check if this game's map matches
+                            const normalizedTarget = targetMap.toLowerCase();
+                            const normalizedGameMap = (gameMapName || '').toLowerCase();
+
+                            if (normalizedGameMap === normalizedTarget) {
+                                console.log(`[Parser] Found target map "${targetMap}" at Game ${gameSequence}`);
+                                isParsingTargetGame = true;
+                                foundTargetMap = true;
+                                mapName = gameMapName.charAt(0).toUpperCase() + gameMapName.slice(1);
+                                // Reset for this game
+                                rounds.length = 0;
+                                Object.keys(players).forEach(k => delete players[k]);
+                                currentRoundObj = null;
+                                startTime = null;
+                            } else {
+                                isParsingTargetGame = false;
+                                console.log(`[Parser] Game ${gameSequence} map "${gameMapName}" doesn't match target "${targetMap}", skipping`);
+                            }
+                        } else {
+                            // No target map specified - default behavior (Game 1 only)
+                            if (gameSequence > 1) {
+                                console.log(`[Parser] Detected Game ${gameSequence}. Stopping parse to isolate Game 1.`);
+                                fileStream.destroy();
+                                rl.close();
+                                return;
+                            }
+                            isParsingTargetGame = true;
+
+                            if (gameMapName) {
+                                mapName = gameMapName.charAt(0).toUpperCase() + gameMapName.slice(1);
+                                console.log(`[Parser] Explicit Map Detected: ${mapName}`);
+                            }
                         }
                     }
 
                     if (event.type === 'map-started' || event.type === 'game-started') {
                         // Fallback map detection
-                        if (event.map?.name && mapName === 'Unknown') {
+                        if (isParsingTargetGame && event.map?.name && mapName === 'Unknown') {
                              mapName = event.map.name.charAt(0).toUpperCase() + event.map.name.slice(1);
                         }
                     }
 
+                    // Skip events if we're not parsing the target game
+                    if (!isParsingTargetGame) continue;
+
                     // Round Start - Capture Players & Agents
                     if (event.type === 'game-started-round') {
-                        // ROUND 1 CHECK REMOVED (Replaced by Sequence Number check above) --
-                        // actually, keeping a safety check effectively isn't bad, but let's rely on Sequence Number 
-                        // as it's cleaner. If Sequence check fails (no event), we might mix data.
-                        // But Grid data is reliable with structure.
-
                         if (currentRoundObj) rounds.push(currentRoundObj);
                         currentRoundObj = {
                             roundNumber: event.roundNumber || (rounds.length + 1),
@@ -146,10 +188,13 @@ async function parseMatchFile(filePath) {
                             if (team.name && team.side) {
                                 teamSides[team.name] = team.side;
                             }
-                            // Map players from event
+                            // Map players from event - include team info to avoid cross-team name collisions
                             for (const p of team.players || []) {
                                 if (p.name && p.character?.name) {
-                                    players[p.name] = p.character.name;
+                                    players[p.name] = {
+                                        agent: p.character.name,
+                                        teamName: team.name
+                                    };
                                 }
                             }
                         }
@@ -218,10 +263,16 @@ async function parseMatchFile(filePath) {
                             const kPos = event.actor?.state?.game?.position;
                             const vPos = event.target?.state?.game?.position;
 
+                            // Extract agent from players object (now includes team info)
+                            const killerInfo = players[killerName];
+                            const victimInfo = players[victimName];
+                            const killerAgent = typeof killerInfo === 'object' ? killerInfo.agent : (killerInfo || 'Unknown');
+                            const victimAgent = typeof victimInfo === 'object' ? victimInfo.agent : (victimInfo || 'Unknown');
+
                             const kill = {
                                 time: new Date(eventTimeVal).getTime() - currentRoundObj.startTime,
-                                killer: { name: killerName, teamName: resolvedKillerTeam, agent: players[killerName] || 'Unknown' },
-                                victim: { name: victimName, teamName: resolvedVictimTeam, agent: players[victimName] || 'Unknown' }, 
+                                killer: { name: killerName, teamName: resolvedKillerTeam, agent: killerAgent },
+                                victim: { name: victimName, teamName: resolvedVictimTeam, agent: victimAgent },
                                 weapon: event.actor?.state?.inventory?.find(i => i.equipped)?.name || 'Unknown',
                                 killerPos: kPos,
                                 victimPos: vPos
@@ -233,7 +284,8 @@ async function parseMatchFile(filePath) {
 
                         // Ability Usage (New)
                         if (event.type === 'player-used-ability') {
-                            const agent = players[event.actor?.state?.name] || 'Unknown';
+                            const playerInfo = players[event.actor?.state?.name];
+                            const agent = typeof playerInfo === 'object' ? playerInfo.agent : (playerInfo || 'Unknown');
                             const ability = event.target?.state?.name || 'Unknown';
                             const time = new Date(event.occurredAt).getTime() - currentRoundObj.startTime;
                             const pos = event.actor?.state?.game?.position; // {x, y}
@@ -272,15 +324,22 @@ async function parseMatchFile(filePath) {
 
         rl.on('close', () => {
             if (currentRoundObj) rounds.push(currentRoundObj);
-            
-            fs.appendFileSync('worker-debug.log', `[Parser] Finished. Rounds: ${rounds.length}\n`);
-            
-            resolve({ 
-                rounds, 
-                players, 
+
+            // Check if we found the target map (when one was specified)
+            if (targetMap && !foundTargetMap) {
+                fs.appendFileSync('worker-debug.log', `[Parser] Target map "${targetMap}" not found in series!\n`);
+                console.log(`[Parser] Warning: Target map "${targetMap}" not found in series`);
+            }
+
+            fs.appendFileSync('worker-debug.log', `[Parser] Finished. Rounds: ${rounds.length}, Map: ${mapName}\n`);
+
+            resolve({
+                rounds,
+                players,
                 mapName,
                 tournamentName: matchData.tournamentName,
-                seriesDate: matchData.seriesDate
+                seriesDate: matchData.seriesDate,
+                targetMapFound: targetMap ? foundTargetMap : true
             });
         });
 
@@ -299,17 +358,21 @@ async function processJob(jobId) {
     if (!job) return;
 
     try {
-        console.log(`[Worker] Starting job ${jobId} for ${job.teamName}`);
+        const targetMap = job.targetMap; // null for all maps (Game 1), or specific map name
+        console.log(`[Worker] Starting job ${jobId} for ${job.teamName}${targetMap ? ` (Map: ${targetMap})` : ''}`);
         reportQueue.updateJob(jobId, { status: reportQueue.JOB_STATUS.PROCESSING, progress: 10 });
 
+        // Create cache key that includes map for per-map digests
+        const cacheKey = targetMap ? `${job.seriesId}_${targetMap}` : job.seriesId;
+
         // 0. Check for Cached Digest
-        let digest = matchDataService.loadDigest(job.seriesId);
+        let digest = matchDataService.loadDigest(cacheKey);
         let matchData = null; // Only needed if no digest
 
         if (digest) {
-            console.log(`[Worker] Using cached DIGEST for ${job.seriesId}. Skipping Download/Parse.`);
-            reportQueue.updateJob(jobId, { 
-                progress: 50, 
+            console.log(`[Worker] Using cached DIGEST for ${cacheKey}. Skipping Download/Parse.`);
+            reportQueue.updateJob(jobId, {
+                progress: 50,
                 stages: { ...job.stages, digest: 'completed', analyst: 'processing' },
                 intermediate: { digest }
             });
@@ -318,18 +381,23 @@ async function processJob(jobId) {
             const filePath = await getMatchData(job.seriesId);
             reportQueue.updateJob(jobId, { progress: 20 });
 
-            // 2. Parse Data
-            matchData = await parseMatchFile(filePath);
+            // 2. Parse Data (pass targetMap to parse specific game)
+            matchData = await parseMatchFile(filePath, targetMap);
             reportQueue.updateJob(jobId, { progress: 30 });
+
+            // Check if target map was found
+            if (targetMap && !matchData.targetMapFound) {
+                throw new Error(`Map "${targetMap}" not found in this series`);
+            }
 
             // 3. Build Digest
             reportQueue.updateJob(jobId, { stages: { ...job.stages, digest: 'processing' } });
             digest = digestBuilder.buildMatchDigest(matchData, job.teamName);
-            
-            // SAVE DIGEST TO CACHE
-            matchDataService.saveDigest(job.seriesId, digest);
 
-            reportQueue.updateJob(jobId, { 
+            // SAVE DIGEST TO CACHE (with map-specific key)
+            matchDataService.saveDigest(cacheKey, digest);
+
+            reportQueue.updateJob(jobId, {
                 stages: { ...job.stages, digest: 'completed', analyst: 'processing' },
                 progress: 50,
                 intermediate: { digest } // Save formatted digest
@@ -348,7 +416,8 @@ async function processJob(jobId) {
             targetTeam: job.teamName,
             map: matchData ? matchData.mapName : digest.meta.map, // Use digest map if matchData is null
             date: digest.meta.date ? new Date(digest.meta.date).toLocaleDateString() : new Date().toLocaleDateString(),
-            tournament: digest.meta.tournament
+            tournament: digest.meta.tournament,
+            roster: digest.meta.roster
         });
 
         // 6. Complete

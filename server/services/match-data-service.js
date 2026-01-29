@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const AdmZip = require('adm-zip');
+const { pipeline } = require('stream/promises');
 
 // Configuration
 const MATCH_DATA_DIR = path.resolve(__dirname, "../match_data");
@@ -13,6 +14,7 @@ const DOWNLOAD_TIMEOUT_MS = 60000; // 60s timeout for large files
 class MatchDataService {
     constructor() {
         this.ensureDataDir();
+        this._inFlight = new Map(); // seriesId -> Promise<string>
     }
 
     /**
@@ -79,8 +81,16 @@ class MatchDataService {
             return cachedPath;
         }
 
-        // 2. Download
-        return await this.downloadAndExtract(seriesId);
+        // Prevent concurrent downloads/extractions for the same seriesId
+        if (this._inFlight.has(seriesId)) {
+            return this._inFlight.get(seriesId);
+        }
+
+        const p = this.downloadAndExtract(seriesId)
+            .finally(() => this._inFlight.delete(seriesId));
+
+        this._inFlight.set(seriesId, p);
+        return p;
     }
 
     /**
@@ -121,6 +131,9 @@ class MatchDataService {
             }
         }
 
+        // Validate the downloaded file looks like a ZIP before attempting to extract
+        this._assertZipLooksValid(zipPath, seriesId);
+
         // 3. Extract
         console.log(`[MatchDataService] Extracting ${seriesId}...`);
         try {
@@ -146,26 +159,60 @@ class MatchDataService {
      * Helper to perform the actual HTTP stream download
      */
     async _downloadFile(url, destPath, apiKey) {
-        const writer = fs.createWriteStream(destPath);
-        
         const response = await axios({
             method: 'get',
             url: url,
-            headers: { 
+            headers: {
                 "x-api-key": apiKey,
                 "Accept": "application/zip, application/octet-stream",
                 "User-Agent": "Valobrain-Scouter/1.0"
             },
             responseType: 'stream',
-            timeout: DOWNLOAD_TIMEOUT_MS
+            timeout: DOWNLOAD_TIMEOUT_MS,
+            validateStatus: status => status >= 200 && status < 300
         });
 
-        response.data.pipe(writer);
+        const contentType = String(response.headers?.['content-type'] || '').toLowerCase();
+        if (contentType && !contentType.includes('zip') && !contentType.includes('octet-stream')) {
+            // Often means HTML/JSON error body got downloaded instead of a zip
+            throw new Error(`Unexpected content-type "${contentType}" from ${url}`);
+        }
 
-        return new Promise((resolve, reject) => {
-            writer.on('finish', resolve);
-            writer.on('error', reject);
-        });
+        // Write atomically to reduce risk of partially-written files being read
+        const tmpPath = `${destPath}.tmp`;
+        const writer = fs.createWriteStream(tmpPath);
+
+        try {
+            await pipeline(response.data, writer);
+            fs.renameSync(tmpPath, destPath);
+        } catch (e) {
+            try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch {}
+            throw e;
+        }
+    }
+
+    _assertZipLooksValid(zipPath, seriesId) {
+        if (!fs.existsSync(zipPath)) {
+            throw new Error(`Downloaded file missing for ${seriesId}`);
+        }
+
+        const stat = fs.statSync(zipPath);
+        if (stat.size < 8) {
+            throw new Error(`Downloaded file too small to be a zip for ${seriesId} (${stat.size} bytes)`);
+        }
+
+        const fd = fs.openSync(zipPath, 'r');
+        try {
+            const header = Buffer.alloc(4);
+            fs.readSync(fd, header, 0, 4, 0);
+            const sig = header.toString('binary');
+            // ZIP local file header signature: PK\x03\x04
+            if (sig !== 'PK\u0003\u0004') {
+                throw new Error(`Downloaded content is not a ZIP (bad signature) for ${seriesId}`);
+            }
+        } finally {
+            fs.closeSync(fd);
+        }
     }
 
     /**
