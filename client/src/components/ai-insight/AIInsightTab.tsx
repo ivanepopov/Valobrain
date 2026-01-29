@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Shield, Crosshair, Brain, Target, AlertCircle,
-  FileText, Loader2, DollarSign, Users, MessageSquare
+  FileText, Loader2, DollarSign, Users, MessageSquare, ChevronDown, ChevronUp
 } from 'lucide-react';
 import axios from 'axios';
 import { GlassBox } from '../ui/GlassBox';
@@ -61,6 +61,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
   const [generationStatus, setGenerationStatus] = useState<string>('');
   const [generationStage, setGenerationStage] = useState<'idle' | 'digest' | 'analyst' | 'writer' | 'complete'>('idle');
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [isSeriesCollapsed, setIsSeriesCollapsed] = useState(false);
 
   // Track which series have available match data
   const [availableSeries, setAvailableSeries] = useState<Record<string, boolean>>({});
@@ -468,19 +469,29 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <GlassBox>
-          <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
             <h2 className="text-2xl font-bold text-white">
               {selectedMap === 'All'
                 ? 'Available Series'
                 : 'Filtered Series'}
             </h2>
-            <span className="text-blue-300 text-sm">
-              {isCheckingAvailability ? 'Checking...' : `${filteredSeries.length} series with match data`}
-            </span>
+            <button
+              onClick={() => setIsSeriesCollapsed(!isSeriesCollapsed)}
+              className="text-blue-400 hover:text-blue-300 transition-colors"
+              aria-label={isSeriesCollapsed ? "Expand series list" : "Collapse series list"}
+            >
+              {isSeriesCollapsed ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+            </button>
           </div>
-
-          {isCheckingAvailability ? (
+          <span className="text-blue-300 text-sm">
+            {isCheckingAvailability ? 'Checking...' : `${filteredSeries.length} series with match data`}
+          </span>
+        </div>
+        
+        {!isSeriesCollapsed && (
+          <GlassBox>
+            {isCheckingAvailability ? (
             <div className="flex flex-col items-center justify-center py-12">
               <Loader2 className="w-8 h-8 text-blue-400 animate-spin mb-3" />
               <p className="text-blue-200">Checking match data availability...</p>
@@ -556,6 +567,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
             </div>
           )}
         </GlassBox>
+        )}
       </motion.div>
 
       {/* Generate Report Button */}
@@ -583,10 +595,10 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                   onClick={handleGenerateReport}
                   disabled={isGenerating}
                   className={`
-                    flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-lg transition-all duration-300
+                    flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
                     ${isGenerating
-                      ? 'bg-blue-600/50 text-white/50 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-500 text-white hover:scale-105'
+                      ? 'bg-blue-900/50 text-white/50 cursor-not-allowed'
+                      : 'bg-blue-900 text-white hover:scale-105'
                     }
                   `}
                 >
@@ -621,13 +633,13 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                     className={`
                       px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
                       ${selectedReportMap === 'all'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-white/10 text-blue-300 hover:bg-white/20'
+                        ? 'bg-blue-900 text-white'
+                        : 'bg-white/5 text-blue-200 hover:bg-white/10'
                       }
                       ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                   >
-                    All Maps
+                    All
                   </button>
                   {getSeriesMaps().map((map, i) => (
                     <button
@@ -637,8 +649,8 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                       className={`
                         px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
                         ${selectedReportMap === map
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-white/10 text-blue-300 hover:bg-white/20'
+                          ? 'bg-blue-900 text-white'
+                          : 'bg-white/5 text-blue-200 hover:bg-white/10'
                         }
                         ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}
                       `}
@@ -907,13 +919,27 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                           </tr>
                         </thead>
                         <tbody>
-                          {reportData.playerIntel.map((player, i) => (
-                            <tr key={i} className="border-b border-white/5">
-                              <td className="py-2 px-3 text-white font-semibold">{player.player}</td>
-                              <td className="py-2 px-3 text-blue-300">{player.agent}</td>
-                              <td className="py-2 px-3 text-blue-100">{player.insight}</td>
-                            </tr>
-                          ))}
+                          {reportData.playerIntel.map((player, i) => {
+                            const agentName = player.agent.trim();
+                            const agentImage = `/src/assets/agents/${agentName}.png`;
+                            
+                            return (
+                              <tr key={i} className="border-b border-white/5">
+                                <td className="py-2 px-3 text-white font-semibold">{player.player}</td>
+                                <td className="py-2 px-3">
+                                  <img 
+                                    src={agentImage} 
+                                    alt={agentName}
+                                    className="w-6 h-6 rounded"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
+                                </td>
+                                <td className="py-2 px-3 text-blue-100">{player.insight}</td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
