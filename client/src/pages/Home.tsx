@@ -109,7 +109,7 @@ const Home = () => {
             {/* Dropdown */}
             {teamsDropdown.length > 0 && (
                 <div
-                    className="absolute top-full left-0 right-0 mt-3 bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                    className="absolute top-full left-0 right-0 mt-3 backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
                   <div className="py-2">
                     {teamsDropdown.map((t) => (
                         <button
@@ -119,19 +119,19 @@ const Home = () => {
                               setTeamName(t.name);
                               handleTeamSelect(t);
                             }}
-                            className="w-full flex items-center px-5 py-3 hover:bg-white/10 transition-colors text-left group"
+                            className="w-full flex items-center px-5 py-3 hover:bg-white/10 hover:backdrop-blur-lg transition-all duration-300 text-left group"
                         >
                           {t.logoUrl ? (
                               <img src={t.logoUrl} alt=""
                                    className="w-8 h-8 rounded-md mr-4 object-contain bg-black/40 p-1"/>
                           ) : (
                               <div
-                                  className="w-8 h-8 rounded-md mr-4 bg-gray-800 flex items-center justify-center text-xs text-gray-400 font-bold uppercase">
+                                  className="w-8 h-8 rounded-md mr-4 bg-white/10 backdrop-blur-sm flex items-center justify-center text-xs text-blue-200 font-bold uppercase">
                                 {t.name.substring(0, 1)}
                               </div>
                           )}
                           <span
-                              className="text-sm font-semibold text-blue-200 group-hover:text-blue-100 transition-colors">
+                              className="text-sm font-semibold text-blue-200 group-hover:text-white transition-colors">
                         {t.name}
                       </span>
                         </button>

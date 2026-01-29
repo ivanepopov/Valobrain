@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowLeft, Clock, BarChart3, FileText, Calendar, TrendingUp } from "lucide-react";
+import Spline from '@splinetool/react-spline';
 import MatchHistory from "../components/match/MatchHistory";
 import AnalyticsBreakdown from "../components/analytics/AnalyticsBreakdown";
 import ScoutingReport from "../components/report/ScoutingReport";
@@ -114,6 +115,13 @@ const Dashboard = () => {
         <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 text-white py-12 px-6 overflow-hidden">
             {/* Header */}
             <Header />
+            
+            {/* Spline 3D Background */}
+            <div className="fixed inset-0 z-0 opacity-60 pointer-events-none">
+                <Spline
+                    scene="https://prod.spline.design/Exoc-c1KvXHUx7bJ/scene.splinecode"
+                />
+            </div>
             
             {/* Neural Network Background */}
             <NeuralNetworkBackground />
