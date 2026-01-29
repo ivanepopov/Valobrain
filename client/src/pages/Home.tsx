@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Search, Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Spline from '@splinetool/react-spline';
 import getTeams from '../services/getTeams.ts';
 import type { Team } from '../types/Team.ts';
 import FeaturedImagesCarousel from '../components/ui/FeaturedImagesCarousel.tsx';
@@ -49,6 +50,13 @@ const Home = () => {
       {/* Header */}
       <Header />
       
+      {/* Spline 3D Background */}
+      <div className="fixed inset-0 z-0 opacity-60 pointer-events-none">
+        <Spline
+          scene="https://prod.spline.design/Exoc-c1KvXHUx7bJ/scene.splinecode"
+        />
+      </div>
+      
       {/* Neural Network Background */}
       <NeuralNetworkBackground />
 
@@ -62,11 +70,11 @@ const Home = () => {
         >
           <div className="flex items-center justify-center gap-3 mb-6">
             {/* <Brain className="w-12 h-12 text-blue-400" /> */}
-            <h1 className="text-6xl font-bold text-white" style={{ textShadow: '0 0 30px rgba(59, 130, 246, 0.8), 0 0 60px rgba(59, 130, 246, 0.4)' }}>Level up your Valorant IQ.</h1>
+            <h1 className="text-6xl font-bold text-white" >Level up your Valorant IQ.</h1>
             {/* Grow your Valorant IQ with ValoBrain */}
           </div>
           <p className="text-xl text-blue-200 mb-8">
-            Use ValoBrain to discover how teams play, where they excel, and how to counter their strategies with AI-powered match analytics and tactical reports.
+            Discover how teams play, where they excel, and how to counter their strategies with AI-powered match analytics and tactical reports, just with a team name.
           </p>
 
           {/* Search Bar */}

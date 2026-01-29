@@ -14,6 +14,7 @@ import type { TeamStats } from "../types/TeamStats";
 import type { SeriesStats } from "../types/SeriesStats";
 import NeuralNetworkBackground from "../components/ui/NeuralNetworkBackground.tsx";
 import Header from "../components/ui/Header.tsx";
+import Footer from "../components/ui/Footer.tsx";
 
 const Dashboard = () => {
     const { teamId } = useParams<{ teamId: string }>();
@@ -226,6 +227,9 @@ const Dashboard = () => {
                     </>
                 )}
             </div>
+            
+            {/* Footer */}
+            <Footer />
         </div>
     );
 };
