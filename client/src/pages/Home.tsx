@@ -176,16 +176,24 @@ const Home = () => {
         </div>
 
         {/* Feature Cards */}
-        <FeaturedCards />
+        <div id="features" className="scroll-mt-24">
+          <FeaturedCards />
+        </div>
 
         {/* How It Works */}
-        <HowItWorks />
+        <div id="how-it-works" className="scroll-mt-24">
+          <HowItWorks />
+        </div>
 
         {/* Feature Images Carousel */}
-        <FeaturedImagesCarousel />
+        <div id="showcase" className="scroll-mt-24">
+          <FeaturedImagesCarousel />
+        </div>
 
         {/* CTA Section */}
-        <CTASection />
+        <div id="get-started" className="scroll-mt-24">
+          <CTASection />
+        </div>
 
       </div>
 

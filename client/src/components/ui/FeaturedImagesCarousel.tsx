@@ -15,7 +15,7 @@ const DEFAULT_IMAGES = [
 ];
 
 const FeaturedImagesCarousel = ({
-                                    title = "Featured Matches",
+                                    title = "Showcase",
                                     images,
                                     intervalMs = 3000,
                                 }: FeaturedImagesCarouselProps) => {

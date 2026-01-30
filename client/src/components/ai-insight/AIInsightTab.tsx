@@ -433,6 +433,12 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run on mount
 
+  const handleFilterChange = () => {
+    setSelectedSeries(null);
+    setReportData(null);
+    setError(null);
+  };
+
   const handleGenerateReport = async () => {
     if (!selectedSeries) return;
 
@@ -464,12 +470,6 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
       setIsGenerating(false);
       setGenerationStatus('');
     }
-  };
-
-  const handleFilterChange = () => {
-    setSelectedSeries(null);
-    setReportData(null);
-    setError(null);
   };
 
   return (

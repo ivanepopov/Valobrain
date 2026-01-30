@@ -32,7 +32,7 @@ const CTASection = () => {
                         onClick={handleScrollToTop}
                         className="group inline-flex items-center gap-3 px-8 py-4 bg-blue-900 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105"
                     >
-                        Get Started Now
+                        Get Started
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </button>
                 </div>
