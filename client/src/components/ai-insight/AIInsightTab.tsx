@@ -2,11 +2,12 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Shield, Crosshair, Brain, Target, AlertCircle,
-  FileText, Loader2, DollarSign, Users, MessageSquare
+  FileText, Loader2, DollarSign, Users, MessageSquare, ChevronDown, ChevronUp
 } from 'lucide-react';
 import axios from 'axios';
 import { GlassBox } from '../ui/GlassBox';
 import type { SeriesStats } from '../../types/SeriesStats';
+import { capitalize } from '../../utils/formatters';
 import type {
   TransformedSeries,
   ReportSections,
@@ -83,7 +84,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
   const [actualSeriesMaps, setActualSeriesMaps] = useState<Record<string, string[]>>({});
   const [isLoadingMaps, setIsLoadingMaps] = useState(false);
 
-  const maps = ['All', 'Abyss', 'Ascent', 'Bind', 'Breeze', 'Fracture', 'Haven', 'Icebox', 'Lotus', 'Pearl', 'Split', 'Sunset'];
+  const maps = ['All', 'Abyss', 'Ascent', 'Bind', 'Breeze', 'Corrode', 'Fracture', 'Haven', 'Icebox', 'Lotus', 'Pearl', 'Split', 'Sunset'];
 
   // Check which series have downloadable match data
   useEffect(() => {
@@ -149,7 +150,9 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
   const filteredSeries = useMemo(() => {
     let filtered = transformedSeries.filter(s => availableSeries[s.id] === true);
     if (selectedMap !== 'All') {
-      filtered = filtered.filter(s => s.maps.includes(selectedMap));
+      filtered = filtered.filter(s => 
+        s.maps.some(map => map.toLowerCase() === selectedMap.toLowerCase())
+      );
     }
 
     return filtered;
@@ -502,21 +505,31 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <GlassBox>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white">
-              {selectedMap === 'All'
-                ? 'Available Series'
-                : 'Filtered Series'}
-            </h2>
-            <span className="text-blue-300 text-sm">
-              {isCheckingAvailability ? 'Checking...' : `${filteredSeries.length} series with match data`}
-            </span>
-          </div>
-
-          {isCheckingAvailability ? (
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-white">
+            {selectedMap === 'All'
+              ? 'Available Series'
+              : 'Filtered Series'}
+          </h2>
+          <button
+            onClick={() => setIsSeriesCollapsed(!isSeriesCollapsed)}
+            className="text-white/70 hover:text-white transition-colors"
+            aria-label={isSeriesCollapsed ? "Expand series list" : "Collapse series list"}
+          >
+            {isSeriesCollapsed ? <ChevronDown className="w-6 h-6" /> : <ChevronUp className="w-6 h-6" />}
+          </button>
+        </div>
+        
+        {!isSeriesCollapsed && (
+          <GlassBox>
+            <div className="flex justify-start mb-3">
+              <span className="text-blue-300 text-sm">
+                {isCheckingAvailability ? 'Checking...' : `${filteredSeries.length} series with match data`}
+              </span>
+            </div>
+            {isCheckingAvailability ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 text-blue-400 animate-spin mb-3" />
+              <Loader2 className="w-8 h-8 text-blue-900 animate-spin mb-3" />
               <p className="text-blue-200">Checking match data availability...</p>
             </div>
           ) : filteredSeries.length > 0 ? (
@@ -569,7 +582,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                             }
                           `}
                         >
-                          {map}
+                          {capitalize(map)}
                         </span>
                       ))}
                     </div>
@@ -589,6 +602,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
             </div>
           )}
         </GlassBox>
+        )}
       </motion.div>
 
       {/* Generate Report Button */}
@@ -616,10 +630,10 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                   onClick={handleGenerateReport}
                   disabled={isGenerating}
                   className={`
-                    flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-lg transition-all duration-300
+                    flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
                     ${isGenerating
-                      ? 'bg-blue-600/50 text-white/50 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-500 text-white hover:scale-105'
+                      ? 'bg-blue-900/50 text-white/50 cursor-not-allowed'
+                      : 'bg-blue-900 text-white hover:scale-105'
                     }
                   `}
                 >
@@ -643,7 +657,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
               <span className="text-blue-200 text-sm">Generate report for:</span>
               {isLoadingMaps ? (
                 <div className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
+                  <Loader2 className="w-4 h-4 text-blue-900 animate-spin" />
                   <span className="text-blue-300 text-sm">Loading maps...</span>
                 </div>
               ) : (
@@ -654,13 +668,13 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                     className={`
                       px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
                       ${selectedReportMap === 'all'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-white/10 text-blue-300 hover:bg-white/20'
+                        ? 'bg-blue-900 text-white'
+                        : 'bg-white/5 text-blue-200 hover:bg-white/10'
                       }
                       ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                   >
-                    All Maps
+                    All
                   </button>
                   {getSeriesMaps().map((map, i) => (
                     <button
@@ -670,8 +684,8 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                       className={`
                         px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
                         ${selectedReportMap === map
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-white/10 text-blue-300 hover:bg-white/20'
+                          ? 'bg-blue-900 text-white'
+                          : 'bg-white/5 text-blue-200 hover:bg-white/10'
                         }
                         ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}
                       `}
@@ -711,7 +725,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                           ${isComplete
                             ? 'bg-green-500 text-white'
                             : isActive
-                              ? 'bg-blue-500 text-white'
+                              ? 'bg-blue-900 text-white'
                               : 'bg-white/10 text-blue-300'
                           }
                         `}>
@@ -739,7 +753,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                 {/* Progress Bar Track */}
                 <div className="relative h-2 bg-white/10 rounded-full overflow-hidden">
                   <motion.div
-                    className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full"
+                    className="absolute left-0 top-0 h-full bg-blue-900 rounded-full"
                     initial={{ width: '0%' }}
                     animate={{
                       width: generationStage === 'digest' ? '33%'
@@ -940,13 +954,27 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                           </tr>
                         </thead>
                         <tbody>
-                          {reportData.playerIntel.map((player, i) => (
-                            <tr key={i} className="border-b border-white/5">
-                              <td className="py-2 px-3 text-white font-semibold">{player.player}</td>
-                              <td className="py-2 px-3 text-blue-300">{player.agent}</td>
-                              <td className="py-2 px-3 text-blue-100">{player.insight}</td>
-                            </tr>
-                          ))}
+                          {reportData.playerIntel.map((player, i) => {
+                            const agentName = player.agent.trim();
+                            const agentImage = `/src/assets/agents/${agentName}.png`;
+                            
+                            return (
+                              <tr key={i} className="border-b border-white/5">
+                                <td className="py-2 px-3 text-white font-semibold">{player.player}</td>
+                                <td className="py-2 px-3">
+                                  <img 
+                                    src={agentImage} 
+                                    alt={agentName}
+                                    className="w-6 h-6 rounded"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
+                                </td>
+                                <td className="py-2 px-3 text-blue-100">{player.insight}</td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowLeft, FileText, Calendar, TrendingUp, Sparkles } from "lucide-react";
+import Spline from '@splinetool/react-spline';
 import MatchHistory from "../components/match/MatchHistory";
 import AnalyticsBreakdown from "../components/analytics/AnalyticsBreakdown";
 import ScoutingReport from "../components/report/ScoutingReport";
@@ -16,6 +17,8 @@ import type { SeriesStats } from "../types/SeriesStats";
 import type { AIInsightReportState } from "../types/AIInsight";
 import { initialAIInsightReportState } from "../types/AIInsight";
 import NeuralNetworkBackground from "../components/ui/NeuralNetworkBackground.tsx";
+import Header from "../components/ui/Header.tsx";
+import Footer from "../components/ui/Footer.tsx";
 
 const Dashboard = () => {
     const { teamId } = useParams<{ teamId: string }>();
@@ -122,16 +125,26 @@ const Dashboard = () => {
     const tabs = [
         { id: "history", label: "Match History", icon: Calendar },
         { id: "analytics", label: "Analytics", icon: TrendingUp },
-        { id: "scouting", label: "Scouting Report", icon: FileText },
+        { id: "scouting", label: "Tactical Report", icon: FileText },
         { id: "ai-insight", label: "AI Insight", icon: Sparkles },
     ];
 
     return (
-        <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 text-white p-8 overflow-hidden">
+        <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 text-white py-12 px-6 overflow-hidden">
+            {/* Header */}
+            <Header />
+            
+            {/* Spline 3D Background */}
+            <div className="fixed inset-0 z-0 opacity-60 pointer-events-none">
+                <Spline
+                    scene="https://prod.spline.design/Exoc-c1KvXHUx7bJ/scene.splinecode"
+                />
+            </div>
+            
             {/* Neural Network Background */}
             <NeuralNetworkBackground />
 
-            <div className="relative z-10 max-w-7xl mx-auto">
+            <div className="relative z-10 max-w-7xl mx-auto pt-20">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
@@ -249,6 +262,9 @@ const Dashboard = () => {
                     </>
                 )}
             </div>
+            
+            {/* Footer */}
+            <Footer />
         </div>
     );
 };

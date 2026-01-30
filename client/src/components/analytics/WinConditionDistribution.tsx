@@ -3,7 +3,7 @@ import type { SeriesStats } from "../../types/SeriesStats.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { Target, Shield } from "lucide-react";
+import { Target, Shield, ChevronDown, ChevronUp } from "lucide-react";
 
 type WinTypes = {
     bomb: number;
@@ -24,6 +24,8 @@ type Props = {
 };
 
 const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    
     const stats = useMemo(() => {
         const initial = () => ({
             bomb: 0,
@@ -215,11 +217,22 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
             transition={{ duration: 0.5, delay: 0.5 }}
             className="mb-6"
         >
-            <h2 className="text-2xl font-bold text-white mb-4">Win Condition Distribution</h2>
-            <div className="flex flex-col gap-6 lg:flex-row">
-                {renderSideSection("Attack Win Conditions", stats.attack, "bg-red-400", "bg-red-400/20", "shadow-red-400/40", "shadow-none", "bg-red-400", "bg-red-400/30", "attack")}
-                {renderSideSection("Defense Win Conditions", stats.defense, "bg-blue-400", "bg-blue-400/20", "shadow-blue-400/40", "shadow-none", "bg-blue-400", "bg-blue-400/30", "defense")}
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-white">Win Condition Distribution</h2>
+                <button
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className="text-white/70 hover:text-white transition-colors"
+                >
+                    {isCollapsed ? <ChevronDown className="w-6 h-6" /> : <ChevronUp className="w-6 h-6" />}
+                </button>
             </div>
+            
+            {!isCollapsed && (
+                <div className="flex flex-col gap-6 lg:flex-row">
+                    {renderSideSection("Attack Win Conditions", stats.attack, "bg-red-400", "bg-red-400/20", "shadow-red-400/40", "shadow-none", "bg-red-400", "bg-red-400/30", "attack")}
+                    {renderSideSection("Defense Win Conditions", stats.defense, "bg-blue-400", "bg-blue-400/20", "shadow-blue-400/40", "shadow-none", "bg-blue-400", "bg-blue-400/30", "defense")}
+                </div>
+            )}
         </motion.div>
     );
 };
