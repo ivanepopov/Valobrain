@@ -2,20 +2,18 @@ import type { SeriesStats } from "../../types/SeriesStats.ts";
 import type { Team } from "../../types/Team.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
 import { capitalize } from "../../utils/formatters.ts";
-import { useMemo, useState } from "react";
+import { useMemo, useState, memo } from "react";
 import { motion } from "motion/react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 type Props = {
-    team: Team | null;
+    team: Team;
     allSeriesData: SeriesStats[];
     selectedMap?: string;
 }
 
-const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => {
+const MapPerformance = memo(({ team, allSeriesData, selectedMap = "All" }: Props) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    
-    if (!team) return null;
 
     const [visibleMetrics, setVisibleMetrics] = useState({
         matchWinRate: true,
@@ -103,11 +101,11 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
                     {isCollapsed ? <ChevronDown className="w-6 h-6" /> : <ChevronUp className="w-6 h-6" />}
                 </button>
             </div>
-            
+
             {!isCollapsed && (
             <GlassBox className="mt-4 border-white/10">
             <div className="flex justify-end items-center mb-8">
-                <div className="flex gap-4 bg-gradient-to-r from-slate-950/60 to-slate-900/60 p-3.5 rounded-xl border border-white/10 backdrop-blur-sm">
+                <div className="flex gap-4 bg-linear-to-r from-slate-950/60 to-slate-900/60 p-3.5 rounded-xl border border-white/10 backdrop-blur-sm">
                     <button 
                         onClick={() => toggleMetric('matchWinRate')}
                         className={`flex items-center gap-2.5 transition-all duration-300 cursor-pointer hover:scale-105 ${visibleMetrics.matchWinRate ? 'opacity-100' : 'opacity-40'}`}
@@ -209,6 +207,6 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
             )}
         </motion.div>
     );
-};
+});
 
 export default MapPerformance;

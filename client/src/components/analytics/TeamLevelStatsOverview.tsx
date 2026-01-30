@@ -1,28 +1,27 @@
+import { useMemo, memo, useState } from "react";
 import type { SeriesStats } from "../../types/SeriesStats.ts";
 import type { Team } from "../../types/Team.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
 import { Trophy, Target, Shield, ChevronDown, ChevronUp } from "lucide-react";
 import { motion } from "motion/react";
-import { useState } from "react";
 
 type Props = {
-    team: Team | null;
+    team: Team;
     allSeriesData: SeriesStats[];
 }
 
-const TeamLevelStatsOverview = ({ team, allSeriesData }: Props) => {
+const TeamLevelStatsOverview = memo(({ team, allSeriesData }: Props) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    
-    if (!team) return null;
 
-    let totalMatches = 0;
-    let matchesWon = 0;
-    
-    let totalAttackRounds = 0;
-    let attackRoundsWon = 0;
-    
-    let totalDefenseRounds = 0;
-    let defenseRoundsWon = 0;
+    const stats = useMemo(() => {
+        let totalMatches = 0;
+        let matchesWon = 0;
+
+        let totalAttackRounds = 0;
+        let attackRoundsWon = 0;
+
+        let totalDefenseRounds = 0;
+        let defenseRoundsWon = 0;
 
     allSeriesData.forEach(series => {
         series.seriesState.games.forEach(game => {
@@ -54,6 +53,17 @@ const TeamLevelStatsOverview = ({ team, allSeriesData }: Props) => {
     const attackWinRate = totalAttackRounds > 0 ? (attackRoundsWon / totalAttackRounds) * 100 : 0;
     const defenseWinRate = totalDefenseRounds > 0 ? (defenseRoundsWon / totalDefenseRounds) * 100 : 0;
 
+        return {
+            matchWinRate,
+            attackWinRate,
+            defenseWinRate
+        };
+    }, [allSeriesData, team.name]);
+
+    if (!stats) return null;
+
+    const { matchWinRate, attackWinRate, defenseWinRate } = stats;
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -70,7 +80,7 @@ const TeamLevelStatsOverview = ({ team, allSeriesData }: Props) => {
                     {isCollapsed ? <ChevronDown className="w-6 h-6" /> : <ChevronUp className="w-6 h-6" />}
                 </button>
             </div>
-            
+
             {!isCollapsed && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 justify-center">
                     <GlassBox>
@@ -109,6 +119,6 @@ const TeamLevelStatsOverview = ({ team, allSeriesData }: Props) => {
             )}
         </motion.div>
     );
-};
+});
 
 export default TeamLevelStatsOverview;

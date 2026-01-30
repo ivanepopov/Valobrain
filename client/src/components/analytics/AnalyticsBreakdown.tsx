@@ -21,67 +21,81 @@ import MapPerformance from "./MapPerformance.tsx";
 import TeamLevelStatsOverview from "./TeamLevelStatsOverview.tsx";
 import WinConditionDistribution from "./WinConditionDistribution.tsx";
 import CompositionHistory from "./CompositionHistory.tsx";
-import type {TeamStats} from "../../types/TeamStats.ts";
 import type {SeriesStats} from "../../types/SeriesStats.ts";
-import { useState, useMemo } from "react";
+import { useState, useMemo, memo } from "react";
 import { motion } from "motion/react";
 import LoadingPage from "../ui/LoadingPage.tsx";
 import { GlassBox } from "../ui/GlassBox.tsx";
 
 
 type Props = {
-    team: Team | null;
-    stats: TeamStats | null;
+    team: Team;
     allSeriesData: SeriesStats[];
     isLoadingSeries: boolean;
 }
 
-const AnalyticsBreakdown = ({ team, stats, allSeriesData, isLoadingSeries }: Props) => {
+const AnalyticsBreakdown = memo(({ team, allSeriesData, isLoadingSeries }: Props) => {
     const [selectedMap, setSelectedMap] = useState<string>("All");
     const [timeRange, setTimeRange] = useState<string>("all");
-
-    if (!team || !stats || isLoadingSeries) return <LoadingPage />;
 
     const filteredSeriesData = useMemo(() => {
         let filtered = [...allSeriesData];
 
         // 1. Filter by Date Range
         if (timeRange !== 'all') {
-            const now = new Date();
-            const days = parseInt(timeRange);
-            const cutoff = new Date(now.setDate(now.getDate() - days));
+            const days = parseInt(timeRange, 10);
+            if (!isNaN(days)) {
+                const now = new Date();
+                const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
 
-            filtered = filtered.filter(series => {
-                const seriesDate = new Date(series.seriesState.startedAt);
-                return seriesDate >= cutoff;
-            });
+                filtered = filtered.filter(series => {
+                    const seriesDate = new Date(series.seriesState.startedAt);
+                    return !isNaN(seriesDate.getTime()) && seriesDate >= cutoff;
+                });
+            }
         }
 
         // 2. Filter by Map (Filter games within series)
         if (selectedMap !== 'All') {
-            filtered = filtered.map(series => ({
-                ...series,
-                seriesState: {
-                    ...series.seriesState,
-                    games: series.seriesState.games.filter(game => game.map.name.toLowerCase() === selectedMap.toLowerCase())
+            const normalizedSelectedMap = selectedMap.toLowerCase();
+            filtered = filtered.reduce<typeof filtered>((acc, series) => {
+                const filteredGames = series.seriesState.games.filter(
+                    game => game.map?.name?.toLowerCase() === normalizedSelectedMap
+                );
+
+                if (filteredGames.length > 0) {
+                    acc.push({
+                        ...series,
+                        seriesState: {
+                            ...series.seriesState,
+                            games: filteredGames
+                        }
+                    });
                 }
-            })).filter(series => series.seriesState.games.length > 0);
+                return acc;
+            }, []);
         }
 
         return filtered;
     }, [allSeriesData, selectedMap, timeRange]);
 
     // Derived roster from all matches
-    const playersMap = new Map();
-    allSeriesData.forEach(series => {
-        series.seriesState.games.forEach(game => {
-            const teamMatch = game.teams.find(t => t.name === team?.name);
-            teamMatch?.players.forEach(p => {
-                playersMap.set(p.name, { id: p.name, nickname: p.name });
+    const roster = useMemo(() => {
+        const playersMap = new Map();
+        allSeriesData.forEach(series => {
+            series.seriesState?.games?.forEach(game => {
+                const teamMatch = game.teams?.find(t => t.name === team?.name);
+                teamMatch?.players?.forEach(p => {
+                    if (p.name) {
+                        playersMap.set(p.name, { id: p.name, nickname: p.name });
+                    }
+                });
             });
         });
-    });
-    const roster = Array.from(playersMap.values());
+        return Array.from(playersMap.values());
+    }, [allSeriesData, team?.name]);
+
+    if (isLoadingSeries) return <LoadingPage />;
 
     const maps = ['All', 'Abyss', 'Ascent', 'Bind', 'Breeze', 'Corrode', 'Fracture', 'Haven', 'Icebox', 'Lotus', 'Pearl', 'Split', 'Sunset'];
     const timeFilters = ['All', 'Last 30 Days', 'Last 60 Days', 'Last 90 Days'];
@@ -163,7 +177,7 @@ const AnalyticsBreakdown = ({ team, stats, allSeriesData, isLoadingSeries }: Pro
             <PlayerStatisticsTable 
                 team={team}
                 roster={roster} 
-                allSeriesData={filteredSeriesData}
+                allSeriesData={allSeriesData}
             />
 
             <MapPerformance 
@@ -177,6 +191,6 @@ const AnalyticsBreakdown = ({ team, stats, allSeriesData, isLoadingSeries }: Pro
             />
         </div>
     );
-};
+});
 
 export default AnalyticsBreakdown;

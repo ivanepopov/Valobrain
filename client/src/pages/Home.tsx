@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { Search, Brain } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Spline from '@splinetool/react-spline';
 import getTeams from '../services/getTeams.ts';
@@ -18,30 +18,52 @@ import ProPlayersCarousel from '../components/ui/ProPlayersCarousel.tsx';
  * Home Page
  */
 const Home = () => {
-  const navigate = useNavigate();
-  const [teamName, setTeamName] = useState('');
-  const [teamsDropdown, setTeamsDropdown] = useState<Team[]>([]);
+    const navigate = useNavigate();
+    const [teamName, setTeamName] = useState('');
+    const [teamsDropdown, setTeamsDropdown] = useState<Team[]>([]);
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLFormElement>(null);
 
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (teamName.trim() && teamsDropdown.length > 0) {
-      handleTeamSelect(teamsDropdown[0]);
-    }
-  };
+    useEffect(() => {
+        const controller = new AbortController();
+        const timer = setTimeout(async () => {
+            if (teamName.trim().length >= 2) {
+                const teams = await getTeams(teamName, controller.signal);
+                setTeamsDropdown(teams);
+                setIsOpen(teams.length > 0);
+            } else {
+                setTeamsDropdown([]);
+                setIsOpen(false);
+            }
+        }, 300);
 
-  const handleTeamSelect = (selectedTeam: Team) => {
-    navigate(`/dashboard/${selectedTeam.id}`);
-  };
+        return () => {
+            clearTimeout(timer);
+            controller.abort();
+        };
+    }, [teamName]);
 
-  async function fetchTeams(contains: string) {
-    if (!contains) {
-      setTeamsDropdown([]);
-      return;
-    }
-    const teams = await getTeams(contains);
-    setTeamsDropdown(teams);
-  }
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (teamName.trim() && teamsDropdown.length > 0) {
+            handleTeamSelect(teamsDropdown[0]);
+        }
+    };
+
+    const handleTeamSelect = (selectedTeam: Team) => {
+        setIsOpen(false);
+        navigate(`/dashboard/${selectedTeam.id}`);
+    };
 
 
 
@@ -49,14 +71,14 @@ const Home = () => {
     <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 py-12 px-6 overflow-hidden">
       {/* Header */}
       <Header />
-      
+
       {/* Spline 3D Background */}
       <div className="fixed inset-0 z-0 opacity-60 pointer-events-none">
         <Spline
           scene="https://prod.spline.design/Exoc-c1KvXHUx7bJ/scene.splinecode"
         />
       </div>
-      
+
       {/* Neural Network Background */}
       <NeuralNetworkBackground />
 
@@ -69,7 +91,6 @@ const Home = () => {
           className="text-center mb-24"
         >
           <div className="flex items-center justify-center gap-3 mb-6">
-            {/* <Brain className="w-12 h-12 text-blue-400" /> */}
             <h1 className="text-6xl font-bold text-white" >Level up your Valorant IQ.</h1>
             {/* Grow your Valorant IQ with ValoBrain */}
           </div>
@@ -86,10 +107,8 @@ const Home = () => {
                 <input
                     type="text"
                     value={teamName}
-                    onChange={(e) => {
-                      setTeamName(e.target.value);
-                      fetchTeams(e.target.value);
-                    }}
+                    onChange={(e) => setTeamName(e.target.value)}
+                    onFocus={() => teamsDropdown.length > 0 && setIsOpen(true)}
                     placeholder="Search for a team name..."
                     className="flex-1 bg-transparent text-white placeholder-blue-200/50 outline-none text-lg py-3"
                 />
@@ -101,11 +120,11 @@ const Home = () => {
                 </button>
               </div>
             </div>
-            
+
             <p className="text-blue-200/70 text-sm mt-4">
               Try searching: Sentinels, Team Liquid, FNATIC, or any team name
             </p>
-              
+
             {/* Dropdown */}
             {teamsDropdown.length > 0 && (
                 <div
@@ -147,7 +166,7 @@ const Home = () => {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="mt-4"
           >
-            
+
           </motion.div>
         </motion.div>
 

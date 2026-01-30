@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import type { MatchStats } from '../../types/MatchStats';
 import StatsTable from "./StatsTable.tsx";
 
@@ -65,7 +65,7 @@ const aggregatePlayerStats = (games: MatchStats[], teamName: string) => {
     })).sort((a, b) => b.kills - a.kills);
 };
 
-const Match: React.FC<MatchProps> = ({ match, allMaps }) => {
+const Match: React.FC<MatchProps> = memo(({ match, allMaps }) => {
     // If allMaps is provided, show aggregated stats
     const isAllMaps = allMaps && allMaps.length > 0;
 
@@ -142,6 +142,6 @@ const Match: React.FC<MatchProps> = ({ match, allMaps }) => {
             </div>
         </div>
     );
-};
+});
 
 export default Match;

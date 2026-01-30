@@ -1,16 +1,14 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, FileText, Calendar, TrendingUp, Sparkles } from "lucide-react";
+import { ArrowLeft, Calendar, TrendingUp, Sparkles } from "lucide-react";
 import Spline from '@splinetool/react-spline';
 import MatchHistory from "../components/match/MatchHistory";
 import AnalyticsBreakdown from "../components/analytics/AnalyticsBreakdown";
-import ScoutingReport from "../components/report/ScoutingReport";
 import AIInsightTab from "../components/ai-insight/AIInsightTab";
 import getTeam from "../services/getTeam";
 import getTeamStats from "../services/getTeamStats";
 import getSeriesStats from "../services/getSeriesStats";
-import { getAdvancedSeriesStats } from "../services/getAdvancedSeriesStats";
 import type { Team } from "../types/Team";
 import type { TeamStats } from "../types/TeamStats";
 import type { SeriesStats } from "../types/SeriesStats";
@@ -23,38 +21,61 @@ import Footer from "../components/ui/Footer.tsx";
 const Dashboard = () => {
     const { teamId } = useParams<{ teamId: string }>();
     const navigate = useNavigate();
-    
+
     const [team, setTeam] = useState<Team | null>(null);
-    const [activeTab, setActiveTab] = useState<"history" | "analytics" | "scouting" | "ai-insight">("history");
+    const [activeTab, setActiveTab] = useState<"history" | "analytics" | "ai-insight">("history");
     const [stats, setStats] = useState<TeamStats | null>(null);
     const [allSeriesData, setAllSeriesData] = useState<SeriesStats[]>([]);
     const [validSeriesIds, setValidSeriesIds] = useState<string[]>([]);
+    const [isLoadingTeam, setIsLoadingTeam] = useState(true);
     const [isFetchingSeries, setIsFetchingSeries] = useState(false);
-    
-    // Scouting states
-    const [scoutingRawData, setScoutingRawData] = useState<any[]>([]);
-    const [isScoutingLoading, setIsScoutingLoading] = useState(false);
-    const [scoutingProgress, setScoutingProgress] = useState({ current: 0, total: 0, status: '' });
-    const [scoutingError, setScoutingError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     // AI Insight states (lifted from AIInsightTab for persistence across tab switches)
     const [aiInsightReport, setAiInsightReport] = useState<AIInsightReportState>(initialAIInsightReportState);
 
     useEffect(() => {
+        const controller = new AbortController();
+
         const fetchTeamData = async () => {
-            if (teamId) {
-                const teamData = await getTeam(teamId);
-                if (!teamData) return;
+            if (!teamId) {
+                setError("No team ID provided");
+                setIsLoadingTeam(false);
+                return;
+            }
+
+            try {
+                setIsLoadingTeam(true);
+                setError(null);
+
+                const teamData = await getTeam(teamId, controller.signal);
+                if (controller.signal.aborted) return;
+
+                if (!teamData) {
+                    setError("Team not found");
+                    setIsLoadingTeam(false);
+                    return;
+                }
                 setTeam(teamData);
 
-                const statsData = await getTeamStats(teamId, "LAST_6_MONTHS");
-                if (!statsData) return;
+                const statsData = await getTeamStats(teamId, "LAST_6_MONTHS", controller.signal);
+                if (controller.signal.aborted) return;
+
+                if (!statsData) {
+                    setError("Failed to load team statistics");
+                    setIsLoadingTeam(false);
+                    return;
+                }
                 setStats(statsData);
+                setIsLoadingTeam(false);
 
                 if (statsData?.aggregationSeriesIds) {
                     setIsFetchingSeries(true);
-                    const seriesPromises = statsData.aggregationSeriesIds.map(id => getSeriesStats(id));
+                    const seriesPromises = statsData.aggregationSeriesIds.map(id =>
+                        getSeriesStats(id, controller.signal)
+                    );
                     const results = await Promise.all(seriesPromises);
+                    if (controller.signal.aborted) return;
 
                     // Filter valid results AND keep track of corresponding IDs
                     const validResults: SeriesStats[] = [];
@@ -73,74 +94,93 @@ const Dashboard = () => {
                     setAllSeriesData(validResults);
                     setValidSeriesIds(matchingIds);
                     setIsFetchingSeries(false);
-
-                    // Start Scouting Background Fetch
-                    await performBackgroundScouting(statsData.aggregationSeriesIds, teamData?.name);
                 }
+            } catch (err) {
+                if (controller.signal.aborted) return;
+                console.error("Error fetching team data:", err);
+                setError("Failed to load team data");
+                setIsLoadingTeam(false);
             }
-        };
-
-        const performBackgroundScouting = async (ids: string[], teamName?: string) => {
-            const cacheKey = `scout_raw_cache_${teamName || 'unknown'}`;
-            const cached = sessionStorage.getItem(cacheKey);
-            if (cached) {
-                try {
-                    const parsed = JSON.parse(cached);
-                    if (parsed.idHash === ids.join(',')) {
-                        setScoutingRawData(parsed.data);
-                        return;
-                    }
-                } catch (e) { sessionStorage.removeItem(cacheKey); }
-            }
-
-            setIsScoutingLoading(true);
-            const fetched: any[] = [];
-            for (let i = 0; i < ids.length; i++) {
-                setScoutingProgress({ current: i + 1, total: ids.length, status: 'Downloading Match Data...' });
-                try {
-                    const data = await getAdvancedSeriesStats(ids[i], teamName);
-                    if (data) fetched.push(data);
-                } catch (err: any) {
-                    if (err.status === 429) {
-                        setScoutingProgress(prev => ({ ...prev, status: 'Rate limit hit. Cooling down...' }));
-                        await new Promise(r => setTimeout(r, 8000));
-                        i--; continue;
-                    }
-                }
-                if (i < ids.length - 1) await new Promise(r => setTimeout(r, 4000));
-            }
-            
-            if (fetched.length > 0) {
-                setScoutingRawData(fetched);
-                sessionStorage.setItem(cacheKey, JSON.stringify({ idHash: ids.join(','), data: fetched }));
-            } else {
-                setScoutingError("Scouting data unavailable.");
-            }
-            setIsScoutingLoading(false);
         };
 
         fetchTeamData();
+
+        return () => {
+            controller.abort();
+        };
     }, [teamId]);
 
     const tabs = [
         { id: "history", label: "Match History", icon: Calendar },
         { id: "analytics", label: "Analytics", icon: TrendingUp },
-        { id: "scouting", label: "Tactical Report", icon: FileText },
         { id: "ai-insight", label: "AI Insight", icon: Sparkles },
     ];
 
+    // Early return for loading state
+    if (isLoadingTeam) {
+        return (
+            <div className="relative min-h-screen bg-linear-to-b from-slate-950 via-blue-950 to-slate-900 text-white p-8 overflow-hidden">
+                <NeuralNetworkBackground />
+                <div className="relative z-10 flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+                    <div className="relative">
+                        <div className="h-16 w-16 animate-spin rounded-full border-4 border-blue-400/20 border-t-blue-400"></div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="h-8 w-8 animate-pulse rounded-full bg-blue-400/20"></div>
+                        </div>
+                    </div>
+                    <div className="text-center">
+                        <h3 className="text-lg font-bold text-white">Loading Team Data</h3>
+                        <p className="text-sm text-blue-200/60 mt-2">
+                            Retrieving team information...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Early return for error state
+    if (error || !team || !stats) {
+        return (
+            <div className="relative min-h-screen bg-linear-to-b from-slate-950 via-blue-950 to-slate-900 text-white p-8 overflow-hidden">
+                <NeuralNetworkBackground />
+                <div className="relative z-10 max-w-7xl mx-auto">
+                    <button
+                        onClick={() => navigate("/")}
+                        className="flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-4 transition-colors"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                        Back to Search
+                    </button>
+                    <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+                        <div className="text-red-400 text-6xl">⚠️</div>
+                        <h2 className="text-2xl font-bold text-white">{error || "Team Not Found"}</h2>
+                        <p className="text-blue-200">Please try searching for a different team.</p>
+                        <button
+                            onClick={() => navigate("/")}
+                            className="mt-4 px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-semibold transition-colors"
+                        >
+                            Return to Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Now we can safely render - team and stats are guaranteed to be non-null
     return (
-        <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 text-white py-12 px-6 overflow-hidden">
+        <div className="relative min-h-screen bg-linear-to-b from-slate-950 via-blue-950 to-slate-900 text-white py-12 px-6 overflow-hidden">
             {/* Header */}
             <Header />
-            
+
             {/* Spline 3D Background */}
             <div className="fixed inset-0 z-0 opacity-60 pointer-events-none">
                 <Spline
                     scene="https://prod.spline.design/Exoc-c1KvXHUx7bJ/scene.splinecode"
                 />
             </div>
-            
+
             {/* Neural Network Background */}
             <NeuralNetworkBackground />
 
@@ -160,11 +200,11 @@ const Dashboard = () => {
                         Back to Search
                     </button>
                     <div className="flex items-center gap-4">
-                        {team?.logoUrl && (
-                            <img src={team.logoUrl} alt="" className="w-12 h-12 object-contain" />
+                        {team.logoUrl && (
+                            <img src={team.logoUrl} alt={`${team.name} logo`} className="w-12 h-12 object-contain" />
                         )}
                         <div>
-                            <h1 className="text-4xl font-bold text-white">{team?.name || "Loading..."}</h1>
+                            <h1 className="text-4xl font-bold text-white">{team.name}</h1>
                             <p className="text-blue-200">Team Dashboard</p>
                         </div>
                     </div>
@@ -181,7 +221,7 @@ const Dashboard = () => {
                         <div className="text-center">
                             <h3 className="text-lg font-bold text-white">Aggregating Intelligence</h3>
                             <p className="text-sm text-blue-200/60 mt-2">
-                                Processing {stats?.aggregationSeriesIds?.length || 0} historical series...
+                                Processing {stats.aggregationSeriesIds?.length || 0} historical series...
                             </p>
                         </div>
                     </div>
@@ -200,7 +240,7 @@ const Dashboard = () => {
                                     return (
                                         <button
                                             key={tab.id}
-                                            onClick={() => setActiveTab(tab.id as "history" | "analytics" | "scouting" | "ai-insight")}
+                                            onClick={() => setActiveTab(tab.id as "history" | "analytics" | "ai-insight")}
                                             className={`
                                                 flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300
                                                 ${activeTab === tab.id 
@@ -226,32 +266,21 @@ const Dashboard = () => {
                         >
                             {activeTab === "history" && (
                                 <MatchHistory 
-                                    team={team} 
-                                    stats={stats} 
+                                    team={team}
                                     allSeriesData={allSeriesData}
                                     isLoadingSeries={isFetchingSeries}
                                 />
                             )}
                             {activeTab === "analytics" && (
                                 <AnalyticsBreakdown 
-                                    team={team} 
-                                    stats={stats}
+                                    team={team}
                                     allSeriesData={allSeriesData}
                                     isLoadingSeries={isFetchingSeries}
                                 />
                             )}
-                            {activeTab === "scouting" && (
-                                <ScoutingReport
-                                    teamName={team?.name}
-                                    rawData={scoutingRawData}
-                                    isLoading={isScoutingLoading}
-                                    progress={scoutingProgress}
-                                    error={scoutingError}
-                                />
-                            )}
                             {activeTab === "ai-insight" && (
                                 <AIInsightTab
-                                    teamName={team?.name || ""}
+                                    teamName={team.name}
                                     seriesData={allSeriesData}
                                     seriesIds={validSeriesIds}
                                     reportState={aiInsightReport}
@@ -262,7 +291,7 @@ const Dashboard = () => {
                     </>
                 )}
             </div>
-            
+
             {/* Footer */}
             <Footer />
         </div>

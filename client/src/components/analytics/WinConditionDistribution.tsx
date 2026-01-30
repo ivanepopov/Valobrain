@@ -1,7 +1,7 @@
 import type { Team } from "../../types/Team.ts";
 import type { SeriesStats } from "../../types/SeriesStats.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
-import { useMemo, useState } from "react";
+import { useMemo, useState, memo } from "react";
 import { motion } from "motion/react";
 import { Target, Shield, ChevronDown, ChevronUp } from "lucide-react";
 
@@ -19,13 +19,13 @@ type SideStats = {
 };
 
 type Props = {
-    team: Team | null;
+    team: Team;
     allSeriesData: SeriesStats[];
 };
 
-const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
+const WinConditionDistribution = memo(({ team, allSeriesData }: Props) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    
+
     const stats = useMemo(() => {
         const initial = () => ({
             bomb: 0,
@@ -39,8 +39,6 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
             attack: { wins: initial(), losses: initial() },
             defense: { wins: initial(), losses: initial() }
         };
-
-        if (!team) return data;
 
         allSeriesData.forEach(series => {
             series.seriesState.games.forEach(game => {
@@ -100,9 +98,7 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
         });
 
         return data;
-    }, [team, allSeriesData]);
-
-    if (!team) return null;
+    }, [team.name, allSeriesData]);
 
     const [visibility, setVisibility] = useState({
         attack: { wins: true, losses: true },
@@ -226,7 +222,7 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
                     {isCollapsed ? <ChevronDown className="w-6 h-6" /> : <ChevronUp className="w-6 h-6" />}
                 </button>
             </div>
-            
+
             {!isCollapsed && (
                 <div className="flex flex-col gap-6 lg:flex-row">
                     {renderSideSection("Attack Win Conditions", stats.attack, "bg-red-400", "bg-red-400/20", "shadow-red-400/40", "shadow-none", "bg-red-400", "bg-red-400/30", "attack")}
@@ -235,6 +231,6 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
             )}
         </motion.div>
     );
-};
+});
 
 export default WinConditionDistribution;
