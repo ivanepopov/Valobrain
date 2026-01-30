@@ -1,9 +1,9 @@
 import axios from 'axios';
 import type { TeamStats } from '../types/TeamStats';
 
-async function getTeamStats(teamId: string, timeFrame: string): Promise<TeamStats | null> {
+async function getTeamStats(teamId: string, timeFrame: string, signal?: AbortSignal): Promise<TeamStats | null> {
     try {
-        const res = await axios.get(`/api/stats/teams/${teamId}/${timeFrame}`);
+        const res = await axios.get(`/api/stats/teams/${teamId}/${timeFrame}`, { signal });
 
         // Guard against non-GraphQL responses like: { error: "Failed to fetch..." }
         if (!res.data || !res.data.data || !res.data.data.teamStatistics) return null;
@@ -13,6 +13,7 @@ async function getTeamStats(teamId: string, timeFrame: string): Promise<TeamStat
 
         return res.data.data.teamStatistics;
     } catch (err) {
+        if (axios.isCancel(err)) return null;
         console.error(err);
         return null;
     }
