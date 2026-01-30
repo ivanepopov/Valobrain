@@ -21,11 +21,12 @@ interface AIInsightTabProps {
   seriesIds: string[];
   reportState: AIInsightReportState;
   setReportState: React.Dispatch<React.SetStateAction<AIInsightReportState>>;
+  selectedMap?: string;
 }
 
-export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, setReportState }: AIInsightTabProps) {
+export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, setReportState, selectedMap: propSelectedMap }: AIInsightTabProps) {
   // Local UI state (not persisted across tab switches)
-  const [selectedMap, setSelectedMap] = useState<string>('All');
+  const selectedMap = propSelectedMap || 'All';
   const [isSeriesCollapsed, setIsSeriesCollapsed] = useState(false);
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -84,8 +85,6 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
   // Track actual maps from JSONL files (not Statistics API)
   const [actualSeriesMaps, setActualSeriesMaps] = useState<Record<string, string[]>>({});
   const [isLoadingMaps, setIsLoadingMaps] = useState(false);
-
-  const maps = ['All', 'Abyss', 'Ascent', 'Bind', 'Breeze', 'Corrode', 'Fracture', 'Haven', 'Icebox', 'Lotus', 'Pearl', 'Split', 'Sunset'];
 
   // Check which series have downloadable match data
   useEffect(() => {
@@ -466,48 +465,8 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
     }
   };
 
-  const handleFilterChange = () => {
-    setSelectedSeries(null);
-    setReportData(null);
-    setError(null);
-  };
-
   return (
     <div className="space-y-6">
-      {/* Filters Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <GlassBox>
-          {/* Map Filter */}
-          <div>
-            <label className="text-blue-200 text-sm mb-2 block">Filter by Map</label>
-            <div className="flex gap-2 flex-wrap">
-              {maps.map((map) => (
-                <button
-                  key={map}
-                  onClick={() => {
-                    setSelectedMap(map);
-                    handleFilterChange();
-                  }}
-                  className={`
-                    px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
-                    ${selectedMap === map
-                      ? 'bg-blue-900 text-white'
-                      : 'bg-white/5 text-blue-200 hover:bg-white/10'
-                    }
-                  `}
-                >
-                  {map}
-                </button>
-              ))}
-            </div>
-          </div>
-        </GlassBox>
-      </motion.div>
-
       {/* Recent/Filtered Series Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
