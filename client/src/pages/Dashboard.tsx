@@ -32,10 +32,6 @@ const Dashboard = () => {
     const [isFetchingSeries, setIsFetchingSeries] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Filter states (shared across Analytics and AI Insight tabs)
-    const [selectedMap, setSelectedMap] = useState<string>("All");
-    const [timeRange, setTimeRange] = useState<string>("all");
-
     // AI Insight states (lifted from AIInsightTab for persistence across tab switches)
     const [aiInsightReport, setAiInsightReport] = useState<AIInsightReportState>(initialAIInsightReportState);
 
@@ -243,69 +239,6 @@ const Dashboard = () => {
                             </div>
                         )}
                     </div>
-
-                    {/* Row 2: Filter Section (full width) */}
-                    <div className="flex items-start justify-end gap-6">
-                        {/* Compact Filter Section (only for Analytics and AI Insight) */}
-                        {!isFetchingSeries && (activeTab === "analytics" || activeTab === "ai-insight") && (
-                            <div className="w-full">
-                                <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-lg px-4 py-2.5">
-                                    {/* Map Filter */}
-                                    <div className={activeTab === "analytics" ? "mb-4" : ""}>
-                                        <label className="text-blue-200 text-sm mb-2 block">Filter by Map</label>
-                                        <div className="flex gap-2 flex-wrap">
-                                            {['All', 'Abyss', 'Ascent', 'Bind', 'Breeze', 'Corrode', 'Fracture', 'Haven', 'Icebox', 'Lotus', 'Pearl', 'Split', 'Sunset'].map((map) => (
-                                                <button
-                                                    key={map}
-                                                    onClick={() => setSelectedMap(map)}
-                                                    className={`
-                                                        px-2.5 py-1 rounded text-sm font-semibold transition-all duration-300
-                                                        ${selectedMap === map
-                                                            ? 'bg-blue-900 text-white'
-                                                            : 'bg-white/5 text-blue-200 hover:bg-white/10'
-                                                        }
-                                                    `}
-                                                >
-                                                    {map}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Timeframe Filter (only for Analytics) */}
-                                    {activeTab === "analytics" && (
-                                        <div>
-                                            <label className="text-blue-200 text-sm mb-2 block">Filter by Timeframe</label>
-                                            <div className="flex gap-2">
-                                                {['All', 'Last 30 Days', 'Last 60 Days', 'Last 90 Days'].map((timeframe) => (
-                                                    <button
-                                                        key={timeframe}
-                                                        onClick={() => setTimeRange(
-                                                            timeframe === 'All' ? 'all' :
-                                                            timeframe === 'Last 30 Days' ? '30' :
-                                                            timeframe === 'Last 60 Days' ? '60' : '90'
-                                                        )}
-                                                        className={`
-                                                            px-2.5 py-1 rounded text-sm font-semibold transition-all duration-300
-                                                            ${(timeframe === 'All' && timeRange === 'all') ||
-                                                              (timeframe === 'Last 30 Days' && timeRange === '30') ||
-                                                              (timeframe === 'Last 60 Days' && timeRange === '60') ||
-                                                              (timeframe === 'Last 90 Days' && timeRange === '90')
-                                                                ? 'bg-blue-900 text-white'
-                                                                : 'bg-white/5 text-blue-200 hover:bg-white/10'
-                                                            }
-                                                        `}
-                                                    >
-                                                        {timeframe}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </div>
                 </motion.div>
 
                 {isFetchingSeries ? (
@@ -344,8 +277,6 @@ const Dashboard = () => {
                                     team={team}
                                     allSeriesData={allSeriesData}
                                     isLoadingSeries={isFetchingSeries}
-                                    selectedMap={selectedMap}
-                                    timeRange={timeRange}
                                 />
                             )}
                             {activeTab === "ai-insight" && (
@@ -355,7 +286,6 @@ const Dashboard = () => {
                                     seriesIds={validSeriesIds}
                                     reportState={aiInsightReport}
                                     setReportState={setAiInsightReport}
-                                    selectedMap={selectedMap}
                                 />
                             )}
                         </motion.div>
