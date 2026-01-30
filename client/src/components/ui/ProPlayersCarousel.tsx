@@ -1,84 +1,62 @@
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion } from 'motion/react';
+import masImage from '../../assets/people/mas.jpg';
+import gucc107Image from '../../assets/people/gucc107.png';
+import huynhImage from '../../assets/people/HUYNH.png';
+import fireballopsImage from '../../assets/people/fireballops.png';
+import runiImage from '../../assets/people/runi.png';
 
 const proPlayers = [
-  { name: 'mas', team: 'Former FaZe', image: 'https://owcdn.net/img/6243ca96e555d.png' },
-  { name: 'Gucc107', team: 'WVU', image: 'https://owcdn.net/img/63fd95c6a0d8b.png' },
-  { name: 'HUYNH', team: 'Former GenG', image: 'https://owcdn.net/img/64d4f0e0b7c74.png' },
-  { name: 'p4', team: 'FNATIC', image: 'https://owcdn.net/img/641e51d76ad57.png' },
-  { name: 'p5', team: 'LOUD', image: 'https://owcdn.net/img/627c554b1d30d.png' },
+  { name: 'mas', team: 'Former FaZe', image: masImage },
+  { name: 'Gucc107', team: 'WVU', image: gucc107Image },
+  { name: 'HUYNH', team: 'Former GenG', image: huynhImage },
+  { name: 'FireBallOps', team: 'NBG', image: fireballopsImage },
+  { name: 'runi', team: 'Former Cloud9', image: runiImage },
   { name: 'p6', team: 'FNATIC', image: 'https://owcdn.net/img/61c317d9c70a4.png' },
   { name: 'p7', team: 'Team Liquid', image: 'https://owcdn.net/img/61c31870ef077.png' },
   { name: 'p8', team: 'FNATIC', image: 'https://owcdn.net/img/63fd958f30c12.png' },
 ];
 
 const ProPlayersCarousel = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const playersPerPage = 5;
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) => {
-      if (prev === 0) {
-        return proPlayers.length - playersPerPage;
-      }
-      return prev - 1;
-    });
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => {
-      if (prev >= proPlayers.length - playersPerPage) {
-        return 0;
-      }
-      return prev + 1;
-    });
-  };
-
-  // Get visible players, wrapping around if necessary
-  const getVisiblePlayers = () => {
-    const players = [];
-    for (let i = 0; i < playersPerPage; i++) {
-      const index = (currentIndex + i) % proPlayers.length;
-      players.push({ ...proPlayers[index], key: currentIndex + i });
-    }
-    return players;
-  };
-
-  const visiblePlayers = getVisiblePlayers();
+  // Duplicate the array to create seamless loop
+  const duplicatedPlayers = [...proPlayers, ...proPlayers];
 
   return (
-    <div className="w-full py-2">
+    <div className="w-full py-2 overflow-hidden">
       {/* Header Text */}
       <p className="text-center text-slate-400 text-sm mb-8">
         Used by top and former Valorant professionals and coaches
       </p>
       
-      <div className="relative flex items-center justify-center gap-4">
-        {/* Left Arrow */}
-        <button
-          onClick={handlePrev}
-          className="text-white/50 hover:text-white transition-colors"
-          aria-label="Previous players"
+      <div className="relative">
+        {/* Infinite scrolling container */}
+        <motion.div
+          className="flex gap-8"
+          animate={{
+            x: [0, -((proPlayers.length * 160))], // 160px = width (128px) + gap (32px) per item
+          }}
+          transition={{
+            x: {
+              repeat: Infinity,
+              repeatType: "loop",
+              duration: 20,
+              ease: "linear",
+            },
+          }}
         >
-          <ChevronLeft className="w-8 h-8" />
-        </button>
-
-        {/* Players Container */}
-        <div className="flex gap-8 justify-center items-center flex-1 max-w-3xl">
-          {visiblePlayers.map((player) => (
+          {duplicatedPlayers.map((player, index) => (
             <div
-              key={player.key}
-              className="flex flex-col items-center gap-3 w-24"
+              key={index}
+              className="flex flex-col items-center gap-3 w-32 flex-shrink-0"
             >
               {/* Player Image */}
-              <div className="w-20 h-20 rounded-lg overflow-hidden border-2 border-white/10 bg-slate-900/50 backdrop-blur-sm">
+              <div className="w-32 h-32 rounded-lg overflow-hidden border-2 border-white/10 bg-slate-900/50 backdrop-blur-sm">
                 <img
                   src={player.image}
                   alt={player.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     // Fallback if image fails to load
-                    e.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="80" height="80" fill="%231e293b"/><text x="50%" y="50%" font-size="24" fill="%2394a3b8" text-anchor="middle" dy=".3em">' + player.name[0] + '</text></svg>';
+                    e.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="128" height="128" fill="%231e293b"/><text x="50%" y="50%" font-size="32" fill="%2394a3b8" text-anchor="middle" dy=".3em">' + player.name[0] + '</text></svg>';
                   }}
                 />
               </div>
@@ -90,16 +68,7 @@ const ProPlayersCarousel = () => {
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Right Arrow */}
-        <button
-          onClick={handleNext}
-          className="text-white/50 hover:text-white transition-colors"
-          aria-label="Next players"
-        >
-          <ChevronRight className="w-8 h-8" />
-        </button>
+        </motion.div>
       </div>
     </div>
   );
