@@ -290,9 +290,9 @@ const ScoutingReport: React.FC<ScoutingReportProps> = ({
                                 <GlassBox key={index} className="hover:border-blue-400/50 transition-colors">
                                     <div className="flex items-center gap-3 mb-2">
                                         <Icon className={`w-5 h-5 ${color}`} />
-                                        <p className="text-white text-lg font-bold">{insight.title}</p>
+                                        <p className="text-2xl font-bold text-white">{insight.title}</p>
                                     </div>
-                                    <p className="text-sm text-blue-200/70 leading-relaxed">{insight.description}</p>
+                                    <p className="text-sm text-white leading-relaxed">{insight.description}</p>
                                 </GlassBox>
                             );
                         })}
@@ -302,16 +302,16 @@ const ScoutingReport: React.FC<ScoutingReportProps> = ({
                 {/* Tempo & Execution Summary */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                     <div className="flex flex-col h-full">
-                        <h2 className="text-2xl font-bold text-white mb-4">Tempo Profile</h2>
+                        <h2 className="text-2xl font-bold text-white mb-4">Tempo</h2>
                         <GlassBox className="flex-1">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-blue-200/70 text-sm mb-1">Pace Style</p>
-                                    <p className="text-2xl font-bold text-white">{scoutData.tempo.tempoStyle}</p>
+                                    <p className="text-2xl font-bold text-white">Pace Style</p>
+                                    <p className="text-xl font-bold text-white">{scoutData.tempo.tempoStyle}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-blue-200/70 text-sm mb-1">Avg. Contact</p>
-                                    <p className="text-2xl font-bold text-blue-400">{scoutData.tempo.avgTimeToFirstContact}s</p>
+                                    <p className="text-white text-sm mb-1">Avg. Contact</p>
+                                    <p className="text-2xl font-bold text-white">{scoutData.tempo.avgTimeToFirstContact}s</p>
                                 </div>
                             </div>
                         </GlassBox>
@@ -320,8 +320,8 @@ const ScoutingReport: React.FC<ScoutingReportProps> = ({
                     <div className="flex flex-col h-full">
                         <h2 className="text-2xl font-bold text-white mb-4">Analysis Summary</h2>
                         <GlassBox className="flex-1 flex flex-col justify-center">
-                            <p className="text-blue-200/70 text-sm text-center leading-relaxed">
-                                The historical data for {teamName} shows a preference for <span className="text-white font-semibold">{scoutData.winConditions.overall.eliminationPct}% elimination wins</span>.
+                            <p className="text-white text-sm text-center leading-relaxed">
+                                The historical data for {teamName} shows a preference for <span className="font-semibold">{scoutData.winConditions.overall.eliminationPct}% elimination wins</span>.
                                 Disrupting their coordination in mid-round aim duels is statistically the most viable counter.
                             </p>
                         </GlassBox>
