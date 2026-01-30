@@ -2,13 +2,13 @@ const fs = require('fs');
 const path = require('path');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// Initialize Gemini API
-const API_KEY = process.env.GEMINI_API_KEY;
-if (!API_KEY) {
-  console.warn("WARNING: GEMINI_API_KEY is not set. AI writing features will fail.");
+// Default Gemini client (uses env API key)
+const defaultApiKey = process.env.GEMINI_API_KEY;
+const defaultGenAI = defaultApiKey ? new GoogleGenerativeAI(defaultApiKey) : null;
+
+if (!defaultApiKey) {
+  console.warn("WARNING: GEMINI_API_KEY is not set. AI writing features will require user-provided API key.");
 }
-const genAI = new GoogleGenerativeAI(API_KEY || 'dummy');
-const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
 /**
  * Service to run the "Pass 2" Writing.
@@ -39,10 +39,21 @@ class AiWriterService {
      * generateReport
      * @param {Object} analystOutput - The structured JSON from the AiAnalystService.
      * @param {Object} metadata - Extra info (team names, map, date, roster) to fill in headers.
+     * @param {string} userApiKey - Optional user-provided API key (overrides env key).
      * @returns {String} - The final Markdown report.
      */
-    async generateReport(analystOutput, metadata) {
+    async generateReport(analystOutput, metadata, userApiKey = null) {
         try {
+            // Use user's API key if provided, otherwise fall back to env
+            const apiKey = userApiKey || defaultApiKey;
+            if (!apiKey) {
+                throw new Error('No Gemini API key provided. Please enter your API key or configure GEMINI_API_KEY in the server environment.');
+            }
+
+            // Create client with the appropriate key
+            const genAI = userApiKey ? new GoogleGenerativeAI(userApiKey) : defaultGenAI;
+            const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+
             const systemPrompt = await this.loadPrompt();
 
             // Build roster list if available

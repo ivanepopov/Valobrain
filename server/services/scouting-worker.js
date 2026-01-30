@@ -404,14 +404,14 @@ async function processJob(jobId) {
             });
         }
 
-        // 4. AI Analyst (Pass 1)
-        const analysis = await aiAnalyst.analyzeMatch(digest);
-        reportQueue.updateJob(jobId, { 
+        // 4. AI Analyst (Pass 1) - Pass user's API key if provided
+        const analysis = await aiAnalyst.analyzeMatch(digest, job.apiKey);
+        reportQueue.updateJob(jobId, {
             stages: { ...job.stages, analyst: 'completed', writer: 'processing' },
             progress: 75
         });
 
-        // 5. AI Writer (Pass 2)
+        // 5. AI Writer (Pass 2) - Pass user's API key if provided
         const report = await aiWriter.generateReport(analysis, {
             targetTeam: job.teamName,
             map: matchData ? matchData.mapName : digest.meta.map, // Use digest map if matchData is null
@@ -419,7 +419,7 @@ async function processJob(jobId) {
             tournament: digest.meta.tournament,
             roster: digest.meta.roster,
             roundScore: digest.stats.roundScore // Pass the correct round score to writer
-        });
+        }, job.apiKey);
 
         // 6. Complete
         reportQueue.updateJob(jobId, { 

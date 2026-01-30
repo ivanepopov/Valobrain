@@ -45,6 +45,7 @@ export interface AIInsightReportState {
   selectedSeries: TransformedSeries | null;
   selectedReportMap: string;
   jobId: string | null;
+  userApiKey: string;
 }
 
 export const initialAIInsightReportState: AIInsightReportState = {
@@ -55,5 +56,6 @@ export const initialAIInsightReportState: AIInsightReportState = {
   error: null,
   selectedSeries: null,
   selectedReportMap: 'all',
-  jobId: null
+  jobId: null,
+  userApiKey: ''
 };

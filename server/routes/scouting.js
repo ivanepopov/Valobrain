@@ -12,6 +12,9 @@ router.post('/:seriesId/report', async (req, res) => {
     const { seriesId } = req.params;
     const { team, map } = req.query;
 
+    // Extract user-provided API key from header (optional)
+    const userApiKey = req.headers['x-gemini-api-key'] || null;
+
     if (!team) {
         return res.status(400).json({ error: "Team parameter is required (?team=TeamName)" });
     }
@@ -20,8 +23,8 @@ router.post('/:seriesId/report', async (req, res) => {
     const targetMap = (map && map.toLowerCase() !== 'all') ? map : null;
 
     try {
-        // Enqueue Job with optional map parameter
-        const jobId = reportQueue.addJob(seriesId, team, targetMap);
+        // Enqueue Job with optional map parameter and API key
+        const jobId = reportQueue.addJob(seriesId, team, targetMap, userApiKey);
         const job = reportQueue.getJob(jobId);
 
         // Trigger Worker (Fire and Forget)
