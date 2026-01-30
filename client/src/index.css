@@ -115,4 +115,5 @@
 html {
   font-size: var(--font-size);
   overflow-y: scroll;
+  scroll-behavior: smooth;
 }

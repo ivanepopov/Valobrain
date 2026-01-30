@@ -1,9 +1,29 @@
 import { Brain } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 const Header = () => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    if (!isHomePage) return;
+
+    const handleScroll = () => {
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.scrollY;
+      const scrollableHeight = documentHeight - windowHeight;
+      const progress = (scrollTop / scrollableHeight) * 100;
+      setScrollProgress(Math.min(progress, 100));
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initialize on mount
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isHomePage]);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -22,7 +42,7 @@ const Header = () => {
           </Link>
 
           {isHomePage && (
-            <nav className="flex items-center gap-6">
+            <nav className="flex items-center gap-6 relative">
               <button
                 onClick={() => scrollToSection('features')}
                 className="text-blue-200 hover:text-white transition-colors text-sm font-medium"
@@ -47,6 +67,14 @@ const Header = () => {
               >
                 Get Started
               </button>
+              
+              {/* Scroll Progress Indicator */}
+              <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-white/10">
+                <div 
+                  className="h-full bg-blue-400 transition-all duration-150 ease-out"
+                  style={{ width: `${scrollProgress}%` }}
+                />
+              </div>
             </nav>
           )}
         </div>
