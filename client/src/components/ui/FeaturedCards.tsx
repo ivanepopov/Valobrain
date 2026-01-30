@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import matchHistoryImg from '../../assets/features_images/match_history.png';
 import analytics1Img from '../../assets/features_images/analytics_1.png';
 import analytics2Img from '../../assets/features_images/analytics_2.png';
+import tacticalReportImg from '../../assets/features_images/tactical_report.png';
 import ai1Img from '../../assets/features_images/ai_1.png';
 import ai2Img from '../../assets/features_images/ai_2.png';
 import ai3Img from '../../assets/features_images/ai_3.png';
@@ -14,13 +15,14 @@ const FeaturedCards = () => {
         matchHistoryImg,    // 0 - Match History
         analytics1Img,      // 1 - Analytics
         analytics2Img,      // 2 - Analytics
-        ai1Img,            // 3 - AI Insights
-        ai2Img,            // 4 - AI Insights
-        ai3Img,            // 5 - AI Insights
+        tacticalReportImg,  // 3 - Tactical Report
+        ai1Img,            // 4 - AI Insights
+        ai2Img,            // 5 - AI Insights
+        ai3Img,            // 6 - AI Insights
     ];
 
     // Map image index to feature index
-    const imageToFeatureMap = [0, 1, 1, 3, 3, 3];
+    const imageToFeatureMap = [0, 1, 1, 2, 3, 3, 3];
 
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isPlaying, setIsPlaying] = useState(true);

@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import {
     Target,
-    TrendingUp,
     AlertCircle,
     Loader2,
-    ShieldCheck,
     Trophy,
+    Crosshair,
+    Shield,
+    Users,
+    Zap,
 } from 'lucide-react';
-import MapFilter from "../ui/MapFilter.tsx";
-import HistoryFilter from "../ui/HistoryFilter.tsx";
+import { GlassBox } from "../ui/GlassBox.tsx";
 
 interface ScoutingReportProps {
     teamName?: string;
@@ -29,42 +30,12 @@ const ScoutingReport: React.FC<ScoutingReportProps> = ({
     const [selectedMap, setSelectedMap] = useState<string>("All");
     const [selectedSeries, setSelectedSeries] = useState<string>("All");
 
-    const seriesOptions = [
-        { value: "All", label: "Aggregate All" },
-        ...rawData.map((series, idx) => {
-            // 1. Determine Opponent Name
-            const opponent = series.rounds?.[0]?.winner === teamName
-                ? series.rounds.find((r: any) => r.winner !== teamName)?.winner || "Unknown"
-                : series.rounds?.[0]?.winner || "Unknown";
-
-            // 2. Group rounds by map to calculate Map Wins
-            const mapResults: Record<string, { teamRounds: number; opponentRounds: number }> = {};
-
-            series.rounds?.forEach((r: any) => {
-                if (!mapResults[r.mapName]) {
-                    mapResults[r.mapName] = { teamRounds: 0, opponentRounds: 0 };
-                }
-                if (r.winner === teamName) mapResults[r.mapName].teamRounds++;
-                else if (r.winner === opponent) mapResults[r.mapName].opponentRounds++;
-            });
-
-            let teamMapWins = 0;
-            let opponentMapWins = 0;
-
-            Object.values(mapResults).forEach(res => {
-                if (res.teamRounds > res.opponentRounds) teamMapWins++;
-                else if (res.opponentRounds > res.teamRounds) opponentMapWins++;
-            });
-
-            const result = teamMapWins > opponentMapWins ? 'W' : 'L';
-
-            return {
-                value: idx.toString(),
-                label: `vs ${opponent} (${teamMapWins}-${opponentMapWins} ${result})`
-            };
-        })
+    const timeframeOptions = [
+        { value: "All", label: "All" },
+        { value: "Last 30 Days", label: "Last 30 Days" },
+        { value: "Last 60 Days", label: "Last 60 Days" },
+        { value: "Last 90 Days", label: "Last 90 Days" },
     ];
-
 
     const aggregateData = (allData: any[], mapFilter: string, seriesFilter: string) => {
         // Handle Single Series Selection (Uses Backend Analysis)
@@ -195,134 +166,168 @@ const ScoutingReport: React.FC<ScoutingReportProps> = ({
 
     if (isLoading && rawData.length === 0) {
         return (
-            <div
-                className="flex flex-col items-center justify-center py-24 bg-slate-900/20 rounded-3xl border border-slate-800/50">
+            <GlassBox className="flex flex-col items-center justify-center py-24">
                 <div className="relative mb-6">
-                    <Loader2 className="w-12 h-12 animate-spin text-blue-500"/>
-                    <Trophy className="w-5 h-5 text-blue-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse"/>
+                    <Loader2 className="w-12 h-12 animate-spin text-blue-900"/>
+                    <Trophy className="w-5 h-5 text-blue-900 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse"/>
                 </div>
-                <h3 className="text-xl font-black uppercase tracking-widest italic text-white">
-                    Deep Intelligence Mining
+                <h3 className="text-xl font-bold text-white">
+                    Analyzing Match Data
                 </h3>
-                <p className="text-slate-500 mt-2 font-bold uppercase text-[10px] tracking-[0.3em] text-center px-4">
+                <p className="text-blue-200/70 mt-2 text-sm">
                     {progress.status}
                 </p>
-                <p className="text-blue-400 font-black uppercase text-xs tracking-wider mt-1">
+                <p className="text-blue-400 font-semibold text-sm mt-1">
                     Series {progress.current} of {progress.total}
                 </p>
-                <div className="w-48 h-1.5 bg-slate-800 rounded-full mt-6 overflow-hidden">
+                <div className="w-48 h-1.5 bg-white/10 rounded-full mt-6 overflow-hidden">
                     <div
-                        className="h-full bg-blue-500 transition-all duration-1000 ease-in-out"
+                        className="h-full bg-blue-900 transition-all duration-1000 ease-in-out"
                         style={{width: `${(progress.current / progress.total) * 100}%` }}
                     />
                 </div>
-            </div>
+            </GlassBox>
         );
     }
 
     if (error && rawData.length === 0) {
         return (
-            <div className="p-8 bg-red-500/5 border border-red-500/20 rounded-2xl flex items-center gap-4 text-red-400">
+            <GlassBox className="flex items-center gap-4 text-red-400">
                 <AlertCircle className="w-6 h-6 shrink-0" />
-                <p className="font-medium uppercase tracking-wider text-sm">{error}</p>
-            </div>
+                <p className="font-medium text-sm">{error}</p>
+            </GlassBox>
         );
     }
 
+    const VALORANT_MAPS = ["All", "Abyss", "Ascent", "Bind", "Breeze", "Corrode", "Fracture", "Haven", "Icebox", "Lotus", "Pearl", "Split", "Sunset"];
+
+    const getCategoryIcon = (category: string) => {
+        const lowerCategory = category.toLowerCase();
+        if (lowerCategory.includes('attack')) return { Icon: Crosshair, color: 'text-red-400' };
+        if (lowerCategory.includes('defense')) return { Icon: Shield, color: 'text-blue-400' };
+        if (lowerCategory.includes('player')) return { Icon: Users, color: 'text-purple-400' };
+        if (lowerCategory.includes('conditioning') || lowerCategory.includes('playstyle')) return { Icon: Zap, color: 'text-yellow-400' };
+        return { Icon: Target, color: 'text-green-400' };
+    };
+
     return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-8">
         {/* Header Section */}
-        <div className="flex flex-col xl:flex-row xl:items-end justify-between border-b border-slate-800 pb-6 gap-6">
-            <div>
-                <div className="flex items-center gap-2 text-blue-400 mb-2">
-                    <ShieldCheck className="w-4 h-4" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em]">Advanced Tactical Analysis</span>
+       
+
+        {/* Filters */}
+        <GlassBox>
+            <div className="space-y-6">
+                {/* Map Filter */}
+                <div>
+                    <label className="text-blue-200 text-sm mb-2 block">Filter by Map</label>
+                    <div className="flex gap-2 flex-wrap">
+                        {VALORANT_MAPS.map(map => (
+                            <button
+                                key={map}
+                                onClick={() => setSelectedMap(map)}
+                                className={`
+                                    px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
+                                    ${selectedMap === map
+                                        ? 'bg-blue-900 text-white'
+                                        : 'bg-white/5 text-blue-200 hover:bg-white/10'
+                                    }
+                                `}
+                            >
+                                {map}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-                <h2 className="text-3xl font-black uppercase italic tracking-tighter">
-                    Tactical Report: <span className="text-blue-500">{teamName || 'Unknown Team'}</span>
-                </h2>
-            </div>
 
-            <div className="flex flex-wrap gap-3">
-                {/* Series Filter */}
-                <HistoryFilter
-                    value={selectedSeries}
-                    onChange={(val) => {
-                        setSelectedSeries(val);
-                        if (val !== "All") setSelectedMap("All");
-                    }}
-                    options={seriesOptions}
-                />
-
-                {/* Map Filter Component */}
-                <MapFilter selectedMap={selectedMap} setSelectedMap={setSelectedMap} selectedSeries={selectedSeries} />
+                {/* Timeframe Filter */}
+                <div>
+                    <label className="text-blue-200 text-sm mb-2 block">Filter by Timeframe</label>
+                    <div className="flex gap-2 flex-wrap">
+                        {timeframeOptions.map((option, idx) => (
+                            <button
+                                key={`${option.value}-${idx}`}
+                                onClick={() => setSelectedSeries(option.value)}
+                                className={`
+                                    px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
+                                    ${selectedSeries === option.value
+                                        ? 'bg-blue-900 text-white'
+                                        : 'bg-white/5 text-blue-200 hover:bg-white/10'
+                                    }
+                                `}
+                            >
+                                {option.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
             </div>
-        </div>
+        </GlassBox>
 
         {!scoutData ? (
-            <div className="p-24 bg-slate-900/10 border border-dashed border-slate-800 rounded-3xl text-center">
-                <Target className="w-12 h-12 text-slate-800 mx-auto mb-4" />
-                <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">No match records found for {selectedMap}</p>
+            <GlassBox className="p-24 text-center">
+                <Target className="w-12 h-12 text-white/30 mx-auto mb-4" />
+                <p className="text-blue-200/70 text-sm">No match records found for {selectedMap}</p>
                 <button
                     onClick={() => {
                         setSelectedMap('All');
                         setSelectedSeries('All');
                     }}
-                    className="mt-4 text-blue-500 text-[10px] font-black uppercase tracking-[0.3em] hover:text-blue-400 transition-colors"
+                    className="mt-4 px-6 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors text-sm font-medium"
                 >
                     Reset Filter
                 </button>
-            </div>
+            </GlassBox>
         ) : (
             <>
-                {/* Tactical Insights Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {scoutData.analysis.map((insight: any, index: number) => (
-                        <div key={index} className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-blue-500/30 transition-colors group">
-                            <div className="flex items-center justify-between mb-4">
-                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-800 px-2 py-1 rounded">
-                                {insight.category}
-                            </span>
-                                <Target className="w-4 h-4 text-slate-700 group-hover:text-blue-500 transition-colors" />
-                            </div>
-                            <h4 className="text-lg font-bold text-white mb-2">{insight.title}</h4>
-                            <p className="text-sm text-slate-400 leading-relaxed">{insight.description}</p>
-                        </div>
-                    ))}
+                {/* Tactical Insights Section */}
+                <div>
+                    <h2 className="text-2xl font-bold text-white mb-4">Tactical Insights</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {scoutData.analysis.map((insight: any, index: number) => {
+                            const { Icon, color } = getCategoryIcon(insight.category);
+                            return (
+                                <GlassBox key={index} className="hover:border-blue-400/50 transition-colors">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <Icon className={`w-5 h-5 ${color}`} />
+                                        <p className="text-white text-lg font-bold">{insight.title}</p>
+                                    </div>
+                                    <p className="text-sm text-blue-200/70 leading-relaxed">{insight.description}</p>
+                                </GlassBox>
+                            );
+                        })}
+                    </div>
                 </div>
 
                 {/* Tempo & Execution Summary */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="bg-linear-to-br from-slate-900 to-black border border-slate-800 rounded-2xl p-8">
-                        <div className="flex items-center gap-3 mb-6">
-                            <TrendingUp className="w-5 h-5 text-green-400" />
-                            <h3 className="font-black uppercase italic tracking-widest text-sm">Tempo Profile</h3>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Pace Style</p>
-                                <p className="text-2xl font-black text-white uppercase italic">{scoutData.tempo.tempoStyle}</p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                    <div className="flex flex-col h-full">
+                        <h2 className="text-2xl font-bold text-white mb-4">Tempo Profile</h2>
+                        <GlassBox className="flex-1">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-blue-200/70 text-sm mb-1">Pace Style</p>
+                                    <p className="text-2xl font-bold text-white">{scoutData.tempo.tempoStyle}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-blue-200/70 text-sm mb-1">Avg. Contact</p>
+                                    <p className="text-2xl font-bold text-blue-400">{scoutData.tempo.avgTimeToFirstContact}s</p>
+                                </div>
                             </div>
-                            <div className="text-right">
-                                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Avg. Contact</p>
-                                <p className="text-2xl font-black text-blue-500 italic">{scoutData.tempo.avgTimeToFirstContact}s</p>
-                            </div>
-                        </div>
+                        </GlassBox>
                     </div>
 
-                    <div className="bg-slate-900/30 border border-dashed border-slate-800 rounded-2xl p-8 flex flex-col justify-center">
-                        <p className="text-slate-500 text-sm italic text-center leading-relaxed">
-                            "The historical data for {teamName} shows a preference for <span className="text-white font-bold">{scoutData.winConditions.overall.eliminationPct}% elimination wins</span>.
-                            Disrupting their coordination in mid-round aim duels is statistically the most viable counter."
-                        </p>
+                    <div className="flex flex-col h-full">
+                        <h2 className="text-2xl font-bold text-white mb-4">Analysis Summary</h2>
+                        <GlassBox className="flex-1 flex flex-col justify-center">
+                            <p className="text-blue-200/70 text-sm text-center leading-relaxed">
+                                The historical data for {teamName} shows a preference for <span className="text-white font-semibold">{scoutData.winConditions.overall.eliminationPct}% elimination wins</span>.
+                                Disrupting their coordination in mid-round aim duels is statistically the most viable counter.
+                            </p>
+                        </GlassBox>
                     </div>
                 </div>
 
-                <div className="text-center">
-                    <p className="text-slate-700 text-[9px] font-black uppercase tracking-[0.4em]">
-                        {scoutData.isSingleSeries ? 'Detailed Series Analysis' : `Aggregated from ${scoutData.seriesCount} series records`}
-                    </p>
-                </div>
             </>
         )}
     </div>
