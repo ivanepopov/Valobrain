@@ -1,6 +1,6 @@
-import {motion} from "motion/react";
-import {BarChart3, FileText, Search, Sparkles, ChevronLeft, ChevronRight} from "lucide-react";
-import { useState } from "react";
+import {motion, AnimatePresence} from "motion/react";
+import {BarChart3, FileText, Search, Sparkles} from "lucide-react";
+import { useState, useEffect } from "react";
 import matchHistoryImg from '../../assets/features_images/match_history.png';
 import analytics1Img from '../../assets/features_images/analytics_1.png';
 import analytics2Img from '../../assets/features_images/analytics_2.png';
@@ -9,42 +9,56 @@ import ai2Img from '../../assets/features_images/ai_2.png';
 import ai3Img from '../../assets/features_images/ai_3.png';
 
 const FeaturedCards = () => {
-    const [activeFeature, setActiveFeature] = useState(0);
-    const [analyticsImageIndex, setAnalyticsImageIndex] = useState(0);
-    const [aiImageIndex, setAiImageIndex] = useState(0);
+    // All images in sequence
+    const allImages = [
+        matchHistoryImg,    // 0 - Match History
+        analytics1Img,      // 1 - Analytics
+        analytics2Img,      // 2 - Analytics
+        ai1Img,            // 3 - AI Insights
+        ai2Img,            // 4 - AI Insights
+        ai3Img,            // 5 - AI Insights
+    ];
 
-    const analyticsImages = [ analytics1Img, analytics2Img];
-    const aiImages = [ai1Img, ai2Img, ai3Img];
+    // Map image index to feature index
+    const imageToFeatureMap = [0, 1, 1, 3, 3, 3];
+
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(true);
+
+    // Auto-play carousel
+    useEffect(() => {
+        if (!isPlaying) return;
+
+        const timer = setInterval(() => {
+            setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+        }, 3000);
+
+        return () => clearInterval(timer);
+    }, [isPlaying, allImages.length]);
+
+    // Auto-update active feature based on current image
+    const activeFeature = imageToFeatureMap[currentImageIndex];
 
     const features = [
         {
             icon: <BarChart3 className="w-8 h-8" />,
             title: 'Match History',
             description: 'Track and analyze team matches',
-            previewImage: matchHistoryImg,
         },
         {
             icon: <Search className="w-8 h-8" />,
             title: 'Analytics',
             description: 'Deep dive into performance metrics and overall team stats',
-            previewImage: analyticsImages[analyticsImageIndex],
-            hasCarousel: true,
-            carouselType: 'analytics',
         },
         {
             icon: <FileText className="w-8 h-8" />,
             title: 'Tactical Report',
             description: 'Gain access to comprehensive reports on team strategies',
-            previewImage: '/featured/tactical-preview.png',
         },
-
         {
             icon: <Sparkles className="w-8 h-8" />,
             title: 'AI Insights',
             description: 'Generate AI driven insights to enhance in-game performance',
-            previewImage: aiImages[aiImageIndex],
-            hasCarousel: true,
-            carouselType: 'ai',
         },
     ];
 
@@ -82,7 +96,14 @@ const FeaturedCards = () => {
                             transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
                         >
                             <button
-                                onClick={() => setActiveFeature(index)}
+                                onClick={() => {
+                                    // Find the first image index for this feature
+                                    const firstImageIndex = imageToFeatureMap.findIndex(f => f === index);
+                                    if (firstImageIndex !== -1) {
+                                        setCurrentImageIndex(firstImageIndex);
+                                        setIsPlaying(false); // Pause when user manually selects
+                                    }
+                                }}
                                 className={`w-full backdrop-blur-md bg-white/5 border rounded-lg p-4 hover:border-blue-400/50 hover:bg-white/10 transition-all duration-300 h-40 flex flex-col justify-center ${
                                     activeFeature === index ? 'border-blue-400 bg-white/10 ring-2 ring-blue-400/30' : 'border-white/10'
                                 }`}
@@ -104,7 +125,7 @@ const FeaturedCards = () => {
                 </div>
             </motion.div>
 
-            {/* Preview Image Section */}
+            {/* Preview Image Section with Unified Carousel */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -112,54 +133,70 @@ const FeaturedCards = () => {
                 transition={{ duration: 0.6, delay: 0.5 }}
                 className="relative max-w-4xl mx-auto"
             >
+                {/* Carousel Container */}
                 <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4 overflow-hidden">
                     <div className="relative">
-                        <motion.div
-                            key={`${activeFeature}-${analyticsImageIndex}-${aiImageIndex}`}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.4 }}
-                            className="relative aspect-video bg-gradient-to-br from-slate-800/50 to-blue-900/30 rounded-xl overflow-hidden border border-white/10"
-                        >
-                            <img 
-                                src={features[activeFeature].previewImage} 
-                                alt={features[activeFeature].title}
-                                className="w-full h-full object-cover"
-                            />
-                        </motion.div>
-                        
-                        {/* Carousel arrows for features with carousel */}
-                        {features[activeFeature].hasCarousel && (
-                            <>
-                                <button
-                                    onClick={() => {
-                                        if (features[activeFeature].carouselType === 'analytics') {
-                                            setAnalyticsImageIndex((prev) => (prev === 0 ? analyticsImages.length - 1 : prev - 1));
-                                        } else if (features[activeFeature].carouselType === 'ai') {
-                                            setAiImageIndex((prev) => (prev === 0 ? aiImages.length - 1 : prev - 1));
-                                        }
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={currentImageIndex}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="relative aspect-video bg-gradient-to-br from-slate-800/50 to-blue-900/30 rounded-xl overflow-hidden border border-white/10"
+                            >
+                                <img 
+                                    src={allImages[currentImageIndex]} 
+                                    alt={features[activeFeature].title}
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                    onError={(e) => {
+                                        e.currentTarget.onerror = null;
+                                        e.currentTarget.src = '/vite.svg';
                                     }}
-                                    className="absolute left-2 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-all duration-300 hover:scale-110"
-                                    aria-label="Previous image"
-                                >
-                                    <ChevronLeft className="w-8 h-8" />
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        if (features[activeFeature].carouselType === 'analytics') {
-                                            setAnalyticsImageIndex((prev) => (prev === analyticsImages.length - 1 ? 0 : prev + 1));
-                                        } else if (features[activeFeature].carouselType === 'ai') {
-                                            setAiImageIndex((prev) => (prev === aiImages.length - 1 ? 0 : prev + 1));
-                                        }
-                                    }}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-all duration-300 hover:scale-110"
-                                    aria-label="Next image"
-                                >
-                                    <ChevronRight className="w-8 h-8" />
-                                </button>
-                            </>
-                        )}
+                                />
+                            </motion.div>
+                        </AnimatePresence>
                     </div>
+                </div>
+
+                {/* Bottom Controls - Outside the glass box */}
+                <div className="flex justify-center items-center gap-4 mt-6">
+                    {/* Dots Indicator */}
+                    <div className="flex gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full">
+                        {allImages.map((_, index) => (
+                            <button
+                                key={index}
+                                onClick={() => {
+                                    setCurrentImageIndex(index);
+                                    setIsPlaying(false); // Pause when user manually navigates
+                                }}
+                                className={`transition-all duration-300 rounded-full ${
+                                    currentImageIndex === index
+                                        ? "bg-blue-400 w-12 h-2"
+                                        : "bg-white/30 hover:bg-white/50 w-2 h-2"
+                                }`}
+                                aria-label={`Go to slide ${index + 1}`}
+                            />
+                        ))}
+                    </div>
+
+                    {/* Play/Pause Button */}
+                    <button
+                        onClick={() => setIsPlaying(!isPlaying)}
+                        className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full transition-all duration-300"
+                        aria-label={isPlaying ? "Pause carousel" : "Play carousel"}
+                    >
+                        {isPlaying ? (
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
+                            </svg>
+                        ) : (
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
+                        )}
+                    </button>
                 </div>
             </motion.div>
         </div>
