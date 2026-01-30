@@ -7,60 +7,73 @@ import {
 import axios from 'axios';
 import { GlassBox } from '../ui/GlassBox';
 import type { SeriesStats } from '../../types/SeriesStats';
+import type {
+  TransformedSeries,
+  ReportSections,
+  AIInsightReportState,
+  GenerationStage
+} from '../../types/AIInsight';
 
 interface AIInsightTabProps {
   teamName: string;
   seriesData: SeriesStats[];
   seriesIds: string[];
+  reportState: AIInsightReportState;
+  setReportState: React.Dispatch<React.SetStateAction<AIInsightReportState>>;
 }
 
-interface TransformedSeries {
-  id: string;
-  opponent: string;
-  result: 'win' | 'loss';
-  score: string;
-  date: string;
-  dateValue: number;
-  maps: string[];
-}
-
-interface ReportSections {
-  executiveSummary: string;
-  attackProtocols: {
-    defaultPhase: string;
-    executePhase: string;
-    tendencies: string[];
-  };
-  defenseSetups: {
-    standardSetups: string;
-    aggressivePlays: string;
-    tendencies: string[];
-  };
-  pistolEconomy: string;
-  playerIntel: Array<{
-    player: string;
-    agent: string;
-    insight: string;
-  }>;
-  counterStrats: Array<{
-    priority: number;
-    name: string;
-    advice: string;
-  }>;
-  coachNote: string;
-}
-
-export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabProps) {
+export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, setReportState }: AIInsightTabProps) {
+  // Local UI state (not persisted across tab switches)
   const [selectedMap, setSelectedMap] = useState<string>('All');
-  const [selectedSeries, setSelectedSeries] = useState<TransformedSeries | null>(null);
-  const [selectedReportMap, setSelectedReportMap] = useState<string>('all'); // Which map from series to generate report for
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [reportGenerated, setReportGenerated] = useState(false);
-  const [reportData, setReportData] = useState<ReportSections | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [generationStatus, setGenerationStatus] = useState<string>('');
-  const [generationStage, setGenerationStage] = useState<'idle' | 'digest' | 'analyst' | 'writer' | 'complete'>('idle');
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Destructure persisted state from props
+  const {
+    data: reportData,
+    isGenerating,
+    generationStage,
+    generationStatus,
+    error,
+    selectedSeries,
+    selectedReportMap,
+    jobId
+  } = reportState;
+
+  // Helper to check if report has been generated
+  const reportGenerated = reportData !== null;
+
+  // Helper functions to update persisted state
+  const setSelectedSeries = (series: TransformedSeries | null) => {
+    setReportState(prev => ({ ...prev, selectedSeries: series }));
+  };
+
+  const setSelectedReportMap = (map: string) => {
+    setReportState(prev => ({ ...prev, selectedReportMap: map }));
+  };
+
+  const setIsGenerating = (generating: boolean) => {
+    setReportState(prev => ({ ...prev, isGenerating: generating }));
+  };
+
+  const setReportData = (data: ReportSections | null) => {
+    setReportState(prev => ({ ...prev, data }));
+  };
+
+  const setError = (err: string | null) => {
+    setReportState(prev => ({ ...prev, error: err }));
+  };
+
+  const setGenerationStatus = (status: string) => {
+    setReportState(prev => ({ ...prev, generationStatus: status }));
+  };
+
+  const setGenerationStage = (stage: GenerationStage) => {
+    setReportState(prev => ({ ...prev, generationStage: stage }));
+  };
+
+  const setJobId = (id: string | null) => {
+    setReportState(prev => ({ ...prev, jobId: id }));
+  };
 
   // Track which series have available match data
   const [availableSeries, setAvailableSeries] = useState<Record<string, boolean>>({});
@@ -333,13 +346,12 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
     return actualSeriesMaps[selectedSeries.id] || selectedSeries.maps;
   };
 
-  const handleGenerateReport = async () => {
-    if (!selectedSeries) return;
-
-    setIsGenerating(true);
-    setError(null);
-    setGenerationStatus('Initiating report generation...');
-    setGenerationStage('idle');
+  // Start polling for a given job ID
+  const startPolling = (pollJobId: string) => {
+    // Clear any existing polling
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+    }
 
     // Timeout after 3 minutes
     const timeoutId = setTimeout(() => {
@@ -350,7 +362,72 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
       setError('Report generation timed out. Please try again.');
       setIsGenerating(false);
       setGenerationStatus('');
+      setJobId(null);
     }, 180000);
+
+    pollIntervalRef.current = setInterval(async () => {
+      try {
+        const statusRes = await axios.get(`/api/scouting/jobs/${pollJobId}`);
+        const job = statusRes.data;
+        console.log('[AI Insight] Job status:', job.status, 'stages:', job.stages);
+
+        // Update status message based on job stages
+        if (job.stages?.writer === 'processing' || job.stages?.writer === 'completed') {
+          setGenerationStage('writer');
+          setGenerationStatus('Generating scouting report...');
+        } else if (job.stages?.analyst === 'processing' || job.stages?.analyst === 'completed') {
+          setGenerationStage('analyst');
+          setGenerationStatus('AI analyzing tactical patterns...');
+        } else if (job.stages?.digest === 'processing' || job.stages?.digest === 'completed') {
+          setGenerationStage('digest');
+          setGenerationStatus('Building match digest...');
+        }
+
+        if (job.status === 'completed') {
+          clearTimeout(timeoutId);
+          if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+
+          setGenerationStage('complete');
+
+          // Parse the markdown report
+          const markdown = job.result?.reportMarkdown || '';
+          const parsed = parseMarkdownReport(markdown);
+          setReportData(parsed);
+          setIsGenerating(false);
+          setGenerationStatus('');
+          setGenerationStage('idle');
+          setJobId(null);
+        } else if (job.status === 'failed') {
+          clearTimeout(timeoutId);
+          if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+          setError(job.error || 'Report generation failed');
+          setIsGenerating(false);
+          setGenerationStatus('');
+          setGenerationStage('idle');
+          setJobId(null);
+        }
+      } catch (pollError) {
+        console.error('[AI Insight] Polling error:', pollError);
+      }
+    }, 2000);
+  };
+
+  // Resume polling if we have an active job when component mounts
+  useEffect(() => {
+    if (isGenerating && jobId) {
+      console.log('[AI Insight] Resuming polling for job:', jobId);
+      startPolling(jobId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
+
+  const handleGenerateReport = async () => {
+    if (!selectedSeries) return;
+
+    setIsGenerating(true);
+    setError(null);
+    setGenerationStatus('Initiating report generation...');
+    setGenerationStage('idle');
 
     try {
       // 1. Start report generation
@@ -359,59 +436,17 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
       const response = await axios.post(
         `/api/scouting/${selectedSeries.id}/report?team=${encodeURIComponent(teamName)}${mapParam}`
       );
-      const { jobId } = response.data;
-      console.log('[AI Insight] Job created:', jobId);
+      const { jobId: newJobId } = response.data;
+      console.log('[AI Insight] Job created:', newJobId);
 
+      // Store jobId so polling can resume if user navigates away
+      setJobId(newJobId);
       setGenerationStatus('Processing match data...');
 
-      // 2. Poll for completion
-      pollIntervalRef.current = setInterval(async () => {
-        try {
-          const statusRes = await axios.get(`/api/scouting/jobs/${jobId}`);
-          const job = statusRes.data;
-          console.log('[AI Insight] Job status:', job.status, 'stages:', job.stages);
-
-          // Update status message based on job stages
-          if (job.stages?.writer === 'processing' || job.stages?.writer === 'completed') {
-            setGenerationStage('writer');
-            setGenerationStatus('Generating scouting report...');
-          } else if (job.stages?.analyst === 'processing' || job.stages?.analyst === 'completed') {
-            setGenerationStage('analyst');
-            setGenerationStatus('AI analyzing tactical patterns...');
-          } else if (job.stages?.digest === 'processing' || job.stages?.digest === 'completed') {
-            setGenerationStage('digest');
-            setGenerationStatus('Building match digest...');
-          }
-
-          if (job.status === 'completed') {
-            clearTimeout(timeoutId);
-            if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-
-            setGenerationStage('complete');
-
-            // Parse the markdown report
-            const markdown = job.result?.reportMarkdown || '';
-            const parsed = parseMarkdownReport(markdown);
-            setReportData(parsed);
-            setReportGenerated(true);
-            setIsGenerating(false);
-            setGenerationStatus('');
-            setGenerationStage('idle');
-          } else if (job.status === 'failed') {
-            clearTimeout(timeoutId);
-            if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-            setError(job.error || 'Report generation failed');
-            setIsGenerating(false);
-            setGenerationStatus('');
-            setGenerationStage('idle');
-          }
-        } catch (pollError) {
-          console.error('[AI Insight] Polling error:', pollError);
-        }
-      }, 2000);
+      // 2. Start polling for completion
+      startPolling(newJobId);
 
     } catch (err: any) {
-      clearTimeout(timeoutId);
       console.error('[AI Insight] Failed to start:', err);
       setError(err.response?.data?.error || 'Failed to start report generation');
       setIsGenerating(false);
@@ -421,7 +456,6 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
 
   const handleFilterChange = () => {
     setSelectedSeries(null);
-    setReportGenerated(false);
     setReportData(null);
     setError(null);
   };
@@ -493,7 +527,6 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                   onClick={() => {
                     setSelectedSeries(series);
                     setSelectedReportMap('all'); // Reset to all maps when selecting new series
-                    setReportGenerated(false);
                     setReportData(null);
                     setError(null);
                   }}
