@@ -1,3 +1,4 @@
+    import { useMemo, memo } from "react";
 import type { SeriesStats } from "../../types/SeriesStats.ts";
 import type { Team } from "../../types/Team.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
@@ -5,51 +6,61 @@ import { Trophy, Target, Shield } from "lucide-react";
 import { motion } from "motion/react";
 
 type Props = {
-    team: Team | null;
+    team: Team;
     allSeriesData: SeriesStats[];
 }
 
-const TeamLevelStatsOverview = ({ team, allSeriesData }: Props) => {
-    if (!team) return null;
+const TeamLevelStatsOverview = memo(({ team, allSeriesData }: Props) => {
+    const stats = useMemo(() => {
+        let totalMatches = 0;
+        let matchesWon = 0;
+        
+        let totalAttackRounds = 0;
+        let attackRoundsWon = 0;
+        
+        let totalDefenseRounds = 0;
+        let defenseRoundsWon = 0;
 
-    let totalMatches = 0;
-    let matchesWon = 0;
-    
-    let totalAttackRounds = 0;
-    let attackRoundsWon = 0;
-    
-    let totalDefenseRounds = 0;
-    let defenseRoundsWon = 0;
+        allSeriesData.forEach(series => {
+            series.seriesState?.games?.forEach(game => {
+                const teamMatch = game.teams?.find(t => t.name === team.name);
+                if (!teamMatch) return;
 
-    allSeriesData.forEach(series => {
-        series.seriesState.games.forEach(game => {
-            const teamMatch = game.teams.find(t => t.name === team.name);
-            if (!teamMatch) return;
+                // 1. Match Win Rate
+                totalMatches++;
+                if (teamMatch.won) matchesWon++;
 
-            // 1. Match Win Rate
-            totalMatches++;
-            if (teamMatch.won) matchesWon++;
+                // 2. Round Win Rates (Segments represent rounds in Valorant)
+                game.segments?.forEach(segment => {
+                    const teamSegment = segment.teams?.find(t => t.name === team.name);
+                    if (!teamSegment) return;
 
-            // 2. Round Win Rates (Segments represent rounds in Valorant)
-            game.segments?.forEach(segment => {
-                const teamSegment = segment.teams.find(t => t.name === team.name);
-                if (!teamSegment) return;
-
-                const side = teamSegment.side.toLowerCase();
-                if (side === 'attacker') {
-                    totalAttackRounds++;
-                    if (teamSegment.won) attackRoundsWon++;
-                } else if (side === 'defender') {
-                    totalDefenseRounds++;
-                    if (teamSegment.won) defenseRoundsWon++;
-                }
+                    const side = teamSegment.side?.toLowerCase();
+                    if (side === 'attacker') {
+                        totalAttackRounds++;
+                        if (teamSegment.won) attackRoundsWon++;
+                    } else if (side === 'defender') {
+                        totalDefenseRounds++;
+                        if (teamSegment.won) defenseRoundsWon++;
+                    }
+                });
             });
         });
-    });
 
-    const matchWinRate = totalMatches > 0 ? (matchesWon / totalMatches) * 100 : 0;
-    const attackWinRate = totalAttackRounds > 0 ? (attackRoundsWon / totalAttackRounds) * 100 : 0;
-    const defenseWinRate = totalDefenseRounds > 0 ? (defenseRoundsWon / totalDefenseRounds) * 100 : 0;
+        const matchWinRate = totalMatches > 0 ? (matchesWon / totalMatches) * 100 : 0;
+        const attackWinRate = totalAttackRounds > 0 ? (attackRoundsWon / totalAttackRounds) * 100 : 0;
+        const defenseWinRate = totalDefenseRounds > 0 ? (defenseRoundsWon / totalDefenseRounds) * 100 : 0;
+
+        return {
+            matchWinRate,
+            attackWinRate,
+            defenseWinRate
+        };
+    }, [allSeriesData, team.name]);
+
+    if (!stats) return null;
+
+    const { matchWinRate, attackWinRate, defenseWinRate } = stats;
 
     return (
         <motion.div
@@ -95,6 +106,6 @@ const TeamLevelStatsOverview = ({ team, allSeriesData }: Props) => {
             </div>
         </motion.div>
     );
-};
+});
 
 export default TeamLevelStatsOverview;

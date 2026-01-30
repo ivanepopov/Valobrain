@@ -3,13 +3,12 @@
  *
  * Data surface for viewing match history.
  */
-import { useState, useEffect } from "react";
+import { useState, useMemo, memo } from "react";
 import { motion } from "motion/react";
 import { Users } from "lucide-react";
 import Series from "./Series.tsx";
 import Match from "./Match.tsx";
 import type { Team } from "../../types/Team.ts";
-import type { TeamStats } from "../../types/TeamStats.ts";
 import type { SeriesStats } from "../../types/SeriesStats.ts";
 import { formatDuration, capitalize } from "../../utils/formatters.ts";
 import { getMapImage } from "../../utils/mapImages.ts";
@@ -17,27 +16,28 @@ import { GlassBox } from "../ui/GlassBox.tsx";
 import LoadingPage from "../ui/LoadingPage.tsx";
 
 type Props = {
-    team: Team | null;
-    stats: TeamStats | null;
+    team: Team;
     allSeriesData: SeriesStats[];
     isLoadingSeries: boolean;
 }
 
-const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) => {
-    const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null);
+const MatchHistory = memo(({ team, allSeriesData, isLoadingSeries }: Props) => {
+
+    const initialSeriesId = useMemo(() => {
+        return allSeriesData[0]?.seriesState.games[0]?.id.split('-')[0] || null;
+    }, [allSeriesData]);
+
+    const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(initialSeriesId);
     const [selectedGameIndex, setSelectedGameIndex] = useState(0);
     const [selectedMapTab, setSelectedMapTab] = useState<string>('All Maps');
 
-    // Auto-select the first series once data arrives
-    useEffect(() => {
-        if (allSeriesData.length > 0 && !selectedSeriesId) {
-            const firstSeriesId = allSeriesData[0].seriesState.games[0]?.id.split('-')[0];
-            setSelectedSeriesId(firstSeriesId);
-        }
-    }, [allSeriesData, selectedSeriesId]);
+    // Update selectedSeriesId when data changes (but only if not manually selected)
+    const effectiveSeriesId = selectedSeriesId || initialSeriesId;
+
+    if (isLoadingSeries) return <LoadingPage />;
 
     const selectedSeriesData = allSeriesData.find(s =>
-        s.seriesState.games.some(game => game.id.startsWith(selectedSeriesId || "NEVER_MATCH"))
+        s.seriesState.games.some(game => game.id.startsWith(effectiveSeriesId || "NEVER_MATCH"))
     );
 
     const handleSeriesClick = (seriesId: string) => {
@@ -46,13 +46,11 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
         setSelectedMapTab('All Maps');
     };
 
-    if (!team || !stats || isLoadingSeries) return <LoadingPage />;
-
     // Calculate series score
     const getSeriesScore = () => {
-        if (!selectedSeriesData) return { wins: 0, losses: 0 };
+        if (!selectedSeriesData || !selectedSeriesData.seriesState?.games) return { wins: 0, losses: 0 };
         const wins = selectedSeriesData.seriesState.games.filter(g =>
-            g.teams.find(t => t.name === team.name)?.won
+            g.teams?.find(t => t.name === team.name)?.won
         ).length;
         const losses = selectedSeriesData.seriesState.games.length - wins;
         return { wins, losses };
@@ -60,7 +58,7 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
 
     const seriesScore = getSeriesScore();
     const isSeriesWin = seriesScore.wins > seriesScore.losses;
-    const opponent = selectedSeriesData?.seriesState.teams.find(t => t.id !== team.id);
+    const opponent = selectedSeriesData?.seriesState?.teams?.find(t => t.id !== team.id);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
@@ -140,16 +138,16 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
 
                                     </div>
 
-                                    {selectedSeriesData.seriesState.games.map((game, idx) => {
-                                        const gameTeam = game.teams.find(t => t.name === team.name);
+                                    {selectedSeriesData.seriesState?.games?.map((game, idx) => {
+                                        const gameTeam = game.teams?.find(t => t.name === team.name);
                                         const isWin = gameTeam?.won;
                                         
                                         // Calculate round scores from segments
                                         const teamRoundsWon = game.segments?.filter(s => 
-                                            s.teams.find(t => t.name === team.name)?.won
+                                            s.teams?.find(t => t.name === team.name)?.won
                                         ).length || 0;
                                         const opponentRoundsWon = game.segments?.filter(s => 
-                                            s.teams.find(t => t.name !== team.name)?.won
+                                            s.teams?.find(t => t.name !== team.name)?.won
                                         ).length || 0;
                                         
                                         return (
@@ -171,7 +169,7 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
                                                     }
                                                 `}
                                                 style={{
-                                                    backgroundImage: getMapImage(game.map.name) ? `url(${getMapImage(game.map.name)})` : undefined,
+                                                    backgroundImage: game.map?.name && getMapImage(game.map.name) ? `url(${getMapImage(game.map.name)})` : undefined,
                                                     backgroundSize: 'cover',
                                                     backgroundPosition: 'center',
                                                 }}
@@ -182,7 +180,7 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
                                                 
                                                
                                                 <div className="relative z-10 flex flex-col items-center gap-1">
-                                                    <span className="text-white font-semibold text-15 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{capitalize(game.map.name)}</span>
+                                                    <span className="text-white font-semibold text-15 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{game.map?.name ? capitalize(game.map.name) : 'Unknown'}</span>
                                                     <span className={`text-lg font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${isWin ? 'text-green-400' : 'text-red-400'}`}>
                                                         {teamRoundsWon}-{opponentRoundsWon}
                                                     </span>
@@ -217,6 +215,6 @@ const MatchHistory = ({ team, stats, allSeriesData, isLoadingSeries }: Props) =>
             </div>
         </div>
     );
-};
+});
 
 export default MatchHistory;

@@ -4,85 +4,98 @@ import type {SeriesStats} from "../../types/SeriesStats.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
 import { getAgentLogo } from '../../utils/agentLogos';
 import { capitalize } from '../../utils/formatters';
+import { useMemo, memo } from "react";
+
+interface PlayerRosterItem {
+    id: string;
+    nickname: string;
+}
 
 type Props = {
-    team: Team | null;
-    roster: any[];
+    team: Team;
+    roster: PlayerRosterItem[];
     allSeriesData: SeriesStats[];
 };
 
-    // Helper to compute player stats
-    const computePlayerStats = (playerName: string, seriesData: SeriesStats[]) => {
-        let totalKills = 0;
-        let totalDeaths = 0;
-        let totalAssists = 0;
-        let totalDamage = 0;
-        let totalRounds = 0;
-        let firstKills = 0;
-        const agentCounts: Record<string, number> = {};
+// Helper to compute player stats
+const computePlayerStats = (playerName: string, seriesData: SeriesStats[]) => {
+    let totalKills = 0;
+    let totalDeaths = 0;
+    let totalAssists = 0;
+    let totalDamage = 0;
+    let totalRounds = 0;
+    let firstKills = 0;
+    const agentCounts: Record<string, number> = {};
 
-        seriesData.forEach(series => {
-            series.seriesState.games.forEach(game => {
-                const playerMatch = game.teams
-                    .flatMap(t => t.players)
-                    .find(p => p.name === playerName);
+    seriesData.forEach(series => {
+        series.seriesState?.games?.forEach(game => {
+            const playerMatch = game.teams
+                ?.flatMap(t => t.players || [])
+                .find(p => p.name === playerName);
 
-                if (playerMatch) {
-                    totalKills += playerMatch.kills;
-                    totalDeaths += playerMatch.deaths;
-                    totalAssists += playerMatch.killAssistsGiven;
+            if (playerMatch) {
+                totalKills += playerMatch.kills || 0;
+                totalDeaths += playerMatch.deaths || 0;
+                totalAssists += playerMatch.killAssistsGiven || 0;
 
-                    const agentName = playerMatch.character.name;
+                const agentName = playerMatch.character?.name;
+                if (agentName) {
                     agentCounts[agentName] = (agentCounts[agentName] || 0) + 1;
-
-                    game.segments.forEach(segment => {
-                        totalRounds++;
-                        const playerSegment = segment.teams
-                            .flatMap(t => t.players)
-                            .find(p => p.name === playerName);
-                    
-                        if (playerSegment) {
-                            totalDamage += playerSegment.damageDealt || 0;
-                            if (playerSegment.firstKill) firstKills += 1;
-                        }
-                    });
                 }
-            });
+
+                game.segments?.forEach(segment => {
+                    totalRounds++;
+                    const playerSegment = segment.teams
+                        ?.flatMap(t => t.players || [])
+                        .find(p => p.name === playerName);
+                
+                    if (playerSegment) {
+                        totalDamage += playerSegment.damageDealt || 0;
+                        if (playerSegment.firstKill) firstKills += 1;
+                    }
+                });
+            }
         });
+    });
 
-        const adr = totalRounds > 0 ? (totalDamage / totalRounds).toFixed(1) : "0.0";
-        const kd = totalDeaths > 0 ? (totalKills / totalDeaths).toFixed(2) : totalKills.toFixed(2);
-        const kdDiff = totalKills - totalDeaths;
+    const adr = totalRounds > 0 ? (totalDamage / totalRounds).toFixed(1) : "0.0";
+    const kd = totalDeaths > 0 ? (totalKills / totalDeaths).toFixed(2) : totalKills.toFixed(2);
+    const kdDiff = totalKills - totalDeaths;
 
-        const agentsPlayed = Object.entries(agentCounts)
-            .sort(([, a], [, b]) => b - a)
-            .map(([name]) => name);
+    const agentsPlayed = Object.entries(agentCounts)
+        .sort(([, a], [, b]) => b - a)
+        .map(([name]) => name);
 
-        return {
-            player: playerName,
-            agents: agentsPlayed,
-            kills: totalKills,
-            deaths: totalDeaths,
-            assists: totalAssists,
-            kdDiff: kdDiff > 0 ? `+${kdDiff}` : kdDiff,
-            kd,
-            adr,
-            fk: firstKills,
-        };
+    return {
+        player: playerName,
+        agents: agentsPlayed,
+        kills: totalKills,
+        deaths: totalDeaths,
+        assists: totalAssists,
+        kdDiff: kdDiff > 0 ? `+${kdDiff}` : kdDiff.toString(),
+        kd,
+        adr,
+        fk: firstKills,
     };
+};
 
-    const PlayerStatisticsTable = ({ team, roster, allSeriesData }: Props) => {
-        if (!team) return <div className="p-4 text-blue-200/40 italic text-xs">Select a team to view player analytics</div>;
-
-        const playerStats = roster
+const PlayerStatisticsTable = memo(({ team, roster, allSeriesData }: Props) => {
+    const playerStats = useMemo(() => {
+        return roster
             .map(player => computePlayerStats(player.nickname, allSeriesData))
-            .sort((a, b) => b.kills - a.kills);
+            .sort((a, b) => {
+                const aKd = parseFloat(a.kd);
+                const bKd = parseFloat(b.kd);
+                if (bKd !== aKd) return bKd - aKd;
+                return b.kills - a.kills;
+            });
+    }, [team, roster, allSeriesData]);
 
-        return (
-            <motion.div
+    return (
+        <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.8 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
                 className="mb-6"
             >
                 <h2 className="text-2xl font-bold text-white drop-shadow-md mb-6">Player Statistics</h2>
@@ -139,6 +152,6 @@ type Props = {
                 </GlassBox>
             </motion.div>
         );
-    };
+});
 
-    export default PlayerStatisticsTable;
+export default PlayerStatisticsTable;

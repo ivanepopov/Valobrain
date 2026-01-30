@@ -1,7 +1,7 @@
 import type { Team } from "../../types/Team.ts";
 import type { SeriesStats } from "../../types/SeriesStats.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
-import { useMemo, useState } from "react";
+import { useMemo, useState, memo } from "react";
 import { motion } from "motion/react";
 import { Target, Shield } from "lucide-react";
 
@@ -19,11 +19,11 @@ type SideStats = {
 };
 
 type Props = {
-    team: Team | null;
+    team: Team;
     allSeriesData: SeriesStats[];
 };
 
-const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
+const WinConditionDistribution = memo(({ team, allSeriesData }: Props) => {
     const stats = useMemo(() => {
         const initial = () => ({
             bomb: 0,
@@ -38,13 +38,11 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
             defense: { wins: initial(), losses: initial() }
         };
 
-        if (!team) return data;
-
         allSeriesData.forEach(series => {
-            series.seriesState.games.forEach(game => {
-                game.segments.forEach(round => {
-                    const teamInRound = round.teams.find(t => t.name === team.name);
-                    const oppInRound = round.teams.find(t => t.name !== team.name);
+            series.seriesState?.games?.forEach(game => {
+                game.segments?.forEach(round => {
+                    const teamInRound = round.teams?.find(t => t.name === team.name);
+                    const oppInRound = round.teams?.find(t => t.name !== team.name);
 
                     if (!teamInRound || !oppInRound) return;
 
@@ -53,8 +51,8 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
                     const winner = teamWon ? teamInRound : oppInRound;
                     const loser = teamWon ? oppInRound : teamInRound;
                     
-                    const objectives = winner.objectives.map(o => o.id);
-                    const loserObjectives = loser.objectives.map(o => o.id);
+                    const objectives = winner.objectives?.map(o => o.id) || [];
+                    const loserObjectives = loser.objectives?.map(o => o.id) || [];
 
                     const isPlant = objectives.includes('plantBomb') || loserObjectives.includes('plantBomb');
                     const isExplode = objectives.includes('explodeBomb');
@@ -98,9 +96,7 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
         });
 
         return data;
-    }, [team, allSeriesData]);
-
-    if (!team) return null;
+    }, [team.name, allSeriesData]);
 
     const [visibility, setVisibility] = useState({
         attack: { wins: true, losses: true },
@@ -222,6 +218,6 @@ const WinConditionDistribution = ({ team, allSeriesData }: Props) => {
             </div>
         </motion.div>
     );
-};
+});
 
 export default WinConditionDistribution;

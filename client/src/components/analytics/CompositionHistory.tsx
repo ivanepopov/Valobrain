@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import type { Team } from "../../types/Team.ts";
 import type { SeriesStats } from "../../types/SeriesStats.ts";
 import GlassBox from "../ui/GlassBox.tsx";
@@ -7,12 +7,12 @@ import { motion } from "motion/react";
 import { Users } from "lucide-react";
 
 type Props = {
-    team: Team | null;
+    team: Team;
     allSeriesData: SeriesStats[];
     selectedMap: string;
 }
 
-const CompositionHistory = ({ team, allSeriesData, selectedMap }: Props) => {
+const CompositionHistory = memo(({ team, allSeriesData, selectedMap }: Props) => {
     const [visibility, setVisibility] = React.useState({
         pickRate: true,
         winRate: true
@@ -25,22 +25,22 @@ const CompositionHistory = ({ team, allSeriesData, selectedMap }: Props) => {
         }));
     };
     const compositionStats = React.useMemo(() => {
-        if (selectedMap === "All" || !team) return [];
+        if (selectedMap === "All") return [];
 
         const comps: Record<string, { agents: string[]; totalRoundsWon: number; totalRoundsPlayed: number; totalGames: number }> = {};
         let totalGamesOnMap = 0;
 
         allSeriesData.forEach(series => {
-            series.seriesState.games.forEach(game => {
-                if (game.map.name.toLowerCase() !== selectedMap.toLowerCase()) return;
+            series.seriesState?.games?.forEach(game => {
+                if (game.map?.name?.toLowerCase() !== selectedMap.toLowerCase()) return;
 
                 totalGamesOnMap++;
-                const teamData = game.teams.find(t => t.name === team.name);
+                const teamData = game.teams?.find(t => t.name === team.name);
                 if (!teamData) return;
 
                 const agentNames = teamData.players
-                    .map(p => p.character.name || 'Unknown')
-                    .sort();
+                    ?.map(p => p.character?.name || 'Unknown')
+                    .sort() || [];
                 const compKey = agentNames.join(',');
 
                 if (!comps[compKey]) {
@@ -50,9 +50,9 @@ const CompositionHistory = ({ team, allSeriesData, selectedMap }: Props) => {
                 comps[compKey].totalGames++;
 
                 // Traverse segments to count round wins accurately
-                game.segments.forEach(segment => {
+                game.segments?.forEach(segment => {
                     // Check if the team won the round in this segment
-                    const teamInSegment = segment.teams.find(t => t.name === team.name);
+                    const teamInSegment = segment.teams?.find(t => t.name === team.name);
                     if (teamInSegment?.won) {
                         comps[compKey].totalRoundsWon++;
                     }
@@ -64,21 +64,21 @@ const CompositionHistory = ({ team, allSeriesData, selectedMap }: Props) => {
         return Object.values(comps)
             .map(c => ({
                 ...c,
-                pickRate: c.totalGames > 0 ? (c.totalGames / totalGamesOnMap) * 100 : 0,
+                pickRate: totalGamesOnMap > 0 ? (c.totalGames / totalGamesOnMap) * 100 : 0,
                 winRate: c.totalRoundsPlayed > 0 ? (c.totalRoundsWon / c.totalRoundsPlayed) * 100 : 0
             }))
             .sort((a, b) => b.totalGames - a.totalGames)
             .slice(0, 5);
-    }, [allSeriesData, team, selectedMap]);
+    }, [allSeriesData, team.name, selectedMap]);
 
-    if (selectedMap === "All" || !team) return null;
+    if (selectedMap === "All") return null;
     if (compositionStats.length === 0) return null;
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.5 }}
             className="mb-6"
         >
             <h2 className="text-2xl font-bold text-white drop-shadow-md mb-6">Comps</h2>
@@ -169,6 +169,6 @@ const CompositionHistory = ({ team, allSeriesData, selectedMap }: Props) => {
             </GlassBox>
         </motion.div>
     );
-};
+});
 
 export default CompositionHistory;

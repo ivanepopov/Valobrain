@@ -1,19 +1,19 @@
-import React from 'react';
+import React, { memo } from 'react';
 import type { Team } from "../../types/Team.ts";
 import type { SeriesStats } from "../../types/SeriesStats.ts";
 
 interface SeriesProps {
     seriesData: SeriesStats;
-    team: Team | null;
+    team: Team;
     isSelected?: boolean;
 }
 
-const Series: React.FC<SeriesProps> = ({ seriesData, team, isSelected = false }) => {
+const Series: React.FC<SeriesProps> = memo(({ seriesData, team, isSelected = false }) => {
     const series = seriesData.seriesState;
-    const opponent = series.teams.find(t => t.name !== team?.name);
+    const opponent = series.teams.find(t => t.name !== team.name);
 
     const winCount = series.games.filter(g =>
-        g.teams.find(t => t.name === team?.name)?.won
+        g.teams.find(t => t.name === team.name)?.won
     ).length;
 
     const lossCount = series.games.length - winCount;
@@ -29,7 +29,7 @@ const Series: React.FC<SeriesProps> = ({ seriesData, team, isSelected = false })
         `}>
             {/* Header: Team vs Opponent with Result */}
             <div className="flex items-center justify-between mb-2">
-                <span className="text-white font-semibold">{team?.name} vs {opponent?.name || 'Unknown'}</span>
+                <span className="text-white font-semibold">{team.name} vs {opponent?.name || 'Unknown'}</span>
                 <span className={`
                     px-3 py-1 rounded-full text-sm font-bold
                     ${isWin 
@@ -49,7 +49,7 @@ const Series: React.FC<SeriesProps> = ({ seriesData, team, isSelected = false })
             {/* Map results mini display */}
             <div className="flex gap-1 mt-2">
                 {series.games.map((game, idx) => {
-                    const gameTeam = game.teams.find(t => t.name === team?.name);
+                    const gameTeam = game.teams.find(t => t.name === team.name);
                     const gameWon = gameTeam?.won;
                     return (
                         <div
@@ -65,6 +65,6 @@ const Series: React.FC<SeriesProps> = ({ seriesData, team, isSelected = false })
             </div>
         </div>
     );
-};
+});
 
 export default Series;

@@ -2,17 +2,16 @@ import type { SeriesStats } from "../../types/SeriesStats.ts";
 import type { Team } from "../../types/Team.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
 import { capitalize } from "../../utils/formatters.ts";
-import { useMemo, useState } from "react";
+import { useMemo, useState, memo } from "react";
 import { motion } from "motion/react";
 
 type Props = {
-    team: Team | null;
+    team: Team;
     allSeriesData: SeriesStats[];
     selectedMap?: string;
 }
 
-const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => {
-    if (!team) return null;
+const MapPerformance = memo(({ team, allSeriesData, selectedMap = "All" }: Props) => {
 
     const [visibleMetrics, setVisibleMetrics] = useState({
         matchWinRate: true,
@@ -41,11 +40,12 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
         let totalGamesOverall = 0;
 
         allSeriesData.forEach(series => {
-            series.seriesState.games.forEach(game => {
-                const mapName = game.map.name;
+            series.seriesState?.games?.forEach(game => {
+                const mapName = game.map?.name;
+                if (!mapName) return;
                 if (selectedMap !== "All" && mapName.toLowerCase() !== selectedMap.toLowerCase()) return;
 
-                const teamMatch = game.teams.find(t => t.name === team.name);
+                const teamMatch = game.teams?.find(t => t.name === team.name);
                 if (!teamMatch) return;
 
                 if (!stats[mapName]) {
@@ -56,11 +56,11 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
                 stats[mapName].totalGames += 1;
                 if (teamMatch.won) stats[mapName].wins += 1;
 
-                game.segments.forEach(segment => {
-                    const teamInSegment = segment.teams.find(t => t.name === team.name);
+                game.segments?.forEach(segment => {
+                    const teamInSegment = segment.teams?.find(t => t.name === team.name);
                     if (!teamInSegment) return;
 
-                    const side = teamInSegment.side.toLowerCase();
+                    const side = teamInSegment.side?.toLowerCase();
                     if (side === 'attacker') {
                         stats[mapName].atkTotal++;
                         if (teamInSegment.won) stats[mapName].atkWins++;
@@ -82,7 +82,7 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
                 record: `${s.wins}-${s.totalGames - s.wins}`,
             }))
             .sort((a, b) => b.matchWinRate - a.matchWinRate);
-    }, [allSeriesData, team, selectedMap]);
+    }, [allSeriesData, team?.name, selectedMap]);
 
     return (
         <motion.div
@@ -195,6 +195,6 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
             </GlassBox>
         </motion.div>
     );
-};
+});
 
 export default MapPerformance;
