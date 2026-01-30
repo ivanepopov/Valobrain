@@ -57,8 +57,15 @@ Generate a scouting report for team "${metadata.targetTeam}".
 Tournament: ${metadata.tournament || 'Unknown Tournament'}
 Map: ${metadata.map}
 Date: ${metadata.date}
+Round Score: ${metadata.roundScore || 'Unknown'}
 
 ---
+## CRITICAL: ROUND SCORE
+The correct round score for this map is: ${metadata.roundScore || 'Unknown'}
+If you mention any score in the report, you MUST use EXACTLY "${metadata.roundScore || 'Unknown'}".
+DO NOT invent, calculate, or guess any other score. NEVER write scores like "0-14" or "0-21".
+---
+
 ## CRITICAL: PLAYER ROSTER FOR ${metadata.targetTeam}
 Use ONLY these EXACT player-agent mappings for the Player Intel table:
 ${rosterList || '(No roster data available)'}

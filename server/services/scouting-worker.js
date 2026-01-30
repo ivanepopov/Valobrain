@@ -417,7 +417,8 @@ async function processJob(jobId) {
             map: matchData ? matchData.mapName : digest.meta.map, // Use digest map if matchData is null
             date: digest.meta.date ? new Date(digest.meta.date).toLocaleDateString() : new Date().toLocaleDateString(),
             tournament: digest.meta.tournament,
-            roster: digest.meta.roster
+            roster: digest.meta.roster,
+            roundScore: digest.stats.roundScore // Pass the correct round score to writer
         });
 
         // 6. Complete
