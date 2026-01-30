@@ -267,10 +267,13 @@ function buildTeamStats(rounds, roundSummaries, targetTeam) {
       .slice(0, 2)
       .map(([p, c]) => `${p}: ${c} First Kills`);
 
+  const losses = rounds.length - wins;
   return {
     targetTeam,
     totalRounds: rounds.length,
     wins,
+    losses,
+    roundScore: `${wins}-${losses}`,  // Pre-calculated score for AI (e.g., "13-10")
     winRate: Math.round((wins / rounds.length) * 100),
     tradeEfficiency: `${tradeEfficiency}% (${totalTraded}/${totalDeaths})`,
     pacing: {
