@@ -311,7 +311,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
         delete newMaps[selectedSeries.id];
         return newMaps;
       });
-      setSelectedReportMap('all');
+      // Will be set to first map when maps are loaded
     }
   }, [selectedSeries?.id]);
 
@@ -331,12 +331,20 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
           ...prev,
           [selectedSeries.id]: maps
         }));
+        // Auto-select first map
+        if (maps.length > 0) {
+          setSelectedReportMap(maps[0]);
+        }
       } catch (err) {
         console.error('[AI Insight] Failed to fetch actual maps:', err);
         setActualSeriesMaps(prev => ({
           ...prev,
           [selectedSeries.id]: selectedSeries.maps
         }));
+        // Auto-select first map from fallback
+        if (selectedSeries.maps.length > 0) {
+          setSelectedReportMap(selectedSeries.maps[0]);
+        }
       } finally {
         setIsLoadingMaps(false);
       }
@@ -540,7 +548,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                   key={series.id}
                   onClick={() => {
                     setSelectedSeries(series);
-                    setSelectedReportMap('all'); // Reset to all maps when selecting new series
+                    // Map selection will be set when maps are loaded
                     setReportData(null);
                     setError(null);
                   }}
@@ -663,20 +671,6 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                 </div>
               ) : (
                 <div className="flex gap-2 flex-wrap">
-                  <button
-                    onClick={() => setSelectedReportMap('all')}
-                    disabled={isGenerating}
-                    className={`
-                      px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
-                      ${selectedReportMap === 'all'
-                        ? 'bg-blue-900 text-white'
-                        : 'bg-white/5 text-blue-200 hover:bg-white/10'
-                      }
-                      ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}
-                    `}
-                  >
-                    All
-                  </button>
                   {getSeriesMaps().map((map, i) => (
                     <button
                       key={i}
