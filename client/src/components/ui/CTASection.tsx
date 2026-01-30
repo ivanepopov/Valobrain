@@ -25,7 +25,7 @@ const CTASection = () => {
                     </h2>
 
                     <p className="text-lg text-blue-200/70 mb-8">
-                        Start finding counters to teams with AI-powered insights and comprehensive statistics
+                        Start finding counters to teams with AI-powered insights and comprehensive statistics.
                     </p>
 
                     <button

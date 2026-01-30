@@ -4,6 +4,8 @@ import type {SeriesStats} from "../../types/SeriesStats.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
 import { getAgentLogo } from '../../utils/agentLogos';
 import { capitalize } from '../../utils/formatters';
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
 
 type Props = {
     team: Team | null;
@@ -72,6 +74,8 @@ type Props = {
     };
 
     const PlayerStatisticsTable = ({ team, roster, allSeriesData }: Props) => {
+        const [isCollapsed, setIsCollapsed] = useState(false);
+        
         if (!team) return <div className="p-4 text-blue-200/40 italic text-xs">Select a team to view player analytics</div>;
 
         const playerStats = roster
@@ -85,10 +89,20 @@ type Props = {
                 transition={{ duration: 0.5, delay: 0.8 }}
                 className="mb-6"
             >
-                <h2 className="text-2xl font-bold text-white drop-shadow-md mb-6">Player Statistics</h2>
-                <GlassBox className="mt-4 !p-0 overflow-hidden border-white/5">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-lg">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-white drop-shadow-md">Player Statistics</h2>
+                    <button
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        className="text-white/70 hover:text-white transition-colors"
+                    >
+                        {isCollapsed ? <ChevronDown className="w-6 h-6" /> : <ChevronUp className="w-6 h-6" />}
+                    </button>
+                </div>
+                
+                {!isCollapsed && (
+                    <GlassBox className="mt-4 !p-0 overflow-hidden border-white/5">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-lg">
                             <thead>
                                 <tr className="border-b border-white/10">
                                     <th className="text-left py-3 px-4 text-blue-200 font-semibold">Player</th>
@@ -137,6 +151,7 @@ type Props = {
                         </table>
                     </div>
                 </GlassBox>
+                )}
             </motion.div>
         );
     };

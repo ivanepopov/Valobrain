@@ -239,7 +239,7 @@ const ScoutingReport: React.FC<ScoutingReportProps> = ({
                     <span className="text-[10px] font-black uppercase tracking-[0.3em]">Advanced Tactical Analysis</span>
                 </div>
                 <h2 className="text-3xl font-black uppercase italic tracking-tighter">
-                    Scouting Report: <span className="text-blue-500">{teamName || 'Unknown Team'}</span>
+                    Tactical Report: <span className="text-blue-500">{teamName || 'Unknown Team'}</span>
                 </h2>
             </div>
 

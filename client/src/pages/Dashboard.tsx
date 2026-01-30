@@ -120,7 +120,7 @@ const Dashboard = () => {
     const tabs = [
         { id: "history", label: "Match History", icon: Calendar },
         { id: "analytics", label: "Analytics", icon: TrendingUp },
-        { id: "scouting", label: "Scouting Report", icon: FileText },
+        { id: "scouting", label: "Tactical Report", icon: FileText },
         { id: "ai-insight", label: "AI Insight", icon: Sparkles },
     ];
 

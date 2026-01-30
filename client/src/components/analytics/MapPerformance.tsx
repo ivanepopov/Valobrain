@@ -4,6 +4,7 @@ import { GlassBox } from "../ui/GlassBox.tsx";
 import { capitalize } from "../../utils/formatters.ts";
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 type Props = {
     team: Team | null;
@@ -12,6 +13,8 @@ type Props = {
 }
 
 const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => {
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    
     if (!team) return null;
 
     const [visibleMetrics, setVisibleMetrics] = useState({
@@ -91,7 +94,17 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
             transition={{ duration: 0.5, delay: 0.4 }}
             className="mb-6"
         >
-            <h2 className="text-2xl font-bold text-white drop-shadow-md mb-6">Map Success</h2>
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-white drop-shadow-md">Map Success</h2>
+                <button
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className="text-white/70 hover:text-white transition-colors"
+                >
+                    {isCollapsed ? <ChevronDown className="w-6 h-6" /> : <ChevronUp className="w-6 h-6" />}
+                </button>
+            </div>
+            
+            {!isCollapsed && (
             <GlassBox className="mt-4 border-white/10">
             <div className="flex justify-end items-center mb-8">
                 <div className="flex gap-4 bg-gradient-to-r from-slate-950/60 to-slate-900/60 p-3.5 rounded-xl border border-white/10 backdrop-blur-sm">
@@ -193,6 +206,7 @@ const MapPerformance = ({ team, allSeriesData, selectedMap = "All" }: Props) => 
                 )}
             </div>
             </GlassBox>
+            )}
         </motion.div>
     );
 };

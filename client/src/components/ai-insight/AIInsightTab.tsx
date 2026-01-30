@@ -7,6 +7,7 @@ import {
 import axios from 'axios';
 import { GlassBox } from '../ui/GlassBox';
 import type { SeriesStats } from '../../types/SeriesStats';
+import { capitalize } from '../../utils/formatters';
 
 interface AIInsightTabProps {
   teamName: string;
@@ -71,7 +72,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
   const [actualSeriesMaps, setActualSeriesMaps] = useState<Record<string, string[]>>({});
   const [isLoadingMaps, setIsLoadingMaps] = useState(false);
 
-  const maps = ['All', 'Abyss', 'Ascent', 'Bind', 'Breeze', 'Fracture', 'Haven', 'Icebox', 'Lotus', 'Pearl', 'Split', 'Sunset'];
+  const maps = ['All', 'Abyss', 'Ascent', 'Bind', 'Breeze', 'Corrode', 'Fracture', 'Haven', 'Icebox', 'Lotus', 'Pearl', 'Split', 'Sunset'];
 
   // Check which series have downloadable match data
   useEffect(() => {
@@ -137,7 +138,9 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
   const filteredSeries = useMemo(() => {
     let filtered = transformedSeries.filter(s => availableSeries[s.id] === true);
     if (selectedMap !== 'All') {
-      filtered = filtered.filter(s => s.maps.includes(selectedMap));
+      filtered = filtered.filter(s => 
+        s.maps.some(map => map.toLowerCase() === selectedMap.toLowerCase())
+      );
     }
 
     return filtered;
@@ -470,30 +473,30 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
         transition={{ duration: 0.5, delay: 0.1 }}
       >
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold text-white">
-              {selectedMap === 'All'
-                ? 'Available Series'
-                : 'Filtered Series'}
-            </h2>
-            <button
-              onClick={() => setIsSeriesCollapsed(!isSeriesCollapsed)}
-              className="text-blue-400 hover:text-blue-300 transition-colors"
-              aria-label={isSeriesCollapsed ? "Expand series list" : "Collapse series list"}
-            >
-              {isSeriesCollapsed ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
-            </button>
-          </div>
-          <span className="text-blue-300 text-sm">
-            {isCheckingAvailability ? 'Checking...' : `${filteredSeries.length} series with match data`}
-          </span>
+          <h2 className="text-2xl font-bold text-white">
+            {selectedMap === 'All'
+              ? 'Available Series'
+              : 'Filtered Series'}
+          </h2>
+          <button
+            onClick={() => setIsSeriesCollapsed(!isSeriesCollapsed)}
+            className="text-white/70 hover:text-white transition-colors"
+            aria-label={isSeriesCollapsed ? "Expand series list" : "Collapse series list"}
+          >
+            {isSeriesCollapsed ? <ChevronDown className="w-6 h-6" /> : <ChevronUp className="w-6 h-6" />}
+          </button>
         </div>
         
         {!isSeriesCollapsed && (
           <GlassBox>
+            <div className="flex justify-start mb-3">
+              <span className="text-blue-300 text-sm">
+                {isCheckingAvailability ? 'Checking...' : `${filteredSeries.length} series with match data`}
+              </span>
+            </div>
             {isCheckingAvailability ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 text-blue-400 animate-spin mb-3" />
+              <Loader2 className="w-8 h-8 text-blue-900 animate-spin mb-3" />
               <p className="text-blue-200">Checking match data availability...</p>
             </div>
           ) : filteredSeries.length > 0 ? (
@@ -547,7 +550,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                             }
                           `}
                         >
-                          {map}
+                          {capitalize(map)}
                         </span>
                       ))}
                     </div>
@@ -622,7 +625,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
               <span className="text-blue-200 text-sm">Generate report for:</span>
               {isLoadingMaps ? (
                 <div className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
+                  <Loader2 className="w-4 h-4 text-blue-900 animate-spin" />
                   <span className="text-blue-300 text-sm">Loading maps...</span>
                 </div>
               ) : (
@@ -690,7 +693,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                           ${isComplete
                             ? 'bg-green-500 text-white'
                             : isActive
-                              ? 'bg-blue-500 text-white'
+                              ? 'bg-blue-900 text-white'
                               : 'bg-white/10 text-blue-300'
                           }
                         `}>
@@ -718,7 +721,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                 {/* Progress Bar Track */}
                 <div className="relative h-2 bg-white/10 rounded-full overflow-hidden">
                   <motion.div
-                    className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full"
+                    className="absolute left-0 top-0 h-full bg-blue-900 rounded-full"
                     initial={{ width: '0%' }}
                     animate={{
                       width: generationStage === 'digest' ? '33%'

@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const proPlayers = [
-  { name: 'mas', team: 'Former FaZe Coach', image: 'https://owcdn.net/img/6243ca96e555d.png' },
-  { name: 'p2', team: 'Leviatán', image: 'https://owcdn.net/img/63fd95c6a0d8b.png' },
-  { name: 'p3', team: 'NRG', image: 'https://owcdn.net/img/64d4f0e0b7c74.png' },
+  { name: 'mas', team: 'Former FaZe', image: 'https://owcdn.net/img/6243ca96e555d.png' },
+  { name: 'Gucc107', team: 'WVU', image: 'https://owcdn.net/img/63fd95c6a0d8b.png' },
+  { name: 'HUYNH', team: 'Former GenG', image: 'https://owcdn.net/img/64d4f0e0b7c74.png' },
   { name: 'p4', team: 'FNATIC', image: 'https://owcdn.net/img/641e51d76ad57.png' },
   { name: 'p5', team: 'LOUD', image: 'https://owcdn.net/img/627c554b1d30d.png' },
   { name: 'p6', team: 'FNATIC', image: 'https://owcdn.net/img/61c317d9c70a4.png' },
@@ -50,7 +50,7 @@ const ProPlayersCarousel = () => {
     <div className="w-full py-2">
       {/* Header Text */}
       <p className="text-center text-slate-400 text-sm mb-8">
-        Trusted by top and former Valorant professionals, coaches, and teams 
+        Used by top and former Valorant professionals and coaches
       </p>
       
       <div className="relative flex items-center justify-center gap-4">
