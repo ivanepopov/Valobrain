@@ -4,6 +4,7 @@ import { GlassBox } from "../ui/GlassBox.tsx";
 import { capitalize } from "../../utils/formatters.ts";
 import { useMemo, useState, memo } from "react";
 import { motion } from "motion/react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 type Props = {
     team: Team;
@@ -12,6 +13,7 @@ type Props = {
 }
 
 const MapPerformance = memo(({ team, allSeriesData, selectedMap = "All" }: Props) => {
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const [visibleMetrics, setVisibleMetrics] = useState({
         matchWinRate: true,
@@ -40,12 +42,11 @@ const MapPerformance = memo(({ team, allSeriesData, selectedMap = "All" }: Props
         let totalGamesOverall = 0;
 
         allSeriesData.forEach(series => {
-            series.seriesState?.games?.forEach(game => {
-                const mapName = game.map?.name;
-                if (!mapName) return;
+            series.seriesState.games.forEach(game => {
+                const mapName = game.map.name;
                 if (selectedMap !== "All" && mapName.toLowerCase() !== selectedMap.toLowerCase()) return;
 
-                const teamMatch = game.teams?.find(t => t.name === team.name);
+                const teamMatch = game.teams.find(t => t.name === team.name);
                 if (!teamMatch) return;
 
                 if (!stats[mapName]) {
@@ -56,11 +57,11 @@ const MapPerformance = memo(({ team, allSeriesData, selectedMap = "All" }: Props
                 stats[mapName].totalGames += 1;
                 if (teamMatch.won) stats[mapName].wins += 1;
 
-                game.segments?.forEach(segment => {
-                    const teamInSegment = segment.teams?.find(t => t.name === team.name);
+                game.segments.forEach(segment => {
+                    const teamInSegment = segment.teams.find(t => t.name === team.name);
                     if (!teamInSegment) return;
 
-                    const side = teamInSegment.side?.toLowerCase();
+                    const side = teamInSegment.side.toLowerCase();
                     if (side === 'attacker') {
                         stats[mapName].atkTotal++;
                         if (teamInSegment.won) stats[mapName].atkWins++;
@@ -82,7 +83,7 @@ const MapPerformance = memo(({ team, allSeriesData, selectedMap = "All" }: Props
                 record: `${s.wins}-${s.totalGames - s.wins}`,
             }))
             .sort((a, b) => b.matchWinRate - a.matchWinRate);
-    }, [allSeriesData, team?.name, selectedMap]);
+    }, [allSeriesData, team, selectedMap]);
 
     return (
         <motion.div
@@ -91,10 +92,20 @@ const MapPerformance = memo(({ team, allSeriesData, selectedMap = "All" }: Props
             transition={{ duration: 0.5, delay: 0.4 }}
             className="mb-6"
         >
-            <h2 className="text-2xl font-bold text-white drop-shadow-md mb-6">Map Success</h2>
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-white drop-shadow-md">Map Success</h2>
+                <button
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className="text-white/70 hover:text-white transition-colors"
+                >
+                    {isCollapsed ? <ChevronDown className="w-6 h-6" /> : <ChevronUp className="w-6 h-6" />}
+                </button>
+            </div>
+
+            {!isCollapsed && (
             <GlassBox className="mt-4 border-white/10">
             <div className="flex justify-end items-center mb-8">
-                <div className="flex gap-4 bg-gradient-to-r from-slate-950/60 to-slate-900/60 p-3.5 rounded-xl border border-white/10 backdrop-blur-sm">
+                <div className="flex gap-4 bg-linear-to-r from-slate-950/60 to-slate-900/60 p-3.5 rounded-xl border border-white/10 backdrop-blur-sm">
                     <button 
                         onClick={() => toggleMetric('matchWinRate')}
                         className={`flex items-center gap-2.5 transition-all duration-300 cursor-pointer hover:scale-105 ${visibleMetrics.matchWinRate ? 'opacity-100' : 'opacity-40'}`}
@@ -193,6 +204,7 @@ const MapPerformance = memo(({ team, allSeriesData, selectedMap = "All" }: Props
                 )}
             </div>
             </GlassBox>
+            )}
         </motion.div>
     );
 });

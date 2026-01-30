@@ -4,7 +4,8 @@ import type {SeriesStats} from "../../types/SeriesStats.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
 import { getAgentLogo } from '../../utils/agentLogos';
 import { capitalize } from '../../utils/formatters';
-import { useMemo, memo } from "react";
+import { useMemo, memo, useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface PlayerRosterItem {
     id: string;
@@ -17,54 +18,52 @@ type Props = {
     allSeriesData: SeriesStats[];
 };
 
-// Helper to compute player stats
-const computePlayerStats = (playerName: string, seriesData: SeriesStats[]) => {
-    let totalKills = 0;
-    let totalDeaths = 0;
-    let totalAssists = 0;
-    let totalDamage = 0;
-    let totalRounds = 0;
-    let firstKills = 0;
-    const agentCounts: Record<string, number> = {};
+    // Helper to compute player stats
+    const computePlayerStats = (playerName: string, seriesData: SeriesStats[]) => {
+        let totalKills = 0;
+        let totalDeaths = 0;
+        let totalAssists = 0;
+        let totalDamage = 0;
+        let totalRounds = 0;
+        let firstKills = 0;
+        const agentCounts: Record<string, number> = {};
 
-    seriesData.forEach(series => {
-        series.seriesState?.games?.forEach(game => {
-            const playerMatch = game.teams
-                ?.flatMap(t => t.players || [])
-                .find(p => p.name === playerName);
+        seriesData.forEach(series => {
+            series.seriesState.games.forEach(game => {
+                const playerMatch = game.teams
+                    .flatMap(t => t.players)
+                    .find(p => p.name === playerName);
 
             if (playerMatch) {
                 totalKills += playerMatch.kills || 0;
                 totalDeaths += playerMatch.deaths || 0;
                 totalAssists += playerMatch.killAssistsGiven || 0;
 
-                const agentName = playerMatch.character?.name;
-                if (agentName) {
+                    const agentName = playerMatch.character.name;
                     agentCounts[agentName] = (agentCounts[agentName] || 0) + 1;
+
+                    game.segments.forEach(segment => {
+                        totalRounds++;
+                        const playerSegment = segment.teams
+                            .flatMap(t => t.players)
+                            .find(p => p.name === playerName);
+                    
+                        if (playerSegment) {
+                            totalDamage += playerSegment.damageDealt || 0;
+                            if (playerSegment.firstKill) firstKills += 1;
+                        }
+                    });
                 }
-
-                game.segments?.forEach(segment => {
-                    totalRounds++;
-                    const playerSegment = segment.teams
-                        ?.flatMap(t => t.players || [])
-                        .find(p => p.name === playerName);
-                
-                    if (playerSegment) {
-                        totalDamage += playerSegment.damageDealt || 0;
-                        if (playerSegment.firstKill) firstKills += 1;
-                    }
-                });
-            }
+            });
         });
-    });
 
-    const adr = totalRounds > 0 ? (totalDamage / totalRounds).toFixed(1) : "0.0";
-    const kd = totalDeaths > 0 ? (totalKills / totalDeaths).toFixed(2) : totalKills.toFixed(2);
-    const kdDiff = totalKills - totalDeaths;
+        const adr = totalRounds > 0 ? (totalDamage / totalRounds).toFixed(1) : "0.0";
+        const kd = totalDeaths > 0 ? (totalKills / totalDeaths).toFixed(2) : totalKills.toFixed(2);
+        const kdDiff = totalKills - totalDeaths;
 
-    const agentsPlayed = Object.entries(agentCounts)
-        .sort(([, a], [, b]) => b - a)
-        .map(([name]) => name);
+        const agentsPlayed = Object.entries(agentCounts)
+            .sort(([, a], [, b]) => b - a)
+            .map(([name]) => name);
 
     return {
         player: playerName,
@@ -80,6 +79,8 @@ const computePlayerStats = (playerName: string, seriesData: SeriesStats[]) => {
 };
 
 const PlayerStatisticsTable = memo(({ team, roster, allSeriesData }: Props) => {
+    const [isCollapsed, setIsCollapsed] = useState(false);
+
     const playerStats = useMemo(() => {
         return roster
             .map(player => computePlayerStats(player.nickname, allSeriesData))
@@ -93,65 +94,76 @@ const PlayerStatisticsTable = memo(({ team, roster, allSeriesData }: Props) => {
 
     return (
         <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="mb-6"
-            >
-                <h2 className="text-2xl font-bold text-white drop-shadow-md mb-6">Player Statistics</h2>
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mb-6"
+        >
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-white drop-shadow-md">Player Statistics</h2>
+                <button
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className="text-white/70 hover:text-white transition-colors"
+                >
+                    {isCollapsed ? <ChevronDown className="w-6 h-6" /> : <ChevronUp className="w-6 h-6" />}
+                </button>
+            </div>
+
+            {!isCollapsed && (
                 <GlassBox className="mt-4 !p-0 overflow-hidden border-white/5">
                     <div className="overflow-x-auto">
                         <table className="w-full text-lg">
-                            <thead>
-                                <tr className="border-b border-white/10">
-                                    <th className="text-left py-3 px-4 text-blue-200 font-semibold">Player</th>
-                                    <th className="text-left py-3 px-4 text-blue-200 font-semibold">Agents</th>
-                                    <th className="text-center py-3 px-4 text-blue-200 font-semibold">K</th>
-                                    <th className="text-center py-3 px-4 text-blue-200 font-semibold">D</th>
-                                    <th className="text-center py-3 px-4 text-blue-200 font-semibold">A</th>
-                                    <th className="text-center py-3 px-4 text-blue-200 font-semibold">+/-</th>
-                                    <th className="text-center py-3 px-4 text-blue-200 font-semibold">KD</th>
-                                    <th className="text-center py-3 px-4 text-blue-200 font-semibold">ADR</th>
-                                    <th className="text-center py-3 px-4 text-blue-200 font-semibold">FK</th>
+                        <thead>
+                            <tr className="border-b border-white/10">
+                                <th className="text-left py-3 px-4 text-blue-200 font-semibold">Player</th>
+                                <th className="text-left py-3 px-4 text-blue-200 font-semibold">Agents</th>
+                                <th className="text-center py-3 px-4 text-blue-200 font-semibold">K</th>
+                                <th className="text-center py-3 px-4 text-blue-200 font-semibold">D</th>
+                                <th className="text-center py-3 px-4 text-blue-200 font-semibold">A</th>
+                                <th className="text-center py-3 px-4 text-blue-200 font-semibold">+/-</th>
+                                <th className="text-center py-3 px-4 text-blue-200 font-semibold">KD</th>
+                                <th className="text-center py-3 px-4 text-blue-200 font-semibold">ADR</th>
+                                <th className="text-center py-3 px-4 text-blue-200 font-semibold">FK</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {playerStats.map((player, index) => (
+                                <tr
+                                    key={index}
+                                    className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                                >
+                                    <td className="py-3 px-4 text-white font-semibold whitespace-nowrap">{player.player}</td>
+                                    <td className="py-3 px-4">
+                                        <div className="flex items-center gap-1">
+                                            {player.agents.map((agent, i) => (
+                                                <img
+                                                    key={i}
+                                                    src={getAgentLogo(agent)}
+                                                    alt={agent}
+                                                    className="w-8 h-8 rounded border border-white/10 object-cover"
+                                                    title={capitalize(agent)}
+                                                />
+                                            ))}
+                                        </div>
+                                    </td>
+                                    <td className="py-3 px-4 text-center text-blue-100">{player.kills}</td>
+                                    <td className="py-3 px-4 text-center text-blue-100">{player.deaths}</td>
+                                    <td className="py-3 px-4 text-center text-blue-100">{player.assists}</td>
+                                    <td className={`py-3 px-4 text-center font-mono font-bold ${Number(player.kdDiff) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                        {player.kdDiff}
+                                    </td>
+                                    <td className="py-3 px-4 text-center text-blue-100">{player.kd}</td>
+                                    <td className="py-3 px-4 text-center text-blue-100">{player.adr}</td>
+                                    <td className="py-3 px-4 text-center text-blue-100">{player.fk}</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {playerStats.map((player, index) => (
-                                    <tr 
-                                        key={index} 
-                                        className="border-b border-white/5 hover:bg-white/5 transition-colors"
-                                    >
-                                        <td className="py-3 px-4 text-white font-semibold whitespace-nowrap">{player.player}</td>
-                                        <td className="py-3 px-4">
-                                            <div className="flex items-center gap-1">
-                                                {player.agents.map((agent, i) => (
-                                                    <img
-                                                        key={i}
-                                                        src={getAgentLogo(agent)}
-                                                        alt={agent}
-                                                        className="w-8 h-8 rounded border border-white/10 object-cover"
-                                                        title={capitalize(agent)}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td className="py-3 px-4 text-center text-blue-100">{player.kills}</td>
-                                        <td className="py-3 px-4 text-center text-blue-100">{player.deaths}</td>
-                                        <td className="py-3 px-4 text-center text-blue-100">{player.assists}</td>
-                                        <td className={`py-3 px-4 text-center font-mono font-bold ${Number(player.kdDiff) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                            {player.kdDiff}
-                                        </td>
-                                        <td className="py-3 px-4 text-center text-blue-100">{player.kd}</td>
-                                        <td className="py-3 px-4 text-center text-blue-100">{player.adr}</td>
-                                        <td className="py-3 px-4 text-center text-blue-100">{player.fk}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </GlassBox>
-            </motion.div>
-        );
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </GlassBox>
+            )}
+        </motion.div>
+    );
 });
 
 export default PlayerStatisticsTable;

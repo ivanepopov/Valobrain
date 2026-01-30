@@ -31,7 +31,7 @@ const Series: React.FC<SeriesProps> = memo(({ seriesData, team, isSelected = fal
             <div className="flex items-center justify-between mb-2">
                 <span className="text-white font-semibold">{team.name} vs {opponent?.name || 'Unknown'}</span>
                 <span className={`
-                    px-3 py-1 rounded-full text-sm font-bold
+                    px-3 py-1 rounded-full text-base font-bold
                     ${isWin 
                         ? 'bg-green-500/20 text-green-400' 
                         : 'bg-red-500/20 text-red-400'
@@ -42,7 +42,7 @@ const Series: React.FC<SeriesProps> = memo(({ seriesData, team, isSelected = fal
             </div>
 
             {/* Format and Date Row */}
-            <div className="flex items-center justify-between text-sm mb-2">
+            <div className="flex items-center justify-between text-base mb-2">
                 <span className="text-blue-300 font-semibold">{series.format}</span>
             </div>
 

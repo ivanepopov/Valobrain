@@ -43,10 +43,14 @@ const FeaturedImagesCarousel = ({
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="mb-24"
         >
-            <h2 className="text-2xl font-semibold text-white mb-6 text-center">{title}</h2>
+            <div className="text-center mb-12">
+                <h2 className="text-4xl font-bold text-white mb-4">{title}</h2>
+            </div>
 
             <div className="relative max-w-3xl mx-auto">
                 {/* Carousel Container */}

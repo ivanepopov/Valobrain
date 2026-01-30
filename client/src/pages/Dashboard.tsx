@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowLeft, Calendar, TrendingUp, Sparkles } from "lucide-react";
+import Spline from '@splinetool/react-spline';
 import MatchHistory from "../components/match/MatchHistory";
 import AnalyticsBreakdown from "../components/analytics/AnalyticsBreakdown";
 import AIInsightTab from "../components/ai-insight/AIInsightTab";
@@ -11,7 +12,11 @@ import getSeriesStats from "../services/getSeriesStats";
 import type { Team } from "../types/Team";
 import type { TeamStats } from "../types/TeamStats";
 import type { SeriesStats } from "../types/SeriesStats";
+import type { AIInsightReportState } from "../types/AIInsight";
+import { initialAIInsightReportState } from "../types/AIInsight";
 import NeuralNetworkBackground from "../components/ui/NeuralNetworkBackground.tsx";
+import Header from "../components/ui/Header.tsx";
+import Footer from "../components/ui/Footer.tsx";
 
 const Dashboard = () => {
     const { teamId } = useParams<{ teamId: string }>();
@@ -25,6 +30,9 @@ const Dashboard = () => {
     const [isLoadingTeam, setIsLoadingTeam] = useState(true);
     const [isFetchingSeries, setIsFetchingSeries] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // AI Insight states (lifted from AIInsightTab for persistence across tab switches)
+    const [aiInsightReport, setAiInsightReport] = useState<AIInsightReportState>(initialAIInsightReportState);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -42,7 +50,7 @@ const Dashboard = () => {
 
                 const teamData = await getTeam(teamId, controller.signal);
                 if (controller.signal.aborted) return;
-                
+
                 if (!teamData) {
                     setError("Team not found");
                     setIsLoadingTeam(false);
@@ -63,7 +71,7 @@ const Dashboard = () => {
 
                 if (statsData?.aggregationSeriesIds) {
                     setIsFetchingSeries(true);
-                    const seriesPromises = statsData.aggregationSeriesIds.map(id => 
+                    const seriesPromises = statsData.aggregationSeriesIds.map(id =>
                         getSeriesStats(id, controller.signal)
                     );
                     const results = await Promise.all(seriesPromises);
@@ -137,7 +145,7 @@ const Dashboard = () => {
             <div className="relative min-h-screen bg-linear-to-b from-slate-950 via-blue-950 to-slate-900 text-white p-8 overflow-hidden">
                 <NeuralNetworkBackground />
                 <div className="relative z-10 max-w-7xl mx-auto">
-                    <button 
+                    <button
                         onClick={() => navigate("/")}
                         className="flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-4 transition-colors"
                     >
@@ -162,11 +170,21 @@ const Dashboard = () => {
 
     // Now we can safely render - team and stats are guaranteed to be non-null
     return (
-        <div className="relative min-h-screen bg-linear-to-b from-slate-950 via-blue-950 to-slate-900 text-white p-8 overflow-hidden">
+        <div className="relative min-h-screen bg-linear-to-b from-slate-950 via-blue-950 to-slate-900 text-white py-12 px-6 overflow-hidden">
+            {/* Header */}
+            <Header />
+
+            {/* Spline 3D Background */}
+            <div className="fixed inset-0 z-0 opacity-60 pointer-events-none">
+                <Spline
+                    scene="https://prod.spline.design/Exoc-c1KvXHUx7bJ/scene.splinecode"
+                />
+            </div>
+
             {/* Neural Network Background */}
             <NeuralNetworkBackground />
 
-            <div className="relative z-10 max-w-7xl mx-auto">
+            <div className="relative z-10 max-w-7xl mx-auto pt-20">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
@@ -265,12 +283,17 @@ const Dashboard = () => {
                                     teamName={team.name}
                                     seriesData={allSeriesData}
                                     seriesIds={validSeriesIds}
+                                    reportState={aiInsightReport}
+                                    setReportState={setAiInsightReport}
                                 />
                             )}
                         </motion.div>
                     </>
                 )}
             </div>
+
+            {/* Footer */}
+            <Footer />
         </div>
     );
 };

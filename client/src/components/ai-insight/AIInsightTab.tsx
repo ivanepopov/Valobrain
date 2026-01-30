@@ -2,137 +2,104 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Shield, Crosshair, Brain, Target, AlertCircle,
-  FileText, Loader2, DollarSign, Users, MessageSquare
+  FileText, Loader2, DollarSign, Users, MessageSquare, ChevronDown, ChevronUp
 } from 'lucide-react';
 import axios from 'axios';
 import { GlassBox } from '../ui/GlassBox';
 import type { SeriesStats } from '../../types/SeriesStats';
-
-// Cache availability across tab switches / unmounts (keyed by team + seriesIds set)
-const availabilityCache = new Map<
-  string,
-  { seriesIdsKey: string; availability: Record<string, boolean> }
->();
+import { capitalize } from '../../utils/formatters';
+import type {
+  TransformedSeries,
+  ReportSections,
+  AIInsightReportState,
+  GenerationStage
+} from '../../types/AIInsight';
 
 interface AIInsightTabProps {
   teamName: string;
   seriesData: SeriesStats[];
   seriesIds: string[];
+  reportState: AIInsightReportState;
+  setReportState: React.Dispatch<React.SetStateAction<AIInsightReportState>>;
 }
 
-interface TransformedSeries {
-  id: string;
-  opponent: string;
-  result: 'win' | 'loss';
-  score: string;
-  date: string;
-  dateValue: number;
-  maps: string[];
-}
-
-interface ReportSections {
-  executiveSummary: string;
-  attackProtocols: {
-    defaultPhase: string;
-    executePhase: string;
-    tendencies: string[];
-  };
-  defenseSetups: {
-    standardSetups: string;
-    aggressivePlays: string;
-    tendencies: string[];
-  };
-  pistolEconomy: string;
-  playerIntel: Array<{
-    player: string;
-    agent: string;
-    insight: string;
-  }>;
-  counterStrats: Array<{
-    priority: number;
-    name: string;
-    advice: string;
-  }>;
-  coachNote: string;
-}
-
-export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabProps) {
+export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, setReportState }: AIInsightTabProps) {
+  // Local UI state (not persisted across tab switches)
   const [selectedMap, setSelectedMap] = useState<string>('All');
-  const [selectedSeries, setSelectedSeries] = useState<TransformedSeries | null>(null);
-  const [selectedReportMap, setSelectedReportMap] = useState<string>('all'); // Which map from series to generate report for
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [reportGenerated, setReportGenerated] = useState(false);
-  const [reportData, setReportData] = useState<ReportSections | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [generationStatus, setGenerationStatus] = useState<string>('');
-  const [generationStage, setGenerationStage] = useState<'idle' | 'digest' | 'analyst' | 'writer' | 'complete'>('idle');
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Destructure persisted state from props
+  const {
+    data: reportData,
+    isGenerating,
+    generationStage,
+    generationStatus,
+    error,
+    selectedSeries,
+    selectedReportMap,
+    jobId
+  } = reportState;
+
+  // Helper to check if report has been generated
+  const reportGenerated = reportData !== null;
+
+  // Helper functions to update persisted state
+  const setSelectedSeries = (series: TransformedSeries | null) => {
+    setReportState(prev => ({ ...prev, selectedSeries: series }));
+  };
+
+  const setSelectedReportMap = (map: string) => {
+    setReportState(prev => ({ ...prev, selectedReportMap: map }));
+  };
+
+  const setIsGenerating = (generating: boolean) => {
+    setReportState(prev => ({ ...prev, isGenerating: generating }));
+  };
+
+  const setReportData = (data: ReportSections | null) => {
+    setReportState(prev => ({ ...prev, data }));
+  };
+
+  const setError = (err: string | null) => {
+    setReportState(prev => ({ ...prev, error: err }));
+  };
+
+  const setGenerationStatus = (status: string) => {
+    setReportState(prev => ({ ...prev, generationStatus: status }));
+  };
+
+  const setGenerationStage = (stage: GenerationStage) => {
+    setReportState(prev => ({ ...prev, generationStage: stage }));
+  };
+
+  const setJobId = (id: string | null) => {
+    setReportState(prev => ({ ...prev, jobId: id }));
+  };
 
   // Track which series have available match data
   const [availableSeries, setAvailableSeries] = useState<Record<string, boolean>>({});
-  const [isCheckingAvailability, setIsCheckingAvailability] = useState(() => {
-    // Initial value based on whether we already have IDs
-    return seriesIds.length > 0;
-  });
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(true);
 
   // Track actual maps from JSONL files (not Statistics API)
   const [actualSeriesMaps, setActualSeriesMaps] = useState<Record<string, string[]>>({});
   const [isLoadingMaps, setIsLoadingMaps] = useState(false);
 
-  const maps = ['All', 'Abyss', 'Ascent', 'Bind', 'Breeze', 'Fracture', 'Haven', 'Icebox', 'Lotus', 'Pearl', 'Split', 'Sunset'];
+  const maps = ['All', 'Abyss', 'Ascent', 'Bind', 'Breeze', 'Corrode', 'Fracture', 'Haven', 'Icebox', 'Lotus', 'Pearl', 'Split', 'Sunset'];
 
   // Check which series have downloadable match data
-  const lastCheckedSeriesIds = useRef<string[]>([]);
   useEffect(() => {
-    const controller = new AbortController();
-
-    const seriesIdsKey = seriesIds.join(',');
-    const cacheKey = teamName;
-    const cached = availabilityCache.get(cacheKey);
-
     const checkAvailability = async () => {
       if (seriesIds.length === 0) {
-        setAvailableSeries({});
-        setIsCheckingAvailability(false);
-        lastCheckedSeriesIds.current = [];
-        return;
-      }
-
-      // 1) Use cache if we have the exact same set of IDs for this team
-      if (cached?.seriesIdsKey === seriesIdsKey && Object.keys(cached.availability).length > 0) {
-        setAvailableSeries(cached.availability);
-        setIsCheckingAvailability(false);
-        lastCheckedSeriesIds.current = [...seriesIds];
-        return;
-      }
-
-      // 2) Otherwise, show loading immediately (prevents "No series..." flash)
-      setIsCheckingAvailability(true);
-
-      // Skip network call if we already checked these IDs in this mounted instance AND have data
-      const idsChanged =
-        seriesIds.length !== lastCheckedSeriesIds.current.length ||
-        seriesIds.some((id, index) => id !== lastCheckedSeriesIds.current[index]);
-
-      if (!idsChanged && Object.keys(availableSeries).length > 0) {
         setIsCheckingAvailability(false);
         return;
-      }
-
-      // If we don't need to show the loader, don't set it to true
-      if (idsChanged) {
-        setIsCheckingAvailability(true);
       }
 
       try {
         const response = await axios.post('/api/advanced-stats/check-availability', {
           seriesIds
-        }, { signal: controller.signal });
-        
+        });
         setAvailableSeries(response.data.availability || {});
-        lastCheckedSeriesIds.current = [...seriesIds];
       } catch (err) {
-        if (axios.isCancel(err)) return;
         console.error('Failed to check series availability:', err);
         // On error, assume all are available to not block the UI
         const fallback: Record<string, boolean> = {};
@@ -143,8 +110,8 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
       }
     };
 
+    setIsCheckingAvailability(true);
     checkAvailability();
-    return () => controller.abort();
   }, [seriesIds]);
 
   // Transform SeriesStats[] to internal format
@@ -166,7 +133,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
       const daysAgo = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
       const seriesId = seriesIds[index] || state.games[0]?.id?.split('-')[0] || String(index);
-      // console.log(`[AI Insight] Series ${index}: ID=${seriesId}, opponent=${opponent?.name}, date=${startDate.toLocaleDateString()}`);
+      console.log(`[AI Insight] Series ${index}: ID=${seriesId}, opponent=${opponent?.name}, date=${startDate.toLocaleDateString()}`);
 
       return {
         id: seriesId,
@@ -183,7 +150,9 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
   const filteredSeries = useMemo(() => {
     let filtered = transformedSeries.filter(s => availableSeries[s.id] === true);
     if (selectedMap !== 'All') {
-      filtered = filtered.filter(s => s.maps.includes(selectedMap));
+      filtered = filtered.filter(s => 
+        s.maps.some(map => map.toLowerCase() === selectedMap.toLowerCase())
+      );
     }
 
     return filtered;
@@ -336,29 +305,24 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
 
   useEffect(() => {
     if (selectedSeries) {
-      // Don't clear if we already have them
-      if (!actualSeriesMaps[selectedSeries.id]) {
-        setActualSeriesMaps(prev => {
-          const newMaps = { ...prev };
-          delete newMaps[selectedSeries.id];
-          return newMaps;
-        });
-      }
+      setActualSeriesMaps(prev => {
+        const newMaps = { ...prev };
+        delete newMaps[selectedSeries.id];
+        return newMaps;
+      });
       setSelectedReportMap('all');
     }
   }, [selectedSeries?.id]);
 
   useEffect(() => {
-    const controller = new AbortController();
     const fetchActualMaps = async () => {
       if (!selectedSeries) return;
       if (actualSeriesMaps[selectedSeries.id]) return;
 
-      // Only set loading if we don't have data and aren't skipping
       setIsLoadingMaps(true);
       try {
         console.log('[AI Insight] Fetching maps for series:', selectedSeries.id);
-        const response = await axios.get(`/api/advanced-stats/${selectedSeries.id}/available-maps`, { signal: controller.signal });
+        const response = await axios.get(`/api/advanced-stats/${selectedSeries.id}/available-maps`);
         const maps = response.data.maps || [];
         console.log('[AI Insight] API returned maps:', maps);
 
@@ -367,7 +331,6 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
           [selectedSeries.id]: maps
         }));
       } catch (err) {
-        if (axios.isCancel(err)) return;
         console.error('[AI Insight] Failed to fetch actual maps:', err);
         setActualSeriesMaps(prev => ({
           ...prev,
@@ -379,13 +342,87 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
     };
 
     fetchActualMaps();
-    return () => controller.abort();
   }, [selectedSeries, actualSeriesMaps]);
 
   const getSeriesMaps = (): string[] => {
     if (!selectedSeries) return [];
     return actualSeriesMaps[selectedSeries.id] || selectedSeries.maps;
   };
+
+  // Start polling for a given job ID
+  const startPolling = (pollJobId: string) => {
+    // Clear any existing polling
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+    }
+
+    // Timeout after 3 minutes
+    const timeoutId = setTimeout(() => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+      setError('Report generation timed out. Please try again.');
+      setIsGenerating(false);
+      setGenerationStatus('');
+      setJobId(null);
+    }, 180000);
+
+    pollIntervalRef.current = setInterval(async () => {
+      try {
+        const statusRes = await axios.get(`/api/scouting/jobs/${pollJobId}`);
+        const job = statusRes.data;
+        console.log('[AI Insight] Job status:', job.status, 'stages:', job.stages);
+
+        // Update status message based on job stages
+        if (job.stages?.writer === 'processing' || job.stages?.writer === 'completed') {
+          setGenerationStage('writer');
+          setGenerationStatus('Generating scouting report...');
+        } else if (job.stages?.analyst === 'processing' || job.stages?.analyst === 'completed') {
+          setGenerationStage('analyst');
+          setGenerationStatus('AI analyzing tactical patterns...');
+        } else if (job.stages?.digest === 'processing' || job.stages?.digest === 'completed') {
+          setGenerationStage('digest');
+          setGenerationStatus('Building match digest...');
+        }
+
+        if (job.status === 'completed') {
+          clearTimeout(timeoutId);
+          if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+
+          setGenerationStage('complete');
+
+          // Parse the markdown report
+          const markdown = job.result?.reportMarkdown || '';
+          const parsed = parseMarkdownReport(markdown);
+          setReportData(parsed);
+          setIsGenerating(false);
+          setGenerationStatus('');
+          setGenerationStage('idle');
+          setJobId(null);
+        } else if (job.status === 'failed') {
+          clearTimeout(timeoutId);
+          if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+          setError(job.error || 'Report generation failed');
+          setIsGenerating(false);
+          setGenerationStatus('');
+          setGenerationStage('idle');
+          setJobId(null);
+        }
+      } catch (pollError) {
+        console.error('[AI Insight] Polling error:', pollError);
+      }
+    }, 2000);
+  };
+
+  // Resume polling if we have an active job when component mounts
+  useEffect(() => {
+    if (isGenerating && jobId) {
+      console.log('[AI Insight] Resuming polling for job:', jobId);
+      startPolling(jobId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
 
   const handleGenerateReport = async () => {
     if (!selectedSeries) return;
@@ -395,90 +432,24 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
     setGenerationStatus('Initiating report generation...');
     setGenerationStage('idle');
 
-    const controller = new AbortController();
-
-    // Timeout after 3 minutes
-    const timeoutId = setTimeout(() => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-        pollIntervalRef.current = null;
-      }
-      controller.abort();
-      setError('Report generation timed out. Please try again.');
-      setIsGenerating(false);
-      setGenerationStatus('');
-    }, 180000);
-
     try {
       // 1. Start report generation
       const mapParam = selectedReportMap !== 'all' ? `&map=${encodeURIComponent(selectedReportMap)}` : '';
       console.log('[AI Insight] Starting report for series:', selectedSeries.id, 'team:', teamName, 'map:', selectedReportMap);
       const response = await axios.post(
-        `/api/scouting/${selectedSeries.id}/report?team=${encodeURIComponent(teamName)}${mapParam}`,
-        null,
-        { signal: controller.signal }
+        `/api/scouting/${selectedSeries.id}/report?team=${encodeURIComponent(teamName)}${mapParam}`
       );
-      const { jobId } = response.data;
-      console.log('[AI Insight] Job created:', jobId);
+      const { jobId: newJobId } = response.data;
+      console.log('[AI Insight] Job created:', newJobId);
 
+      // Store jobId so polling can resume if user navigates away
+      setJobId(newJobId);
       setGenerationStatus('Processing match data...');
 
-      // 2. Poll for completion
-      pollIntervalRef.current = setInterval(async () => {
-        try {
-          const statusRes = await axios.get(`/api/scouting/jobs/${jobId}`, { signal: controller.signal });
-          const job = statusRes.data;
-          console.log('[AI Insight] Job status:', job.status, 'stages:', job.stages);
-
-          // Update status message based on job stages
-          if (job.stages?.writer === 'processing' || job.stages?.writer === 'completed') {
-            setGenerationStage('writer');
-            setGenerationStatus('Generating scouting report...');
-          } else if (job.stages?.analyst === 'processing' || job.stages?.analyst === 'completed') {
-            setGenerationStage('analyst');
-            setGenerationStatus('AI analyzing tactical patterns...');
-          } else if (job.stages?.digest === 'processing' || job.stages?.digest === 'completed') {
-            setGenerationStage('digest');
-            setGenerationStatus('Building match digest...');
-          }
-
-          if (job.status === 'completed') {
-            clearTimeout(timeoutId);
-            if (pollIntervalRef.current) {
-              clearInterval(pollIntervalRef.current);
-              pollIntervalRef.current = null;
-            }
-
-            setGenerationStage('complete');
-
-            // Parse the markdown report
-            const markdown = job.result?.reportMarkdown || '';
-            const parsed = parseMarkdownReport(markdown);
-            setReportData(parsed);
-            setReportGenerated(true);
-            setIsGenerating(false);
-            setGenerationStatus('');
-            setGenerationStage('idle');
-          } else if (job.status === 'failed') {
-            clearTimeout(timeoutId);
-            if (pollIntervalRef.current) {
-              clearInterval(pollIntervalRef.current);
-              pollIntervalRef.current = null;
-            }
-            setError(job.error || 'Report generation failed');
-            setIsGenerating(false);
-            setGenerationStatus('');
-            setGenerationStage('idle');
-          }
-        } catch (pollError) {
-          if (axios.isCancel(pollError)) return;
-          console.error('[AI Insight] Polling error:', pollError);
-        }
-      }, 2000);
+      // 2. Start polling for completion
+      startPolling(newJobId);
 
     } catch (err: any) {
-      clearTimeout(timeoutId);
-      if (axios.isCancel(err)) return;
       console.error('[AI Insight] Failed to start:', err);
       setError(err.response?.data?.error || 'Failed to start report generation');
       setIsGenerating(false);
@@ -488,7 +459,6 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
 
   const handleFilterChange = () => {
     setSelectedSeries(null);
-    setReportGenerated(false);
     setReportData(null);
     setError(null);
   };
@@ -535,30 +505,32 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <GlassBox>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white">
-              {selectedMap === 'All'
-                ? 'Available Series'
-                : 'Filtered Series'}
-            </h2>
-            <span className="text-blue-300 text-sm">
-              {isCheckingAvailability ? 'Checking...' : `${filteredSeries.length} series with match data`}
-            </span>
-          </div>
-
-          {isCheckingAvailability ? (
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-white">
+            {selectedMap === 'All'
+              ? 'Available Series'
+              : 'Filtered Series'}
+          </h2>
+          <button
+            onClick={() => setIsSeriesCollapsed(!isSeriesCollapsed)}
+            className="text-white/70 hover:text-white transition-colors"
+            aria-label={isSeriesCollapsed ? "Expand series list" : "Collapse series list"}
+          >
+            {isSeriesCollapsed ? <ChevronDown className="w-6 h-6" /> : <ChevronUp className="w-6 h-6" />}
+          </button>
+        </div>
+        
+        {!isSeriesCollapsed && (
+          <GlassBox>
+            <div className="flex justify-start mb-3">
+              <span className="text-blue-300 text-sm">
+                {isCheckingAvailability ? 'Checking...' : `${filteredSeries.length} series with match data`}
+              </span>
+            </div>
+            {isCheckingAvailability ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <div className="relative mb-4">
-                <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-400/20 border-t-blue-400"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-6 w-6 animate-pulse rounded-full bg-blue-400/20"></div>
-                </div>
-              </div>
-              <h3 className="text-lg font-bold text-white">Checking Availability</h3>
-              <p className="text-sm text-blue-200/60 mt-2">
-                Verifying downloadable match data...
-              </p>
+              <Loader2 className="w-8 h-8 text-blue-900 animate-spin mb-3" />
+              <p className="text-blue-200">Checking match data availability...</p>
             </div>
           ) : filteredSeries.length > 0 ? (
             <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
@@ -568,7 +540,6 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                   onClick={() => {
                     setSelectedSeries(series);
                     setSelectedReportMap('all'); // Reset to all maps when selecting new series
-                    setReportGenerated(false);
                     setReportData(null);
                     setError(null);
                   }}
@@ -611,7 +582,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                             }
                           `}
                         >
-                          {map}
+                          {capitalize(map)}
                         </span>
                       ))}
                     </div>
@@ -631,6 +602,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
             </div>
           )}
         </GlassBox>
+        )}
       </motion.div>
 
       {/* Generate Report Button */}
@@ -658,10 +630,10 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                   onClick={handleGenerateReport}
                   disabled={isGenerating}
                   className={`
-                    flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-lg transition-all duration-300
+                    flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
                     ${isGenerating
-                      ? 'bg-blue-600/50 text-white/50 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-500 text-white hover:scale-105'
+                      ? 'bg-blue-900/50 text-white/50 cursor-not-allowed'
+                      : 'bg-blue-900 text-white hover:scale-105'
                     }
                   `}
                 >
@@ -685,7 +657,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
               <span className="text-blue-200 text-sm">Generate report for:</span>
               {isLoadingMaps ? (
                 <div className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
+                  <Loader2 className="w-4 h-4 text-blue-900 animate-spin" />
                   <span className="text-blue-300 text-sm">Loading maps...</span>
                 </div>
               ) : (
@@ -696,13 +668,13 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                     className={`
                       px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
                       ${selectedReportMap === 'all'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-white/10 text-blue-300 hover:bg-white/20'
+                        ? 'bg-blue-900 text-white'
+                        : 'bg-white/5 text-blue-200 hover:bg-white/10'
                       }
                       ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                   >
-                    All Maps
+                    All
                   </button>
                   {getSeriesMaps().map((map, i) => (
                     <button
@@ -712,8 +684,8 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                       className={`
                         px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
                         ${selectedReportMap === map
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-white/10 text-blue-300 hover:bg-white/20'
+                          ? 'bg-blue-900 text-white'
+                          : 'bg-white/5 text-blue-200 hover:bg-white/10'
                         }
                         ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}
                       `}
@@ -753,7 +725,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                           ${isComplete
                             ? 'bg-green-500 text-white'
                             : isActive
-                              ? 'bg-blue-500 text-white'
+                              ? 'bg-blue-900 text-white'
                               : 'bg-white/10 text-blue-300'
                           }
                         `}>
@@ -781,7 +753,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                 {/* Progress Bar Track */}
                 <div className="relative h-2 bg-white/10 rounded-full overflow-hidden">
                   <motion.div
-                    className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full"
+                    className="absolute left-0 top-0 h-full bg-blue-900 rounded-full"
                     initial={{ width: '0%' }}
                     animate={{
                       width: generationStage === 'digest' ? '33%'
@@ -982,13 +954,27 @@ export function AIInsightTab({ teamName, seriesData, seriesIds }: AIInsightTabPr
                           </tr>
                         </thead>
                         <tbody>
-                          {reportData.playerIntel.map((player, i) => (
-                            <tr key={i} className="border-b border-white/5">
-                              <td className="py-2 px-3 text-white font-semibold">{player.player}</td>
-                              <td className="py-2 px-3 text-blue-300">{player.agent}</td>
-                              <td className="py-2 px-3 text-blue-100">{player.insight}</td>
-                            </tr>
-                          ))}
+                          {reportData.playerIntel.map((player, i) => {
+                            const agentName = player.agent.trim();
+                            const agentImage = `/src/assets/agents/${agentName}.png`;
+                            
+                            return (
+                              <tr key={i} className="border-b border-white/5">
+                                <td className="py-2 px-3 text-white font-semibold">{player.player}</td>
+                                <td className="py-2 px-3">
+                                  <img 
+                                    src={agentImage} 
+                                    alt={agentName}
+                                    className="w-6 h-6 rounded"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
+                                </td>
+                                <td className="py-2 px-3 text-blue-100">{player.insight}</td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>

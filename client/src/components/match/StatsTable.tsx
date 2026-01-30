@@ -17,7 +17,7 @@ const StatsTable: React.FC<{
     isMultipleAgents?: boolean;
 }> = ({ teamName, isWinner, players, isMultipleAgents = false }) => (
     <div className="relative">
-        <h3 className={`text-[11px] font-black uppercase tracking-[0.3em] mb-3 flex items-center gap-3 ${isWinner ? 'text-emerald-400' : 'text-rose-400'}`}>
+        <h3 className={`text-[14px] font-black uppercase tracking-[0.3em] mb-3 flex items-center gap-3 ${isWinner ? 'text-emerald-400' : 'text-rose-400'}`}>
             <span className={`w-1 h-3 rounded-full ${isWinner ? 'bg-emerald-400' : 'bg-rose-400'}`}></span>
             {teamName}
         </h3>
