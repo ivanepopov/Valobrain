@@ -14,6 +14,8 @@ import { getAdvancedSeriesStats } from "../services/getAdvancedSeriesStats";
 import type { Team } from "../types/Team";
 import type { TeamStats } from "../types/TeamStats";
 import type { SeriesStats } from "../types/SeriesStats";
+import type { AIInsightReportState } from "../types/AIInsight";
+import { initialAIInsightReportState } from "../types/AIInsight";
 import NeuralNetworkBackground from "../components/ui/NeuralNetworkBackground.tsx";
 import Header from "../components/ui/Header.tsx";
 import Footer from "../components/ui/Footer.tsx";
@@ -34,6 +36,9 @@ const Dashboard = () => {
     const [isScoutingLoading, setIsScoutingLoading] = useState(false);
     const [scoutingProgress, setScoutingProgress] = useState({ current: 0, total: 0, status: '' });
     const [scoutingError, setScoutingError] = useState<string | null>(null);
+
+    // AI Insight states (lifted from AIInsightTab for persistence across tab switches)
+    const [aiInsightReport, setAiInsightReport] = useState<AIInsightReportState>(initialAIInsightReportState);
 
     useEffect(() => {
         const fetchTeamData = async () => {
@@ -249,6 +254,8 @@ const Dashboard = () => {
                                     teamName={team?.name || ""}
                                     seriesData={allSeriesData}
                                     seriesIds={validSeriesIds}
+                                    reportState={aiInsightReport}
+                                    setReportState={setAiInsightReport}
                                 />
                             )}
                         </motion.div>
