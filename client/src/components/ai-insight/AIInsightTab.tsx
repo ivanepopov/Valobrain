@@ -26,6 +26,7 @@ interface AIInsightTabProps {
 export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, setReportState }: AIInsightTabProps) {
   // Local UI state (not persisted across tab switches)
   const [selectedMap, setSelectedMap] = useState<string>('All');
+  const [isSeriesCollapsed, setIsSeriesCollapsed] = useState(false);
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Destructure persisted state from props
