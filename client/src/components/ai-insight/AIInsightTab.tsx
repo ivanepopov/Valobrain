@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Shield, Crosshair, Brain, Target, AlertCircle,
-  FileText, Loader2, DollarSign, Users, MessageSquare, ChevronDown, ChevronUp
+  FileText, Loader2, DollarSign, Users, MessageSquare, ChevronDown, ChevronUp, Key, Eye, EyeOff
 } from 'lucide-react';
 import axios from 'axios';
 import { GlassBox } from '../ui/GlassBox';
@@ -38,8 +38,12 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
     error,
     selectedSeries,
     selectedReportMap,
-    jobId
+    jobId,
+    userApiKey
   } = reportState;
+
+  // Local state for showing/hiding API key
+  const [showApiKey, setShowApiKey] = useState(false);
 
   // Helper to check if report has been generated
   const reportGenerated = reportData !== null;
@@ -75,6 +79,10 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
 
   const setJobId = (id: string | null) => {
     setReportState(prev => ({ ...prev, jobId: id }));
+  };
+
+  const setUserApiKey = (key: string) => {
+    setReportState(prev => ({ ...prev, userApiKey: key }));
   };
 
   // Track which series have available match data
@@ -451,8 +459,17 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
       // 1. Start report generation
       const mapParam = selectedReportMap !== 'all' ? `&map=${encodeURIComponent(selectedReportMap)}` : '';
       console.log('[AI Insight] Starting report for series:', selectedSeries.id, 'team:', teamName, 'map:', selectedReportMap);
+
+      // Build headers with optional API key
+      const headers: Record<string, string> = {};
+      if (userApiKey) {
+        headers['X-Gemini-API-Key'] = userApiKey;
+      }
+
       const response = await axios.post(
-        `/api/scouting/${selectedSeries.id}/report?team=${encodeURIComponent(teamName)}${mapParam}`
+        `/api/scouting/${selectedSeries.id}/report?team=${encodeURIComponent(teamName)}${mapParam}`,
+        null,
+        { headers }
       );
       const { jobId: newJobId } = response.data;
       console.log('[AI Insight] Job created:', newJobId);
@@ -505,6 +522,53 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
               ))}
             </div>
           </div>
+        </GlassBox>
+      </motion.div>
+
+      {/* API Key Input Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.05 }}
+      >
+        <GlassBox>
+          <div className="flex items-center gap-3 mb-3">
+            <Key className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-200 text-sm font-semibold">Gemini API Key</span>
+            {userApiKey && (
+              <span className="text-green-400 text-xs bg-green-400/10 px-2 py-0.5 rounded-full">
+                Key provided
+              </span>
+            )}
+          </div>
+          <div className="relative">
+            <input
+              type={showApiKey ? 'text' : 'password'}
+              value={userApiKey}
+              onChange={(e) => setUserApiKey(e.target.value)}
+              placeholder="Enter your Gemini API key..."
+              className="w-full px-4 py-2.5 pr-12 rounded-lg bg-white/5 border border-white/10 text-white placeholder-blue-400/50 focus:outline-none focus:border-blue-400/50 transition-colors"
+            />
+            <button
+              type="button"
+              onClick={() => setShowApiKey(!showApiKey)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              {showApiKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
+          <p className="text-blue-300/60 text-xs mt-2">
+            Get a free API key from{' '}
+            <a
+              href="https://aistudio.google.com/app/apikey"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 underline"
+            >
+              Google AI Studio
+            </a>
+            . Your key is stored locally in your browser.
+          </p>
         </GlassBox>
       </motion.div>
 

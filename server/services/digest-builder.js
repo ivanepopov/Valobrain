@@ -106,7 +106,10 @@ function detectMap(rounds) {
 
 function buildTeamStats(rounds, roundSummaries, targetTeam) {
   // Aggregate high-level stats (Win rate, pistol WR, etc)
-  const wins = rounds.filter(r => r.winInfo?.winner === targetTeam).length;
+  // Use case-insensitive comparison to handle team name variations
+  const wins = rounds.filter(r =>
+    r.winInfo?.winner?.toLowerCase() === targetTeam?.toLowerCase()
+  ).length;
   
   // 1. Site Conditioning (Attack Side)
   const siteSequence = rounds
@@ -274,7 +277,6 @@ function buildTeamStats(rounds, roundSummaries, targetTeam) {
     wins,
     losses,
     roundScore: `${wins}-${losses}`,  // Pre-calculated score for AI (e.g., "13-10")
-    winRate: Math.round((wins / rounds.length) * 100),
     tradeEfficiency: `${tradeEfficiency}% (${totalTraded}/${totalDeaths})`,
     pacing: {
         style: pacingStyle,
@@ -361,7 +363,8 @@ function summarizeRound(round, targetTeam, mapName) {
         : 'unknown';
   }
 
-  const result = round.winInfo?.winner === targetTeam ? 'WIN' : 'LOSS';
+  // Use case-insensitive comparison for team name matching
+  const result = round.winInfo?.winner?.toLowerCase() === targetTeam?.toLowerCase() ? 'WIN' : 'LOSS';
   const winType = round.winInfo?.type || 'elimination';
 
   const kills = (round.kills || []).sort((a, b) => a.time - b.time);

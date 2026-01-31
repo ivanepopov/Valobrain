@@ -29,10 +29,11 @@ const JOB_STATUS = {
  * @param {string} seriesId - Match Series ID
  * @param {string} teamName - Target Team
  * @param {string} targetMap - Specific map to analyze (null = all maps/Game 1)
+ * @param {string} apiKey - User-provided Gemini API key (optional)
  * @param {string} pipelineVersion - Version tag for cache busting
  * @returns {string} jobId
  */
-function addJob(seriesId, teamName, targetMap = null, pipelineVersion = 'v2-two-pass') {
+function addJob(seriesId, teamName, targetMap = null, apiKey = null, pipelineVersion = 'v2-two-pass') {
   // Check for existing pending/processing job for same parameters
   for (const [id, job] of jobs.entries()) {
     if (
@@ -53,6 +54,7 @@ function addJob(seriesId, teamName, targetMap = null, pipelineVersion = 'v2-two-
     seriesId,
     teamName,
     targetMap, // null = all maps (Game 1), or specific map name
+    apiKey, // User-provided Gemini API key (optional, falls back to env)
     version: pipelineVersion,
     status: JOB_STATUS.PENDING,
     progress: 0,

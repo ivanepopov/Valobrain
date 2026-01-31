@@ -59,10 +59,14 @@ class MatchDataService {
 
     /**
      * Save a digest to cache.
-     * @param {string} seriesId 
-     * @param {Object} digest 
+     * @param {string} seriesId
+     * @param {Object} digest
      */
     saveDigest(seriesId, digest) {
+        // Ensure digest directory exists before writing
+        if (!fs.existsSync(DIGEST_DIR)) {
+            fs.mkdirSync(DIGEST_DIR, { recursive: true });
+        }
         const p = path.join(DIGEST_DIR, `${seriesId}_digest.json`);
         fs.writeFileSync(p, JSON.stringify(digest, null, 2));
         console.log(`[MatchDataService] Digest saved for ${seriesId}`);
