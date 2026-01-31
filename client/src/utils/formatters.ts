@@ -46,3 +46,18 @@ export function formatSeriesType(format: string): string {
     
     return capitalize(format);
 }
+
+/**
+ * Formats a date string to a readable format (e.g., "Jan 31, 2026")
+ */
+export function formatDate(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+
+    return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+    });
+}

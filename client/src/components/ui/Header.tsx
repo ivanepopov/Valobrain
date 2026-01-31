@@ -20,7 +20,7 @@ const Header = () => {
       setScrollProgress(Math.min(progress, 100));
 
       
-      const sections = ['features', 'how-it-works', 'get-started'];
+      const sections = ['hero', 'features', 'how-it-works', 'get-started'];
       const offset = 100; // Header offset
       
       for (const sectionId of sections) {
@@ -59,6 +59,14 @@ const Header = () => {
 
           {isHomePage && (
             <nav className="flex items-center gap-6 relative">
+              <button
+                onClick={() => scrollToSection('hero')}
+                className={`transition-colors text-sm font-medium ${
+                  activeSection === 'hero' ? 'text-blue-400' : 'text-blue-200 hover:text-white'
+                }`}
+              >
+                Home
+              </button>
               <button
                 onClick={() => scrollToSection('features')}
                 className={`transition-colors text-sm font-medium ${

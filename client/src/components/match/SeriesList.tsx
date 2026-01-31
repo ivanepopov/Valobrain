@@ -2,6 +2,7 @@ import Series from "./Series.tsx";
 import GlassBox from "../ui/GlassBox.tsx";
 import type {SeriesStats} from "../../types/SeriesStats.ts";
 import type {Team} from "../../types/Team.ts";
+import { Search } from "lucide-react";
 
 type Props = {
     allSeriesData: SeriesStats[];
@@ -22,10 +23,12 @@ type Props = {
  */
 const SeriesList = ({ allSeriesData, selectedSeriesId, setSelectedSeriesId, team }: Props) => {
     return (
-        <div className="space-y-3 max-h-[calc(100vh-320px)] overflow-y-auto pr-2 custom-scrollbar">
+        <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar">
             {allSeriesData.length === 0 ? (
-                <GlassBox className="p-8 text-center">
-                    <p className="text-blue-200/60 font-medium italic">No match history available</p>
+                <GlassBox className="p-12 text-center border-dashed border-white/10 flex flex-col items-center justify-center">
+                    <Search className="w-16 h-16 text-blue-400/30 mb-4" />
+                    <h3 className="text-xl font-semibold text-white mb-2">No matches found</h3>
+                    <p className="text-blue-200/60">Try adjusting your filters to find what you're looking for</p>
                 </GlassBox>
             ) : (
                 allSeriesData.map((data) => {

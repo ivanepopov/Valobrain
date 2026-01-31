@@ -17,7 +17,6 @@ import { initialAIInsightReportState } from "../types/AIInsight";
 import NeuralNetworkBackground from "../components/ui/NeuralNetworkBackground.tsx";
 import Header from "../components/ui/Header.tsx";
 import Footer from "../components/ui/Footer.tsx";
-import { GlassBox } from "../components/ui/GlassBox.tsx";
 
 const Dashboard = () => {
     const { teamId } = useParams<{ teamId: string }>();
@@ -120,7 +119,7 @@ const Dashboard = () => {
     // Early return for loading state
     if (isLoadingTeam) {
         return (
-            <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 text-white p-8 overflow-hidden">
+            <div className="relative min-h-screen bg-linear-to-b from-slate-950 via-blue-950 to-slate-900 text-white p-8 overflow-hidden">
                 <div className="fixed inset-0 z-0 opacity-60 pointer-events-none">
                     <Spline
                         scene="https://prod.spline.design/Exoc-c1KvXHUx7bJ/scene.splinecode"
