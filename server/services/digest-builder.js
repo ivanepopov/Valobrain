@@ -36,29 +36,22 @@ function resolveTeamName(targetTeam, players, rounds) {
   }
   
   const teamsArray = Array.from(teamsInData);
-  console.log(`[Digest] Resolving team "${targetTeam}" against JSONL teams: [${teamsArray.join(', ')}]`);
   
   if (teamsArray.length === 0) {
     console.warn(`[Digest] No teams found in JSONL data, using original: "${targetTeam}"`);
     return targetTeam;
   }
   
-  // 2. Check for exact match (case-insensitive)
+  // Check for exact match (case-insensitive)
   const exactMatch = teamsArray.find(t => t.toLowerCase() === targetTeam.toLowerCase());
-  if (exactMatch) {
-    console.log(`[Digest] Exact match found: "${exactMatch}"`);
-    return exactMatch;
-  }
+  if (exactMatch) return exactMatch;
   
-  // 3. Check if target team is a substring of any JSONL team (e.g., "Cloud9" matches "Cloud9 Blue")
+  // Check if target team is a substring of any JSONL team (e.g., "Cloud9" matches "Cloud9 Blue")
   const substringMatch = teamsArray.find(t => 
     t.toLowerCase().includes(targetTeam.toLowerCase()) ||
     targetTeam.toLowerCase().includes(t.toLowerCase())
   );
-  if (substringMatch) {
-    console.log(`[Digest] Substring match found: "${substringMatch}" for target "${targetTeam}"`);
-    return substringMatch;
-  }
+  if (substringMatch) return substringMatch;
   
   // 4. Try normalizing common variations
   const normalizeTeamName = (name) => {
@@ -75,10 +68,7 @@ function resolveTeamName(targetTeam, players, rounds) {
     normalizeTeamName(t).includes(normalizedTarget) ||
     normalizedTarget.includes(normalizeTeamName(t))
   );
-  if (normalizedMatch) {
-    console.log(`[Digest] Normalized match found: "${normalizedMatch}" for target "${targetTeam}"`);
-    return normalizedMatch;
-  }
+  if (normalizedMatch) return normalizedMatch;
   
   // 5. Check word overlap (e.g., "Team Liquid" vs "Liquid")
   const targetWords = targetTeam.toLowerCase().split(/\s+/);
@@ -94,14 +84,10 @@ function resolveTeamName(targetTeam, players, rounds) {
     }
   }
   
-  if (bestMatch && bestOverlap > 0) {
-    console.log(`[Digest] Word overlap match found: "${bestMatch}" (overlap: ${bestOverlap} words) for target "${targetTeam}"`);
-    return bestMatch;
-  }
+  if (bestMatch && bestOverlap > 0) return bestMatch;
   
-  // 6. Fallback: If exactly 2 teams in data, match target by win/loss count expectation
-  //    or log a warning and use original
-  console.warn(`[Digest] No fuzzy match found for "${targetTeam}". Available teams: [${teamsArray.join(', ')}]. Using original.`);
+  // No match found - warn and use original
+  console.warn(`[Digest] No fuzzy match found for "${targetTeam}". Available: [${teamsArray.join(', ')}]`);
   return targetTeam;
 }
 
