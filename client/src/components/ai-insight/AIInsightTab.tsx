@@ -14,6 +14,7 @@ import type {
   AIInsightReportState,
   GenerationStage
 } from '../../types/AIInsight';
+import SeriesFilters from "../ui/SeriesFilters.tsx";
 
 interface AIInsightTabProps {
   teamName: string;
@@ -430,14 +431,13 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
       console.log('[AI Insight] Resuming polling for job:', jobId);
       startPolling(jobId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
+  });
 
-  const handleFilterChange = () => {
-    setSelectedSeries(null);
-    setReportData(null);
-    setError(null);
-  };
+  useEffect(() => {
+      setSelectedSeries(null);
+      setReportData(null);
+      setError(null);
+  }, [selectedMap]);
 
   const handleGenerateReport = async () => {
     if (!selectedSeries) return;
@@ -475,38 +475,10 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
   return (
     <div className="space-y-6">
       {/* Filters Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <GlassBox>
-          {/* Map Filter */}
-          <div>
-            <label className="text-blue-200 text-sm mb-2 block">Filter by Map</label>
-            <div className="flex gap-2 flex-wrap">
-              {maps.map((map) => (
-                <button
-                  key={map}
-                  onClick={() => {
-                    setSelectedMap(map);
-                    handleFilterChange();
-                  }}
-                  className={`
-                    px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
-                    ${selectedMap === map
-                      ? 'bg-blue-900 text-white'
-                      : 'bg-white/5 text-blue-200 hover:bg-white/10'
-                    }
-                  `}
-                >
-                  {map}
-                </button>
-              ))}
-            </div>
-          </div>
-        </GlassBox>
-      </motion.div>
+      <SeriesFilters
+          setSelectedMap={setSelectedMap}
+          selectedMap={selectedMap}
+      />
 
       {/* Recent/Filtered Series Section */}
       <motion.div
