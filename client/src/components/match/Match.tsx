@@ -5,6 +5,7 @@ import StatsTable from "./StatsTable.tsx";
 type Props = {
     match: MatchStats | null;
     allMaps?: MatchStats[]; // For "All Maps" aggregation
+    selectedTeamName?: string;
 }
 
 // Helper to aggregate player stats from all maps
@@ -72,13 +73,23 @@ const aggregatePlayerStats = (games: MatchStats[], teamName: string) => {
  *
  * @param match The match data object for a single match. If `null`, the component handles multi-map scenarios using `allMaps`.
  * @param allMaps An array of map data objects. If provided and non-empty, aggregated statistics across multiple maps are displayed.
+ * @param selectedTeamName The name of the team that should be displayed on top.
  */
-const Match = memo(({ match, allMaps }: Props) => {
+const Match = memo(({ match, allMaps, selectedTeamName }: Props) => {
     // If allMaps is provided, show aggregated stats
     const isAllMaps = allMaps && allMaps.length > 0;
 
     if (isAllMaps) {
-        const teamNames = allMaps[0]?.teams.map(t => t.name) || [];
+        let teamNames = allMaps[0]?.teams.map(t => t.name) || [];
+
+        // Ensure selectedTeamName is always on top
+        if (selectedTeamName) {
+            teamNames = [...teamNames].sort((a, b) => {
+                if (a === selectedTeamName) return -1;
+                if (b === selectedTeamName) return 1;
+                return 0;
+            });
+        }
 
         return (
             <div className="flex flex-col gap-8">
@@ -108,10 +119,19 @@ const Match = memo(({ match, allMaps }: Props) => {
     // Single map view
     if (!match) return null;
 
+    let sortedTeams = [...match.teams];
+    if (selectedTeamName) {
+        sortedTeams.sort((a, b) => {
+            if (a.name === selectedTeamName) return -1;
+            if (b.name === selectedTeamName) return 1;
+            return 0;
+        });
+    }
+
     return (
         <div className="flex flex-col gap-8">
             <div className="flex flex-col gap-10">
-                {match.teams.map((matchTeam, teamIndex) => {
+                {sortedTeams.map((matchTeam, teamIndex) => {
                     // Calculate ADR and FK for each player from the segments in this specific match
                     const enhancedPlayers = matchTeam.players.map(player => {
                         let totalDamage = 0;
