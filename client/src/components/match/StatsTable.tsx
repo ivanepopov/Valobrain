@@ -59,7 +59,7 @@ const StatsTable = ({ teamName, isWinner, players, isMultipleAgents = false }: P
                             >
                                 <td className="py-3 px-4 text-white font-semibold truncate">{player.name}</td>
                                 <td className="py-3 px-4">
-                                    <div className="flex items-center gap-1">
+                                    <div className={`flex items-center ${agents.length > 1 ? '-space-x-4' : 'gap-1'}`}>
                                         {agents.map((agentName, i) => (
                                             getAgentLogo(agentName) ? (
                                                 <img 
@@ -67,7 +67,11 @@ const StatsTable = ({ teamName, isWinner, players, isMultipleAgents = false }: P
                                                     src={getAgentLogo(agentName)} 
                                                     alt={agentName}
                                                     title={capitalize(agentName)}
-                                                    className="w-8 h-8 rounded border border-white/10 object-cover"
+                                                    className={`
+                                                        w-8 h-8 rounded border border-white/10 object-cover
+                                                        ${agents.length > 1 ? 'hover:-translate-y-1 hover:scale-110 transition-transform relative' : ''}
+                                                    `}
+                                                    style={{ zIndex: agents.length - i }}
                                                 />
                                             ) : (
                                                 <span key={i} className="text-blue-100 text-sm">
