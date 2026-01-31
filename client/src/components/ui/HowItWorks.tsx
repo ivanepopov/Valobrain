@@ -46,7 +46,7 @@ const HowItWorks = () => {
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.4 }}
-                    className="text-blue-200/70 text-lg"
+                    className="text-blue-200/70 text-base"
                 >
                     Get started with ValoBrain in three simple steps
                 </motion.p>

@@ -130,8 +130,8 @@ const WinConditionDistribution = memo(({ team, allSeriesData }: Props) => {
         return (
             <div className="group space-y-2">
                 <div className="flex justify-between items-center">
-                    <span className="text-lg text-white font-semibold">{label}</span>
-                    <div className="flex gap-4 text-xs font-bold">
+                    <span className="text-base text-white font-semibold">{label}</span>
+                    <div className="flex gap-4 text-sm font-bold">
                         {showWins && <span className="text-blue-300">W: {winVal}</span>}
                         {showLosses && <span className="text-rose-300">L: {lossVal}</span>}
                     </div>
@@ -181,7 +181,7 @@ const WinConditionDistribution = memo(({ team, allSeriesData }: Props) => {
             <GlassBox className="flex-1 border-white/10">
                 <div className="mb-6 pb-4 border-b border-white/10">
                     <div className="flex justify-between items-center">
-                        <h3 className="text-white text-lg font-bold flex items-center gap-2">
+                        <h3 className="text-white text-xl font-bold flex items-center gap-2">
                             {title.includes('Attack') ? <Target className="w-5 h-5 text-red-400" /> : <Shield className="w-5 h-5 text-blue-400" />}
                             {title}
                         </h3>

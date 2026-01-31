@@ -88,7 +88,7 @@ const FeaturedCards = () => {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.3 }}
-                    className="text-blue-200/70 text-lg"
+                    className="text-blue-200/70 text-base"
                 >
                     Explore the features that ValoBrain offers
                 </motion.p>

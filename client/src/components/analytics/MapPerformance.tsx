@@ -204,7 +204,7 @@ const MapPerformance = memo(({ team, allSeriesData, selectedMap = "All" }: Props
                             <div className="flex gap-6 mt-4">
                                 {mapStats.map((map) => (
                                     <div key={map.name} className="flex-1 text-center min-w-0">
-                                        <span className="block text-white font-bold text-lg tracking-tight hover:text-blue-400 transition-all duration-300 truncate">
+                                        <span className="block text-white font-bold text-base tracking-tight hover:text-blue-400 transition-all duration-300 truncate">
                                             {capitalize(map.name)}
                                         </span>
                                     </div>

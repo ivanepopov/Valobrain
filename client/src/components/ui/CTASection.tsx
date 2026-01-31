@@ -20,10 +20,10 @@ const CTASection = () => {
 
                 <div className="relative z-10 text-center max-w-3xl mx-auto">
                     <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                        Ready to Elevate Your Brain?
+                        Analyze Opponents. Play Smarter. Win More.
                     </h2>
 
-                    <p className="text-lg text-blue-200/70 mb-8">
+                    <p className="text-base text-blue-200/70 mb-8">
                         Start finding counters to teams with AI-powered insights and comprehensive statistics.
                     </p>
 
@@ -31,7 +31,7 @@ const CTASection = () => {
                         onClick={handleScrollToTop}
                         className="group inline-flex items-center gap-3 px-8 py-4 bg-blue-900 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105"
                     >
-                        Search a Team
+                        Analyze Now
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </button>
                 </div>

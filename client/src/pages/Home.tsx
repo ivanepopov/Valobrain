@@ -82,7 +82,7 @@ const Home = () => {
       {/* Neural Network Background */}
       <NeuralNetworkBackground />
 
-      <div className="relative z-10 w-full px-6 pt-20">
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-6 pt-20">
         {/* Header with Search */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -144,7 +144,7 @@ const Home = () => {
                 <div
                     id="team-results"
                     role="listbox"
-                    className="absolute top-full left-0 right-0 mt-3 backdrop-blur-md bg-slate-900/95 border border-white/20 rounded-2xl shadow-2xl overflow-hidden z-50">
+                    className="absolute top-full left-0 right-0 mt-3 backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl overflow-hidden z-50">
                   <div className="py-2">
                     {teamsDropdown.map((t) => (
                         <button

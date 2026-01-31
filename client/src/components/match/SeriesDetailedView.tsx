@@ -55,7 +55,7 @@ const SeriesDetailedView = ({ selectedSeriesData, team }: Props) => {
                                     {team.name} vs {opponent?.name || 'Unknown'}
                                 </h2>
                                 <div className={`
-                                        px-4 py-2 rounded-lg font-bold text-lg
+                                        px-4 py-2 rounded-lg font-bold text-xl
                                         ${isSeriesWin
                                     ? 'bg-green-500/20 text-green-400'
                                     : 'bg-red-500/20 text-red-400'
@@ -129,7 +129,7 @@ const SeriesDetailedView = ({ selectedSeriesData, team }: Props) => {
 
                                             <div className="relative z-10 flex flex-col items-center gap-1">
                                                 <span className="text-white font-semibold text-15 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{game.map?.name ? capitalize(game.map.name) : 'Unknown'}</span>
-                                                <span className={`text-lg font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${isWin ? 'text-green-400' : 'text-red-400'}`}>
+                                                <span className={`text-xl font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${isWin ? 'text-green-400' : 'text-red-400'}`}>
                                                         {teamRoundsWon}-{opponentRoundsWon}
                                                     </span>
                                                 <span className="text-white/80 text-xs font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{formatDuration(game.duration)}</span>
