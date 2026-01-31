@@ -14,7 +14,10 @@ type GetSeriesStatsResponse = {
  *
  * @returns SeriesStats | null
  */
-async function getSeriesStats(seriesId: string, signal?: AbortSignal): Promise<SeriesStats | null> {
+async function getSeriesStats(
+    seriesId: string,
+    signal?: AbortSignal
+): Promise<SeriesStats | null> {
     try {
         const res = await axios.get<GetSeriesStatsResponse>(`/api/series/${seriesId}`, { signal });
 

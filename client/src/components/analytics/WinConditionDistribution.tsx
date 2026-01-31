@@ -23,6 +23,14 @@ type Props = {
     allSeriesData: SeriesStats[];
 };
 
+/**
+ * Analytics Breakdown Page Sub-Feature #5: Win Condition Distribution
+ *
+ * Displays the distribution of win conditions for each side in each round.
+ *
+ * @param team Team to display stats for
+ * @param allSeriesData All (or filtered) series data to display
+ */
 const WinConditionDistribution = memo(({ team, allSeriesData }: Props) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -177,7 +185,7 @@ const WinConditionDistribution = memo(({ team, allSeriesData }: Props) => {
                             {title.includes('Attack') ? <Target className="w-5 h-5 text-red-400" /> : <Shield className="w-5 h-5 text-blue-400" />}
                             {title}
                         </h3>
-                        <div className="flex gap-4 bg-gradient-to-r from-slate-950/60 to-slate-900/60 p-2.5 rounded-lg border border-white/10 backdrop-blur-sm">
+                        <div className="flex gap-4 bg-linear-to-r from-slate-950/60 to-slate-900/60 p-2.5 rounded-lg border border-white/10 backdrop-blur-sm">
                             <button 
                                 onClick={() => toggle(side, 'wins')}
                                 className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 cursor-pointer ${showWins ? 'opacity-100' : 'opacity-40'}`}

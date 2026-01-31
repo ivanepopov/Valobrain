@@ -10,6 +10,15 @@ type Props = {
     allSeriesData: SeriesStats[];
 }
 
+/**
+ * Analytics Breakdown Page Sub-Feature #1: Team-Level Statistics Overview
+ *
+ * This component provides an overview of team-level statistics.
+ * Overall match win rate, attack round win rates, and defense round win rates.
+ *
+ * @param team Team to display stats for
+ * @param allSeriesData All (or filtered) series data to display
+ */
 const TeamLevelStatsOverview = memo(({ team, allSeriesData }: Props) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -23,35 +32,35 @@ const TeamLevelStatsOverview = memo(({ team, allSeriesData }: Props) => {
         let totalDefenseRounds = 0;
         let defenseRoundsWon = 0;
 
-    allSeriesData.forEach(series => {
-        series.seriesState.games.forEach(game => {
-            const teamMatch = game.teams.find(t => t.name === team.name);
-            if (!teamMatch) return;
+        allSeriesData.forEach(series => {
+            series.seriesState.games.forEach(game => {
+                const teamMatch = game.teams.find(t => t.name === team.name);
+                if (!teamMatch) return;
 
-            // 1. Match Win Rate
-            totalMatches++;
-            if (teamMatch.won) matchesWon++;
+                // Step 1. Match Win Rate
+                totalMatches++;
+                if (teamMatch.won) matchesWon++;
 
-            // 2. Round Win Rates (Segments represent rounds in Valorant)
-            game.segments?.forEach(segment => {
-                const teamSegment = segment.teams.find(t => t.name === team.name);
-                if (!teamSegment) return;
+                // Step 2. Round Win Rates
+                game.segments.forEach(segment => {
+                    const teamSegment = segment.teams.find(t => t.name === team.name);
+                    if (!teamSegment) return;
 
-                const side = teamSegment.side.toLowerCase();
-                if (side === 'attacker') {
-                    totalAttackRounds++;
-                    if (teamSegment.won) attackRoundsWon++;
-                } else if (side === 'defender') {
-                    totalDefenseRounds++;
-                    if (teamSegment.won) defenseRoundsWon++;
-                }
+                    const side = teamSegment.side.toLowerCase();
+                    if (side === 'attacker') {
+                        totalAttackRounds++;
+                        if (teamSegment.won) attackRoundsWon++;
+                    } else if (side === 'defender') {
+                        totalDefenseRounds++;
+                        if (teamSegment.won) defenseRoundsWon++;
+                    }
+                });
             });
         });
-    });
 
-    const matchWinRate = totalMatches > 0 ? (matchesWon / totalMatches) * 100 : 0;
-    const attackWinRate = totalAttackRounds > 0 ? (attackRoundsWon / totalAttackRounds) * 100 : 0;
-    const defenseWinRate = totalDefenseRounds > 0 ? (defenseRoundsWon / totalDefenseRounds) * 100 : 0;
+        const matchWinRate = totalMatches > 0 ? (matchesWon / totalMatches) * 100 : 0;
+        const attackWinRate = totalAttackRounds > 0 ? (attackRoundsWon / totalAttackRounds) * 100 : 0;
+        const defenseWinRate = totalDefenseRounds > 0 ? (defenseRoundsWon / totalDefenseRounds) * 100 : 0;
 
         return {
             matchWinRate,
@@ -60,8 +69,7 @@ const TeamLevelStatsOverview = memo(({ team, allSeriesData }: Props) => {
         };
     }, [allSeriesData, team.name]);
 
-    if (!stats) return null;
-
+    if (!stats) return;
     const { matchWinRate, attackWinRate, defenseWinRate } = stats;
 
     return (

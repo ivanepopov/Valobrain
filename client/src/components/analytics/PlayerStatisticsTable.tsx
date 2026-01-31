@@ -1,5 +1,4 @@
 import { motion } from "motion/react";
-import type {Team} from "../../types/Team.ts";
 import type {SeriesStats} from "../../types/SeriesStats.ts";
 import { GlassBox } from "../ui/GlassBox.tsx";
 import { getAgentLogo } from '../../utils/agentLogos';
@@ -13,57 +12,56 @@ interface PlayerRosterItem {
 }
 
 type Props = {
-    team: Team;
     roster: PlayerRosterItem[];
     allSeriesData: SeriesStats[];
 };
 
-    // Helper to compute player stats
-    const computePlayerStats = (playerName: string, seriesData: SeriesStats[]) => {
-        let totalKills = 0;
-        let totalDeaths = 0;
-        let totalAssists = 0;
-        let totalDamage = 0;
-        let totalRounds = 0;
-        let firstKills = 0;
-        const agentCounts: Record<string, number> = {};
+// Helper to compute player stats
+const computePlayerStats = (playerName: string, seriesData: SeriesStats[]) => {
+    let totalKills = 0;
+    let totalDeaths = 0;
+    let totalAssists = 0;
+    let totalDamage = 0;
+    let totalRounds = 0;
+    let firstKills = 0;
+    const agentCounts: Record<string, number> = {};
 
-        seriesData.forEach(series => {
-            series.seriesState.games.forEach(game => {
-                const playerMatch = game.teams
-                    .flatMap(t => t.players)
-                    .find(p => p.name === playerName);
+    seriesData.forEach(series => {
+        series.seriesState.games.forEach(game => {
+            const playerMatch = game.teams
+                .flatMap(t => t.players)
+                .find(p => p.name === playerName);
 
-            if (playerMatch) {
-                totalKills += playerMatch.kills || 0;
-                totalDeaths += playerMatch.deaths || 0;
-                totalAssists += playerMatch.killAssistsGiven || 0;
+        if (playerMatch) {
+            totalKills += playerMatch.kills || 0;
+            totalDeaths += playerMatch.deaths || 0;
+            totalAssists += playerMatch.killAssistsGiven || 0;
 
-                    const agentName = playerMatch.character.name;
-                    agentCounts[agentName] = (agentCounts[agentName] || 0) + 1;
+                const agentName = playerMatch.character.name;
+                agentCounts[agentName] = (agentCounts[agentName] || 0) + 1;
 
-                    game.segments.forEach(segment => {
-                        totalRounds++;
-                        const playerSegment = segment.teams
-                            .flatMap(t => t.players)
-                            .find(p => p.name === playerName);
-                    
-                        if (playerSegment) {
-                            totalDamage += playerSegment.damageDealt || 0;
-                            if (playerSegment.firstKill) firstKills += 1;
-                        }
-                    });
-                }
-            });
+                game.segments.forEach(segment => {
+                    totalRounds++;
+                    const playerSegment = segment.teams
+                        .flatMap(t => t.players)
+                        .find(p => p.name === playerName);
+
+                    if (playerSegment) {
+                        totalDamage += playerSegment.damageDealt || 0;
+                        if (playerSegment.firstKill) firstKills += 1;
+                    }
+                });
+            }
         });
+    });
 
-        const adr = totalRounds > 0 ? (totalDamage / totalRounds).toFixed(1) : "0.0";
-        const kd = totalDeaths > 0 ? (totalKills / totalDeaths).toFixed(2) : totalKills.toFixed(2);
-        const kdDiff = totalKills - totalDeaths;
+    const adr = totalRounds > 0 ? (totalDamage / totalRounds).toFixed(1) : "0.0";
+    const kd = totalDeaths > 0 ? (totalKills / totalDeaths).toFixed(2) : totalKills.toFixed(2);
+    const kdDiff = totalKills - totalDeaths;
 
-        const agentsPlayed = Object.entries(agentCounts)
-            .sort(([, a], [, b]) => b - a)
-            .map(([name]) => name);
+    const agentsPlayed = Object.entries(agentCounts)
+        .sort(([, a], [, b]) => b - a)
+        .map(([name]) => name);
 
     return {
         player: playerName,
@@ -78,19 +76,23 @@ type Props = {
     };
 };
 
-const PlayerStatisticsTable = memo(({ team, roster, allSeriesData }: Props) => {
+/**
+ * Analytics Breakdown Page Sub-Feature #3: Player Statistics Tables (Overall)
+ *
+ * This component provides an overview of player-level statistics.
+ * Overall kill/death/assist rates, average damage per round, first kill count, and agent usage.
+ *
+ * @param roster List of players in the team, including their nickname and agent
+ * @param allSeriesData All (or filtered) series data to display
+ */
+const PlayerStatisticsTable = memo(({ roster, allSeriesData }: Props) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const playerStats = useMemo(() => {
         return roster
             .map(player => computePlayerStats(player.nickname, allSeriesData))
-            .sort((a, b) => {
-                const aKd = parseFloat(a.kd);
-                const bKd = parseFloat(b.kd);
-                if (bKd !== aKd) return bKd - aKd;
-                return b.kills - a.kills;
-            });
-    }, [team, roster, allSeriesData]);
+            .sort((a, b) => b.kills - a.kills);
+    }, [roster, allSeriesData]);
 
     return (
         <motion.div
@@ -110,7 +112,7 @@ const PlayerStatisticsTable = memo(({ team, roster, allSeriesData }: Props) => {
             </div>
 
             {!isCollapsed && (
-                <GlassBox className="mt-4 !p-0 overflow-hidden border-white/5">
+                <GlassBox className="mt-4 p-0! overflow-hidden border-white/5">
                     <div className="overflow-x-auto">
                         <table className="w-full text-lg">
                         <thead>

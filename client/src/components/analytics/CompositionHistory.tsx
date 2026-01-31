@@ -12,35 +12,50 @@ type Props = {
     selectedMap: string;
 }
 
+/**
+ * Analytics Breakdown Page Sub-Feature #2: Agent Usage & Composition Graphs
+ *
+ * This feature displays the composition graphs for a given team and map.
+ * A map must be selected to display composition graphs, showing the win rate and pick rate for each agent combination.
+ *
+ * @param team Team to display stats for
+ * @param allSeriesData All (or filtered) series data to display
+ * @param selectedMap Map to display stats for
+ */
 const CompositionHistory = memo(({ team, allSeriesData, selectedMap }: Props) => {
-    const [visibility, setVisibility] = React.useState({
-        pickRate: true,
-        winRate: true
-    });
 
+    // Visibility toggles for each metric
+    const [visibility, setVisibility] = React.useState({ pickRate: true, winRate: true });
     const toggle = (metric: keyof typeof visibility) => {
         setVisibility(prev => ({
             ...prev,
             [metric]: !prev[metric]
         }));
     };
+
+    // Traverse series data to calculate pick rate and win rate for each agent combination
     const compositionStats = React.useMemo(() => {
         if (selectedMap === "All") return [];
 
+        // Maintain state for composition stats
         const comps: Record<string, { agents: string[]; totalRoundsWon: number; totalRoundsPlayed: number; totalGames: number }> = {};
         let totalGamesOnMap = 0;
 
         allSeriesData.forEach(series => {
-            series.seriesState?.games?.forEach(game => {
-                if (game.map?.name?.toLowerCase() !== selectedMap.toLowerCase()) return;
+            series.seriesState.games.forEach(game => {
 
+                // Step 1: Filter data by map and increment total games
+                if (game.map.name.toLowerCase() !== selectedMap.toLowerCase()) return;
                 totalGamesOnMap++;
-                const teamData = game.teams?.find(t => t.name === team.name);
+
+                // Step 2: Traverse team data to get the agents played on the map
+                const teamData = game.teams.find(t => t.name === team.name);
                 if (!teamData) return;
 
                 const agentNames = teamData.players
-                    ?.map(p => p.character?.name || 'Unknown')
+                    .map(p => p.character.name)
                     .sort() || [];
+
                 const compKey = agentNames.join(',');
 
                 if (!comps[compKey]) {
@@ -49,14 +64,16 @@ const CompositionHistory = memo(({ team, allSeriesData, selectedMap }: Props) =>
 
                 comps[compKey].totalGames++;
 
-                // Traverse segments to count round wins accurately
-                game.segments?.forEach(segment => {
-                    // Check if the team won the round in this segment
-                    const teamInSegment = segment.teams?.find(t => t.name === team.name);
-                    if (teamInSegment?.won) {
+                // Step 3: Traverse segment data to get the number of rounds won by the team on the map
+                game.segments.forEach(segment => {
+                    comps[compKey].totalRoundsPlayed++;
+
+                    const teamInSegment = segment.teams.find(t => t.name === team.name);
+                    if (!teamInSegment) return;
+
+                    if (teamInSegment.won) {
                         comps[compKey].totalRoundsWon++;
                     }
-                    comps[compKey].totalRoundsPlayed++;
                 });
             });
         });
@@ -71,8 +88,7 @@ const CompositionHistory = memo(({ team, allSeriesData, selectedMap }: Props) =>
             .slice(0, 5);
     }, [allSeriesData, team.name, selectedMap]);
 
-    if (selectedMap === "All") return null;
-    if (compositionStats.length === 0) return null;
+    if (selectedMap === "All" || compositionStats.length === 0) return null;
 
     return (
         <motion.div
@@ -88,7 +104,7 @@ const CompositionHistory = memo(({ team, allSeriesData, selectedMap }: Props) =>
                         <Users className="w-5 h-5 text-blue-400" />
                         {selectedMap} Comps
                     </h3>
-                    <div className="flex gap-4 bg-gradient-to-r from-slate-950/60 to-slate-900/60 p-2.5 rounded-lg border border-white/10 backdrop-blur-sm">
+                    <div className="flex gap-4 bg-linear-to-r from-slate-950/60 to-slate-900/60 p-2.5 rounded-lg border border-white/10 backdrop-blur-sm">
                         <button 
                             onClick={() => toggle('pickRate')}
                             className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 cursor-pointer ${visibility.pickRate ? 'opacity-100' : 'opacity-40'}`}
@@ -112,14 +128,14 @@ const CompositionHistory = memo(({ team, allSeriesData, selectedMap }: Props) =>
                             {/* 5 Agent Images */}
                             <div className="flex gap-2 shrink-0">
                                 {comp.agents.map((agent, aIdx) => (
-                                    <div key={aIdx} className="relative w-8 h-8 rounded border border-white/10 overflow-hidden bg-slate-800 transition-transform duration-300 group-hover:translate-y-[-2px] hover:shadow-xl group-hover:z-10">
+                                    <div key={aIdx} className="relative w-8 h-8 rounded border border-white/10 overflow-hidden bg-slate-800 transition-transform duration-300 group-hover:-translate-y-0.5 hover:shadow-xl group-hover:z-10">
                                         <img
                                             src={getAgentLogo(agent)}
                                             alt={agent}
                                             className="w-full h-full object-cover"
                                             onError={(e) => (e.currentTarget.src = "/assets/agents/placeholder.png")}
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
+                                        <div className="absolute inset-0 bg-linear-to-t from-slate-900/40 to-transparent" />
                                     </div>
                                 ))}
                             </div>

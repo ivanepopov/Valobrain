@@ -1,14 +1,21 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import type { Team } from "../../types/Team.ts";
 import type { SeriesStats } from "../../types/SeriesStats.ts";
 
-interface SeriesProps {
+type Props = {
     seriesData: SeriesStats;
     team: Team;
     isSelected?: boolean;
 }
 
-const Series: React.FC<SeriesProps> = memo(({ seriesData, team, isSelected = false }) => {
+/**
+ * Series Component that displays series information for a team, including game results and overall statistics.
+ *
+ * @param seriesData Data for the series being displayed, including overall state and game details.
+ * @param team The team for which the series information is displayed.
+ * @param isSelected Whether the series is currently selected, affecting its visual style.
+ */
+const Series = memo(({ seriesData, team, isSelected = false }: Props) => {
     const series = seriesData.seriesState;
     const opponent = series.teams.find(t => t.name !== team.name);
 
@@ -27,7 +34,7 @@ const Series: React.FC<SeriesProps> = memo(({ seriesData, team, isSelected = fal
                 : 'border-white/10 hover:border-white/20 bg-white/5'
             }
         `}>
-            {/* Header: Team vs Opponent with Result */}
+            {/* Header: Team vs. Opponent with Result */}
             <div className="flex items-center justify-between mb-2">
                 <span className="text-white font-semibold">{team.name} vs {opponent?.name || 'Unknown'}</span>
                 <span className={`
