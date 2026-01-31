@@ -6,14 +6,18 @@ const scoutingWorker = require('../services/scouting-worker');
 /**
  * POST /api/scouting/:seriesId/report
  * Initiates a new report generation job.
- * Query Params: ?team=TeamName&map=MapName (map is optional)
+ * Query Params: ?team=TeamName&map=MapName&agent=gemini&model=gemini-1.5-flash-002&endpoint=url (map, agent, model, endpoint are optional)
  */
 router.post('/:seriesId/report', async (req, res) => {
     const { seriesId } = req.params;
-    const { team, map } = req.query;
+    const { team, map, agent, model, endpoint } = req.query;
 
     // Extract user-provided API key from header (optional)
-    const userApiKey = req.headers['x-gemini-api-key'] || null;
+    const userApiKey = req.headers['x-gemini-api-key'] || 
+                       req.headers['x-openai-api-key'] || 
+                       req.headers['x-claude-api-key'] || 
+                       req.headers['x-ollama-api-key'] || 
+                       null;
 
     if (!team) {
         return res.status(400).json({ error: "Team parameter is required (?team=TeamName)" });
@@ -24,7 +28,7 @@ router.post('/:seriesId/report', async (req, res) => {
 
     try {
         // Enqueue Job with optional map parameter and API key
-        const jobId = reportQueue.addJob(seriesId, team, targetMap, userApiKey);
+        const jobId = reportQueue.addJob(seriesId, team, targetMap, userApiKey, 'v2-two-pass', agent || 'gemini', model, endpoint);
         const job = reportQueue.getJob(jobId);
 
         // Trigger Worker (Fire and Forget)
@@ -61,6 +65,36 @@ router.get('/jobs/:jobId', (req, res) => {
     }
 
     res.json(job);
+});
+
+/**
+ * DELETE /api/scouting/jobs/:jobId
+ * Cancels a job.
+ */
+router.delete('/jobs/:jobId', (req, res) => {
+    const { jobId } = req.params;
+    const success = reportQueue.cancelJob(jobId);
+
+    if (success) {
+        res.json({ success: true, message: "Job cancelled" });
+    } else {
+        res.status(404).json({ error: "Job not found or already completed" });
+    }
+});
+
+/**
+ * POST /api/scouting/jobs/:jobId/abort
+ * Aborts a running job.
+ */
+router.post('/jobs/:jobId/abort', (req, res) => {
+    const { jobId } = req.params;
+    const success = reportQueue.abortJob(jobId);
+
+    if (success) {
+        res.json({ success: true, message: "Job aborted successfully." });
+    } else {
+        res.status(404).json({ error: "Job not found or not in a state that can be aborted." });
+    }
 });
 
 module.exports = router;

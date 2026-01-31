@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Shield, Crosshair, Brain, Target, AlertCircle,
-  FileText, Loader2, DollarSign, Users, MessageSquare, ChevronDown, ChevronUp, Key, Eye, EyeOff
+  FileText, Loader2, DollarSign, Users, MessageSquare, ChevronDown, ChevronUp, Eye, EyeOff, Plus, X
 } from 'lucide-react';
 import axios from 'axios';
 import { GlassBox } from '../ui/GlassBox';
@@ -12,7 +12,8 @@ import type {
   TransformedSeries,
   ReportSections,
   AIInsightReportState,
-  GenerationStage
+  GenerationStage,
+  CustomAIModel
 } from '../../types/AIInsight';
 import SeriesFilters from "../ui/SeriesFilters.tsx";
 
@@ -40,11 +41,21 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
     selectedSeries,
     selectedReportMap,
     jobId,
-    userApiKey
+    userApiKey,
+    selectedAgent,
+    selectedModel,
+    customModels
   } = reportState;
 
   // Local state for showing/hiding API key
   const [showApiKey, setShowApiKey] = useState(false);
+  const [showCustomModal, setShowCustomModal] = useState(false);
+  const [customModelForm, setCustomModelForm] = useState<Omit<CustomAIModel, 'id'>>({
+    name: '',
+    endpoint: '',
+    modelId: '',
+    agent: 'openai'
+  });
 
   // Helper to check if report has been generated
   const reportGenerated = reportData !== null;
@@ -85,6 +96,50 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
   const setUserApiKey = (key: string) => {
     setReportState(prev => ({ ...prev, userApiKey: key }));
   };
+
+  const setSelectedModel = (model: string, agent?: any) => {
+    setReportState(prev => ({ 
+      ...prev, 
+      selectedModel: model,
+      ...(agent ? { selectedAgent: agent } : {})
+    }));
+  };
+
+  const addCustomModel = (model: Omit<CustomAIModel, 'id'>) => {
+    const newModel: CustomAIModel = {
+      ...model,
+      id: `custom-${Date.now()}`
+    };
+    const updatedModels = [...customModels, newModel];
+    setReportState(prev => ({ 
+      ...prev, 
+      customModels: updatedModels,
+      selectedModel: newModel.id,
+      selectedAgent: newModel.agent
+    }));
+    // Save to localStorage for persistence
+    localStorage.setItem('valobrain_custom_models', JSON.stringify(updatedModels));
+  };
+
+  // Load custom models on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('valobrain_custom_models');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setReportState(prev => ({ ...prev, customModels: parsed }));
+      } catch (e) {
+        console.error('Failed to parse custom models from localStorage', e);
+      }
+    }
+  }, []);
+
+  const INITIAL_MODELS = [
+    { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro', agent: 'gemini' },
+    { id: 'gpt-5.2', name: 'GPT-5.2', agent: 'openai' },
+    { id: 'claude-4.5-haiku', name: 'Claude 4.5 Haiku', agent: 'claude' },
+    { id: 'llama3', name: 'Ollama (Llama 3)', agent: 'ollama' }
+  ];
 
   // Track which series have available match data
   const [availableSeries, setAvailableSeries] = useState<Record<string, boolean>>({});
@@ -372,17 +427,31 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
       clearInterval(pollIntervalRef.current);
     }
 
-    // Timeout after 3 minutes
-    const timeoutId = setTimeout(() => {
+    // Timeout after 10 minutes (some models are slow)
+    const timeoutId = setTimeout(async () => {
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
         pollIntervalRef.current = null;
       }
+      
+      // Attempt to abort on backend to terminate AI request
+      try {
+        await axios.post(`/api/scouting/jobs/${pollJobId}/abort`);
+      } catch (abortErr) {
+        console.error('[AI Insight] Failed to abort timed out job:', abortErr);
+        // Fallback to delete if abort fails or is not supported
+        try {
+          await axios.delete(`/api/scouting/jobs/${pollJobId}`);
+        } catch (delErr) {
+          console.error('[AI Insight] Failed to delete timed out job:', delErr);
+        }
+      }
+
       setError('Report generation timed out. Please try again.');
       setIsGenerating(false);
       setGenerationStatus('');
       setJobId(null);
-    }, 180000);
+    }, 600000);
 
     pollIntervalRef.current = setInterval(async () => {
       try {
@@ -456,16 +525,33 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
     try {
       // 1. Start report generation
       const mapParam = selectedReportMap !== 'all' ? `&map=${encodeURIComponent(selectedReportMap)}` : '';
-      console.log('[AI Insight] Starting report for series:', selectedSeries.id, 'team:', teamName, 'map:', selectedReportMap);
+      const agentParam = `&agent=${selectedAgent}`;
+      
+      // Determine model and endpoint
+      let modelToUse = selectedModel;
+      let endpointParam = '';
+      const customModel = customModels.find(m => m.id === selectedModel);
+      if (customModel) {
+        modelToUse = customModel.modelId;
+        if (customModel.endpoint) {
+          endpointParam = `&endpoint=${encodeURIComponent(customModel.endpoint)}`;
+        }
+      }
+      const modelParam = `&model=${modelToUse}`;
+      
+      console.log('[AI Insight] Starting report for series:', selectedSeries.id, 'team:', teamName, 'map:', selectedReportMap, 'agent:', selectedAgent, 'model:', modelToUse, 'endpoint:', endpointParam);
 
       // Build headers with optional API key
       const headers: Record<string, string> = {};
       if (userApiKey) {
-        headers['X-Gemini-API-Key'] = userApiKey;
+        const headerKey = selectedAgent === 'gemini' ? 'X-Gemini-API-Key' : 
+                         selectedAgent === 'openai' ? 'X-OpenAI-API-Key' : 
+                         'X-Claude-API-Key';
+        headers[headerKey] = userApiKey;
       }
 
       const response = await axios.post(
-        `/api/scouting/${selectedSeries.id}/report?team=${encodeURIComponent(teamName)}${mapParam}`,
+        `/api/scouting/${selectedSeries.id}/report?team=${encodeURIComponent(teamName)}${mapParam}${agentParam}${modelParam}${endpointParam}`,
         null,
         { headers }
       );
@@ -487,6 +573,29 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
     }
   };
 
+  const handleCancelGeneration = async () => {
+    if (!jobId) return;
+
+    try {
+      setGenerationStatus('Cancelling report...');
+      await axios.delete(`/api/scouting/jobs/${jobId}`);
+      
+      // Stop polling
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+      
+      setIsGenerating(false);
+      setGenerationStatus('');
+      setGenerationStage('idle');
+      setJobId(null);
+    } catch (err: any) {
+      console.error('[AI Insight] Failed to cancel report:', err);
+      setError('Failed to cancel report generation properly.');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Filters Section */}
@@ -495,52 +604,204 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
           selectedMap={selectedMap}
       />
 
-      {/* API Key Input Section */}
+      {/* Selection Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.05 }}
       >
         <GlassBox>
-          <div className="flex items-center gap-3 mb-3">
-            <Key className="w-5 h-5 text-blue-400" />
-            <span className="text-blue-200 text-sm font-semibold">Gemini API Key</span>
-            {userApiKey && (
-              <span className="text-green-400 text-xs bg-green-400/10 px-2 py-0.5 rounded-full">
-                Key provided
-              </span>
-            )}
+          <div className="flex flex-col gap-4">
+            {/* AI Model Selection */}
+            <div className="flex items-center gap-6">
+              <label className="text-blue-200 text-xs font-medium tracking-wider whitespace-nowrap w-28 uppercase">Model</label>
+              <div className="flex gap-1.5 flex-wrap">
+                {INITIAL_MODELS.map((model) => (
+                  <button
+                    key={model.id}
+                    onClick={() => setSelectedModel(model.id, model.agent)}
+                    className={`
+                      px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-300
+                      ${selectedModel === model.id
+                        ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20'
+                        : 'bg-white/5 text-blue-200 hover:bg-white/10'
+                      }
+                    `}
+                  >
+                    {model.name}
+                  </button>
+                ))}
+                
+                {/* Custom Models */}
+                {customModels.map((model) => (
+                  <div key={model.id} className="relative group">
+                    <button
+                      onClick={() => setSelectedModel(model.id, model.agent)}
+                      className={`
+                        px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-300
+                        ${selectedModel === model.id
+                          ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20'
+                          : 'bg-white/5 text-blue-200 hover:bg-white/10'
+                        }
+                      `}
+                    >
+                      {model.name}
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const updated = customModels.filter(m => m.id !== model.id);
+                        setReportState(prev => ({ ...prev, customModels: updated }));
+                        localStorage.setItem('valobrain_custom_models', JSON.stringify(updated));
+                        if (selectedModel === model.id) {
+                          setSelectedModel(INITIAL_MODELS[0].id, INITIAL_MODELS[0].agent);
+                        }
+                      }}
+                      className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+
+                <button
+                  onClick={() => setShowCustomModal(true)}
+                  className="px-3 py-1.5 rounded-md text-xs font-semibold bg-white/5 text-blue-400 border border-blue-400/20 hover:bg-blue-400/10 transition-all duration-300 flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" />
+                  Custom..
+                </button>
+              </div>
+            </div>
+
+            {/* API Key Input */}
+            <div className="flex items-center gap-6">
+              <label className="text-blue-200 text-xs font-medium tracking-wider whitespace-nowrap w-28 uppercase">API Key</label>
+              <div className="flex-1">
+                <div className="relative">
+                  <input
+                    type={showApiKey ? 'text' : 'password'}
+                    value={userApiKey}
+                    onChange={(e) => setUserApiKey(e.target.value)}
+                    placeholder={`Enter ${capitalize(selectedAgent)} key...`}
+                    className="w-full px-4 py-1.5 pr-10 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-blue-400/50 focus:outline-none focus:border-blue-400/50 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowApiKey(!showApiKey)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <div className="flex items-center justify-between mt-1 px-1">
+                  <p className="text-blue-300/60 text-[10px]">
+                    {selectedAgent === 'ollama' ? (
+                      <span>Ensure <a href="https://ollama.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">Ollama</a> is running locally. No key required.</span>
+                    ) : (
+                      <>
+                        Get key: {selectedAgent === 'gemini' ? (
+                          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">Google Studio</a>
+                        ) : selectedAgent === 'openai' ? (
+                          <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">OpenAI</a>
+                        ) : (
+                          <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">Anthropic</a>
+                        )}
+                      </>
+                    )}
+                  </p>
+                  {userApiKey && (
+                    <span className="text-green-400 text-[10px] font-bold uppercase tracking-wider">
+                      Key Provided ✓
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="relative">
-            <input
-              type={showApiKey ? 'text' : 'password'}
-              value={userApiKey}
-              onChange={(e) => setUserApiKey(e.target.value)}
-              placeholder="Enter your Gemini API key..."
-              className="w-full px-4 py-2.5 pr-12 rounded-lg bg-white/5 border border-white/10 text-white placeholder-blue-400/50 focus:outline-none focus:border-blue-400/50 transition-colors"
-            />
-            <button
-              type="button"
-              onClick={() => setShowApiKey(!showApiKey)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400 hover:text-blue-300 transition-colors"
-            >
-              {showApiKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
-          </div>
-          <p className="text-blue-300/60 text-xs mt-2">
-            Get a free API key from{' '}
-            <a
-              href="https://aistudio.google.com/app/apikey"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300 underline"
-            >
-              Google AI Studio
-            </a>
-            . Your key is stored locally in your browser.
-          </p>
         </GlassBox>
       </motion.div>
+
+      {/* Custom Model Modal */}
+      <AnimatePresence>
+        {showCustomModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-md"
+            >
+              <GlassBox className="p-8 border-blue-400/30">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-white">Add Custom Model</h3>
+                  <button onClick={() => setShowCustomModal(false)} className="text-blue-300 hover:text-white">
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-blue-200 text-xs font-medium uppercase mb-2">Agent Type</label>
+                    <select 
+                      value={customModelForm.agent}
+                      onChange={(e) => setCustomModelForm(prev => ({ ...prev, agent: e.target.value as AIAgent }))}
+                      className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-blue-400"
+                    >
+                      <option value="openai" className="bg-slate-900">OpenAI (Default)</option>
+                      <option value="gemini" className="bg-slate-900">Gemini</option>
+                      <option value="claude" className="bg-slate-900">Claude</option>
+                      <option value="ollama" className="bg-slate-900">Ollama</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-blue-200 text-xs font-medium uppercase mb-2">Display Name</label>
+                    <input 
+                      type="text"
+                      value={customModelForm.name}
+                      onChange={(e) => setCustomModelForm(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="e.g., Local Llama"
+                      className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-blue-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-blue-200 text-xs font-medium uppercase mb-2">Model ID</label>
+                    <input 
+                      type="text"
+                      value={customModelForm.modelId}
+                      onChange={(e) => setCustomModelForm(prev => ({ ...prev, modelId: e.target.value }))}
+                      placeholder="e.g., gpt-4o"
+                      className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-blue-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-blue-200 text-xs font-medium uppercase mb-2">Custom Endpoint (Optional)</label>
+                    <input 
+                      type="text"
+                      value={customModelForm.endpoint}
+                      onChange={(e) => setCustomModelForm(prev => ({ ...prev, endpoint: e.target.value }))}
+                      placeholder={customModelForm.agent === 'ollama' ? "http://localhost:11434/v1" : "https://your-proxy.com/v1"}
+                      className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-blue-400"
+                    />
+                  </div>
+                  
+                  <button
+                    onClick={() => {
+                      if (!customModelForm.name || !customModelForm.modelId) return;
+                      addCustomModel(customModelForm);
+                      setShowCustomModal(false);
+                      setCustomModelForm({ name: '', endpoint: '', modelId: '', agent: 'openai' });
+                    }}
+                    className="w-full py-3 mt-4 bg-blue-900 text-white font-bold rounded-xl hover:scale-[1.02] transition-transform"
+                  >
+                    Add Model
+                  </button>
+                </div>
+              </GlassBox>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Recent/Filtered Series Section */}
       <motion.div
@@ -669,29 +930,40 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                 {error && (
                   <span className="text-red-400 text-sm">{error}</span>
                 )}
-                <button
-                  onClick={handleGenerateReport}
-                  disabled={isGenerating}
-                  className={`
-                    flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
-                    ${isGenerating
-                      ? 'bg-blue-900/50 text-white/50 cursor-not-allowed'
-                      : 'bg-blue-900 text-white hover:scale-105'
-                    }
-                  `}
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <FileText className="w-5 h-5" />
-                      Generate AI Report
-                    </>
+                <div className="flex items-center gap-2">
+                  {isGenerating && (
+                    <button
+                      onClick={handleCancelGeneration}
+                      className="px-4 py-3 rounded-xl font-semibold bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 transition-all duration-300 flex items-center gap-2"
+                    >
+                      <X className="w-5 h-5" />
+                      Cancel
+                    </button>
                   )}
-                </button>
+                  <button
+                    onClick={handleGenerateReport}
+                    disabled={isGenerating}
+                    className={`
+                      flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
+                      ${isGenerating
+                        ? 'bg-blue-900/50 text-white/50 cursor-not-allowed'
+                        : 'bg-blue-900 text-white hover:scale-105'
+                      }
+                    `}
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="w-5 h-5" />
+                        Generate AI Report
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
 

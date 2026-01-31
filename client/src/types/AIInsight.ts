@@ -36,6 +36,16 @@ export interface ReportSections {
 
 export type GenerationStage = 'idle' | 'digest' | 'analyst' | 'writer' | 'complete';
 
+export type AIAgent = 'gemini' | 'openai' | 'claude' | 'ollama';
+
+export interface CustomAIModel {
+  id: string;
+  name: string;
+  endpoint: string;
+  modelId: string;
+  agent: AIAgent;
+}
+
 export interface AIInsightReportState {
   data: ReportSections | null;
   isGenerating: boolean;
@@ -46,6 +56,9 @@ export interface AIInsightReportState {
   selectedReportMap: string;
   jobId: string | null;
   userApiKey: string;
+  selectedAgent: AIAgent;
+  selectedModel: string;
+  customModels: CustomAIModel[];
 }
 
 export const initialAIInsightReportState: AIInsightReportState = {
@@ -57,5 +70,8 @@ export const initialAIInsightReportState: AIInsightReportState = {
   selectedSeries: null,
   selectedReportMap: 'all',
   jobId: null,
-  userApiKey: ''
+  userApiKey: '',
+  selectedAgent: 'gemini',
+  selectedModel: 'gemini-3-pro-preview',
+  customModels: []
 };

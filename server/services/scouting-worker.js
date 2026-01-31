@@ -358,6 +358,15 @@ async function processJob(jobId) {
     if (!job) return;
 
     try {
+        const signal = job.controller?.signal;
+        
+        // Helper to check for abort
+        const checkAbort = () => {
+            if (signal?.aborted) {
+                throw new Error('Report generation aborted by user or timeout.');
+            }
+        };
+
         const targetMap = job.targetMap; // null for all maps (Game 1), or specific map name
         console.log(`[Worker] Starting job ${jobId} for ${job.teamName}${targetMap ? ` (Map: ${targetMap})` : ''}`);
         reportQueue.updateJob(jobId, { status: reportQueue.JOB_STATUS.PROCESSING, progress: 10 });
@@ -379,10 +388,12 @@ async function processJob(jobId) {
         } else {
             // 1. Get/Download Data
             const filePath = await getMatchData(job.seriesId);
+            checkAbort();
             reportQueue.updateJob(jobId, { progress: 20 });
 
             // 2. Parse Data (pass targetMap to parse specific game)
             matchData = await parseMatchFile(filePath, targetMap);
+            checkAbort();
             reportQueue.updateJob(jobId, { progress: 30 });
 
             // Check if target map was found
@@ -393,6 +404,7 @@ async function processJob(jobId) {
             // 3. Build Digest
             reportQueue.updateJob(jobId, { stages: { ...job.stages, digest: 'processing' } });
             digest = digestBuilder.buildMatchDigest(matchData, job.teamName);
+            checkAbort();
 
             // SAVE DIGEST TO CACHE (with map-specific key)
             matchDataService.saveDigest(cacheKey, digest);
@@ -404,14 +416,17 @@ async function processJob(jobId) {
             });
         }
 
-        // 4. AI Analyst (Pass 1) - Pass user's API key if provided
-        const analysis = await aiAnalyst.analyzeMatch(digest, job.apiKey);
+        // 4. AI Analyst (Pass 1) - Pass user's API key, model and endpoint if provided
+        checkAbort();
+        const analysis = await aiAnalyst.analyzeMatch(digest, job.apiKey, job.agent, job.model, job.endpoint, signal);
+        checkAbort();
+
         reportQueue.updateJob(jobId, {
             stages: { ...job.stages, analyst: 'completed', writer: 'processing' },
             progress: 75
         });
 
-        // 5. AI Writer (Pass 2) - Pass user's API key if provided
+        // 5. AI Writer (Pass 2) - Pass user's API key, model and endpoint if provided
         const report = await aiWriter.generateReport(analysis, {
             targetTeam: job.teamName,
             map: matchData ? matchData.mapName : digest.meta.map, // Use digest map if matchData is null
@@ -419,7 +434,9 @@ async function processJob(jobId) {
             tournament: digest.meta.tournament,
             roster: digest.meta.roster,
             roundScore: digest.stats.roundScore // Pass the correct round score to writer
-        }, job.apiKey);
+        }, job.apiKey, job.agent, job.model, job.endpoint, signal);
+
+        checkAbort();
 
         // 6. Complete
         reportQueue.updateJob(jobId, { 
