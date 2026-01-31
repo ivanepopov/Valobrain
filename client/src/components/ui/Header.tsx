@@ -19,7 +19,7 @@ const Header = () => {
       setScrollProgress(Math.min(progress, 100));
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Initialize on mount
 
     return () => window.removeEventListener('scroll', handleScroll);
@@ -71,7 +71,7 @@ const Header = () => {
               {/* Scroll Progress Indicator */}
               <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-white/10">
                 <div 
-                  className="h-full bg-blue-400 transition-all duration-150 ease-out"
+                  className="h-full bg-blue-400 transition-all duration-300 ease-out"
                   style={{ width: `${scrollProgress}%` }}
                 />
               </div>

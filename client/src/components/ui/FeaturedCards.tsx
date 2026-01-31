@@ -68,34 +68,57 @@ const FeaturedCards = () => {
         <div className="mb-24">
             {/* Header */}
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
                 className="text-center mb-12"
             >
-                <h2 className="text-4xl font-bold text-white mb-4">Features</h2>
-                <p className="text-blue-200/70 text-lg">
+                <motion.h2 
+                    initial={{ opacity: 0, x: -30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="text-4xl font-bold text-white mb-4"
+                >
+                    Features
+                </motion.h2>
+                <motion.p 
+                    initial={{ opacity: 0, x: 30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                    className="text-blue-200/70 text-lg"
+                >
                     Explore the features that ValoBrain offers
-                </p>
+                </motion.p>
             </motion.div>
 
             {/* Feature Cards */}
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.2 }}
+                transition={{ duration: 0.4 }}
                 className="mb-12"
             >
                 <div className="grid md:grid-cols-4 gap-4">
                     {features.map((feature, index) => (
                         <motion.div
                             key={feature.title}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
+                            initial={{ opacity: 0, y: 50, scale: 0.8, rotateX: -15 }}
+                            whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+                            viewport={{ once: true, margin: "-50px" }}
+                            transition={{ 
+                                duration: 0.7, 
+                                delay: index * 0.15,
+                                ease: [0.25, 0.46, 0.45, 0.94]
+                            }}
+                            whileHover={{ 
+                                scale: 1.05, 
+                                y: -8,
+                                transition: { duration: 0.3 }
+                            }}
                         >
                             <button
                                 onClick={() => {

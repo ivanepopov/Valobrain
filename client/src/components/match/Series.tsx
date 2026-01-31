@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import type { Team } from "../../types/Team.ts";
 import type { SeriesStats } from "../../types/SeriesStats.ts";
+import { formatSeriesType } from "../../utils/formatters.ts";
 
 type Props = {
     seriesData: SeriesStats;
@@ -50,7 +51,7 @@ const Series = memo(({ seriesData, team, isSelected = false }: Props) => {
 
             {/* Format and Date Row */}
             <div className="flex items-center justify-between text-base mb-2">
-                <span className="text-blue-300 font-semibold">{series.format}</span>
+                <span className="text-blue-300 font-semibold">{formatSeriesType(series.format)}</span>
             </div>
 
             {/* Map results mini display */}
