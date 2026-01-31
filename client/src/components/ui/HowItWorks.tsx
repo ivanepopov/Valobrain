@@ -94,7 +94,8 @@ const HowItWorks = () => {
                                 whileInView={{ opacity: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.6, delay: index * 0.2 + 0.4, ease: "easeOut" }}
-                                className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-400/10 border border-blue-400/30 text-blue-400 mb-6"
+                                className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-400/10 border border-blue-400/30 mb-6"
+                                style={{ color: '#80B9FF' }}
                             >
                                 {step.icon}
                             </motion.div>
@@ -116,7 +117,7 @@ const HowItWorks = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: index * 0.2 + 0.6 }}
-                                className="text-white leading-relaxed"
+                                className="text-gray-200 leading-relaxed"
                             >
                                 {step.description}
                             </motion.p>

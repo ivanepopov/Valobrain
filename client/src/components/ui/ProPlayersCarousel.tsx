@@ -65,8 +65,8 @@ const ProPlayersCarousel = () => {
               
               {/* Player Name */}
               <div className="text-center">
-                <p className="text-sm font-semibold text-white">{player.name}</p>
-                <p className="text-xs text-slate-400">{player.team}</p>
+                <p className="text-sm font-semibold text-gray-200">{player.name}</p>
+                <p className="text-xs text-gray-200">{player.team}</p>
               </div>
             </div>
           ))}

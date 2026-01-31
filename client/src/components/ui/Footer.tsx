@@ -31,7 +31,7 @@ const Footer = () => {
                     {/* Brand */}
                     <div>
                         <Link to="/" className="flex items-center gap-3 mb-4 w-fit hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-lg" aria-label="ValoBrain home">
-                            <Brain className="w-8 h-8 text-blue-400" aria-hidden="true" />
+                            <Brain className="w-8 h-8" style={{ color: '#80B9FF' }} aria-hidden="true" />
                             <h3 className="text-xl font-bold text-white">ValoBrain</h3>
                         </Link>
                         <p className="text-white text-sm leading-relaxed">
@@ -77,7 +77,7 @@ const Footer = () => {
                             <Github className="w-5 h-5" aria-hidden="true" />
                             <span className="text-sm">View on GitHub</span>
                         </a>
-                        <p className="text-slate-400 text-sm">
+                        <p className="text-white text-sm">
                             Built with ❤️ by the ValoBrain team
                         </p>
                     </div>

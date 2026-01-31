@@ -132,9 +132,8 @@ const FeaturedCards = () => {
                                     activeFeature === index ? 'border-blue-400 bg-white/10 ring-2 ring-blue-400/30' : 'border-white/10'
                                 }`}
                             >
-                                <div className={`flex justify-center mb-2 transition-colors ${
-                                    activeFeature === index ? 'text-blue-300' : 'text-blue-400'
-                                }`}>
+                                <div className="flex justify-center mb-2 transition-colors"
+                                    style={{ color: '#80B9FF' }}>
                                     {feature.icon}
                                 </div>
                                 <h3 className="text-base font-semibold text-white text-center mb-2">

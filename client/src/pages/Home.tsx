@@ -96,7 +96,7 @@ const Home = () => {
                   <div className="flex items-center justify-center gap-3 mb-6">
                     <h1 className="text-4xl md:text-6xl font-bold text-white" >Level up your Valorant IQ</h1>
                   </div>
-                  <p className="text-lg md:text-xl text-blue-200 mb-8 max-w-3xl mx-auto">
+                  <p className="text-lg md:text-xl text-gray-200 mb-8 max-w-3xl mx-auto">
                     Discover how teams play, where they excel, and how to counter their strategies with AI-powered match analytics and tactical reports, just with a team name.
                   </p>
         
