@@ -43,8 +43,8 @@ JSON OUTPUT STRUCTURE:
       "key_takeaway": "Insight on their pistol proficiency."
   },
   "formation_usage": {
-      "attack_defaults": ["1-3-1", "Deathball", "Split"], 
-      "defense_setups": ["Sentinel Anchor", "Gambling", "Aggressive Info"]
+      "attack_defaults": ["List formations actually observed in data"], 
+      "defense_setups": ["List setups actually observed in data"]
   },
 
 ### REQUIREMENT: FIND AT LEAST 5 DISTINCT PATTERNS PER PHASE (ATTACK / DEFENSE).
@@ -52,21 +52,37 @@ JSON OUTPUT STRUCTURE:
 ### 3. STRATEGIC FORMATIONS (Deduced from Kill Flow)
 Analyze the `killFlow` locations (`kz` = Killer Zone, `vz` = Victim Zone) of the first 2-3 kills in each round to identify the strategy.
 
-**Attack Defaults:**
-*   **Default / Map Control:** First kills are SPREAD across the map (e.g., A Main AND B Main).
-*   **Rush / Exec:** All early kills happen in ONE Zone (e.g., 3 deaths at B Main).
-*   **Pick / Contact:** Slow start, low ability usage, first kill is late (>40s).
-*   **Mid-to-Site Split:** Kills occur in Mid AND a Site Main simultaneously (Pinching).
-*   **Fake Execute:** Heavy utility/kills at A, but bomb planted B.
-*   **4-1 Pinch:** 4 players hit site, 1 Lurker kills rotators in Mid/Spawn.
+**IMPORTANT: Do NOT default to any single formation. Determine the actual formation from the data.**
+If zone data is "Unknown" for most kills, state "Formation unclear due to limited positional data" rather than guessing.
 
-**Defense Setups:**
-*   **Aggressive Info:** Defense gets early kills (t<20s) at deep zones (e.g., A Main, Mid).
-*   **Anchor:** Defenders dying on Site (e.g., B Site) without trades from teammates locally.
-*   **Stack:** 3+ kills happen at one site on defense.
-*   **Retake Protocol:** Defenders give up site (0 deaths on entry), then die fighting Post-Plant (5v5 Retake).
-*   **Aggressive Flank:** Defender kills attacker in Attacker Spawn/Lobby areas.
-*   **Crossfire Trap:** 2 Defenders get kills in the same zone from different angles.
+**ATTACK FORMATION GLOSSARY:**
+| Formation | Player Split | Description | Kill Pattern |
+|-----------|--------------|-------------|---------------|
+| **1-3-1** | 1 lurk, 3 main hit, 1 anchor | Standard default with lurker | Early kills spread: 1 in spawn/flank, 3+ at main site |
+| **2-1-2** | 2 A side, 1 mid, 2 B side | Balanced map control | Early kills at both A and B simultaneously |
+| **2-3** | 2 players one site, 3 the other | Slight stack toward one site | 3 players dying at same site entry |
+| **3-2** | 3 players one site, 2 the other | Heavy stack toward one site | Most deaths at single chokepoint |
+| **4-1 Stack** | 4 hit site, 1 lurks/anchors | Fast exec with lurk | 4 deaths at site, 1 late kill elsewhere |
+| **5-0 Deathball** | 5-man rush | Full commit, no map control | All 5 kills at same zone within 10s |
+| **Split Execute** | 2-3 players per entry point | Pincer attack on site | Simultaneous kills from 2 entry points |
+| **Mid-to-Site** | Control mid, rotate to site | Slow methodical take | Early mid kills, late site kills |
+| **Fake + Rotate** | Utility dump one site, hit other | Deception play | Heavy ability use at fake site, plant at other |
+| **Pick Default** | Spread for info, collapse on pick | Wait for opener | Late first blood (>40s), then fast collapse |
+| **Contact Play** | 5-man aggressive push | No util, pure aim | Very fast first blood (<15s), multiple trades |
+
+**DEFENSE FORMATION GLOSSARY:**
+| Setup | Player Split | Description | Kill Pattern |
+|-------|--------------|-------------|---------------|
+| **2-1-2** | 2 each site, 1 mid | Standard balanced | Deaths evenly distributed |
+| **3-2** | 3 on preferred site, 2 on other | Slight stack | More kills at stacked site |
+| **2-3** | Opposite of above | Stack other site | Adjust based on enemy patterns |
+| **1-3-1** | 1 anchor each site, 3 rotate | Retake focused | Few entry deaths, more post-plant deaths |
+| **4-1 Stack** | 4 on one site, 1 info | Heavy stack + gamble | Dominant at stacked site, weak at other |
+| **5-0 Full Stack** | All 5 at one site | Pure gamble | Either stomp or get destroyed |
+| **Aggressive Info** | Push out for early picks | Early round pressure | Fast kills (<20s) at attacker territory |
+| **Passive Retake** | Give space, retake with numbers | Trade-focused | Deaths happen post-plant |
+| **Crossfire Holds** | 2 players set angles on same zone | Coordinated defense | 2 kills from same zone, different angles |
+| **Flank/Lurk Defense** | 1 player rotates behind attackers | Timing-based | Late kills in attacker spawn/lobby |
 
 ### 4. TACTICAL MICRO-PLAYS (Combos & Setups)
 Analyze `keyEvents.abilities` to find coordinated plays in specific zones (`z`).
@@ -80,11 +96,14 @@ Analyze `keyEvents.abilities` to find coordinated plays in specific zones (`z`).
 *   List identified combos with Zone and Players involved (e.g., "Breach+Raze Stun-Nade Combo @ A Main").
 
 **JSON Output Field:** `formation_usage`
-*   List identified formations with frequency (e.g., "1-3-1 Default: 5 rounds").
+*   List ONLY formations you actually observed with evidence. Vary your analysis - do not always report the same formation.
+*   Include frequency count (e.g., "3-2 Stack A: 4 rounds", "Split Execute: 3 rounds", "Deathball B: 2 rounds").
 
 **Analysis Instruction:**
-For every Tactical Pattern identified, cite the FORMATION used.
-*Example:* "Round 4: Attackers used a **1-3-1 Default** to condition Mid before rotating A."
+For every Tactical Pattern identified, cite the FORMATION used based on actual kill locations.
+*Example A:* "Rounds 2,4,7: Attackers used a **3-2 Stack** favoring B-Main, with 3 players hitting B while 2 lurked A."
+*Example B:* "Rounds 5,8: Attackers ran a **Split Execute** with simultaneous kills at A-Main and Mid."
+*Example C:* "Rounds 1,6: Defenders used a **4-1 Stack** on A-Site, leaving B exposed."
 
   "player_analysis": [
     {
