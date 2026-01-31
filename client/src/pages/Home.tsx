@@ -82,7 +82,7 @@ const Home = () => {
       {/* Neural Network Background */}
       <NeuralNetworkBackground />
 
-      <div className="relative z-10 max-w-6xl mx-auto pt-20">
+      <div className="relative z-10 w-full px-6 pt-20">
         {/* Header with Search */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -127,7 +127,7 @@ const Home = () => {
                 />
                 <button
                   type="submit"
-                  className="px-8 py-3 min-h-[44px] bg-blue-600 text-white font-semibold rounded-xl transition-all duration-300 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-950"
+                  className="px-8 py-3 bg-blue-900 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105"
                   aria-label="Search team"
                 >
                   Search
