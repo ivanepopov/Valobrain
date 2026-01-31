@@ -7,6 +7,7 @@ import {getMapImage} from "../../utils/mapImages.ts";
 import {capitalize, formatDate, formatDuration, formatSeriesType} from "../../utils/formatters.ts";
 import Match from "./Match.tsx";
 import {Search} from "lucide-react";
+import {useNavigate} from "react-router-dom";
 
 type Props = {
     selectedSeriesData: SeriesStats | undefined;
@@ -22,6 +23,7 @@ type Props = {
  * @param team The team for which the series statistics are displayed.
  */
 const SeriesDetailedView = ({ selectedSeriesData, team }: Props) => {
+    const navigate = useNavigate();
 
     const [selectedGameIndex, setSelectedGameIndex] = useState(0);
     const [selectedMapTab, setSelectedMapTab] = useState<string>('All Maps');
@@ -53,11 +55,16 @@ const SeriesDetailedView = ({ selectedSeriesData, team }: Props) => {
                         <div className="mb-6 bg-white/5 p-4 rounded-xl border border-white/5">
                             <div className="flex items-center justify-between mb-2">
                                 <div className="flex flex-col">
-                                    <span className="text-blue-200/40 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Detailed Series Overview</span>
+                                    <span className="text-blue-200/40 text-[10px] font-black tracking-[0.2em] mb-1">Detailed Series Overview</span>
                                     <h2 className="text-2xl font-black text-white flex items-center gap-3">
                                         <span className="text-blue-400">{team.name}</span>
                                         <span className="text-white/20 text-lg">VS</span>
-                                        <span>{opponent?.name || 'Unknown'}</span>
+                                        <span 
+                                            onClick={() => opponent && navigate(`/dashboard/${opponent.id}`)}
+                                            className={`transition-colors duration-300 ${opponent ? 'cursor-pointer hover:text-blue-400' : ''}`}
+                                        >
+                                            {opponent?.name || 'Unknown'}
+                                        </span>
                                     </h2>
                                 </div>
                                 <div className={`
@@ -72,7 +79,7 @@ const SeriesDetailedView = ({ selectedSeriesData, team }: Props) => {
 
                             </div>
                             <div className="flex items-center gap-4 text-xs font-bold">
-                                <span className="text-blue-300/60 uppercase tracking-widest">{formatSeriesType(selectedSeriesData.seriesState.format)}</span>
+                                <span className="text-blue-300/60 tracking-widest">{formatSeriesType(selectedSeriesData.seriesState.format)}</span>
                                 <span className="w-1 h-1 rounded-full bg-white/10"></span>
                                 <span className="text-blue-200/40">{formatDate(selectedSeriesData.seriesState.startedAt)}</span>
                             </div>
@@ -89,7 +96,7 @@ const SeriesDetailedView = ({ selectedSeriesData, team }: Props) => {
                                     }}
                                     className={`
                                             group relative rounded-lg py-2 px-6 border transition-all duration-300 hover:scale-105 overflow-hidden cursor-pointer flex flex-col items-center justify-center gap-2
-                                            ${(selectedSeriesData.seriesState?.games?.length || 0) <= 3 ? 'flex-1' : 'shrink-0 min-w-[120px]'}
+                                            ${(selectedSeriesData.seriesState?.games?.length || 0) <= 3 ? 'flex-1' : 'shrink-0 min-w-30'}
                                             ${selectedMapTab === 'All Maps'
                                         ? 'bg-blue-900/40 border-blue-400 shadow-lg shadow-blue-500/20'
                                         : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10'
@@ -120,7 +127,7 @@ const SeriesDetailedView = ({ selectedSeriesData, team }: Props) => {
                                             }}
                                             className={`
                                                     group relative rounded-lg py-2 px-8 border transition-all duration-300 hover:scale-105 overflow-hidden cursor-pointer
-                                                    ${(selectedSeriesData.seriesState?.games?.length || 0) <= 3 ? 'flex-1' : 'shrink-0 min-w-[140px]'}
+                                                    ${(selectedSeriesData.seriesState?.games?.length || 0) <= 3 ? 'flex-1' : 'shrink-0 min-w-35'}
                                                     ${isWin
                                                 ? 'border-emerald-400/30 hover:border-emerald-400/60'
                                                 : 'border-rose-400/30 hover:border-rose-400/60'
@@ -141,7 +148,7 @@ const SeriesDetailedView = ({ selectedSeriesData, team }: Props) => {
                                             <span className="absolute bottom-1 right-2 text-[10px] font-black text-white/40 z-10">{idx + 1}</span>
 
                                             <div className="relative z-10 flex flex-col items-center gap-0.5">
-                                                <span className="text-white font-bold text-xs uppercase tracking-tight drop-shadow-md">{game.map?.name ? capitalize(game.map.name) : 'Unknown'}</span>
+                                                <span className="text-white font-bold text-xs tracking-tight drop-shadow-md">{game.map?.name ? capitalize(game.map.name) : 'Unknown'}</span>
                                                 <span className={`text-lg font-black drop-shadow-md ${isWin ? 'text-emerald-400' : 'text-rose-400'}`}>
                                                         {teamRoundsWon}-{opponentRoundsWon}
                                                     </span>
@@ -160,6 +167,7 @@ const SeriesDetailedView = ({ selectedSeriesData, team }: Props) => {
                             <Match
                                 match={selectedMapTab === 'All Maps' ? null : selectedSeriesData.seriesState.games[selectedGameIndex]}
                                 allMaps={selectedMapTab === 'All Maps' ? selectedSeriesData.seriesState.games : undefined}
+                                selectedTeamName={team.name}
                             />
                         </div>
                     </GlassBox>
