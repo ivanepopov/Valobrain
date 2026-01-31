@@ -94,8 +94,6 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
   const [actualSeriesMaps, setActualSeriesMaps] = useState<Record<string, string[]>>({});
   const [isLoadingMaps, setIsLoadingMaps] = useState(false);
 
-  const maps = ['All', 'Abyss', 'Ascent', 'Bind', 'Breeze', 'Corrode', 'Fracture', 'Haven', 'Icebox', 'Lotus', 'Pearl', 'Split', 'Sunset'];
-
   // Check which series have downloadable match data
   useEffect(() => {
     const checkAvailability = async () => {
