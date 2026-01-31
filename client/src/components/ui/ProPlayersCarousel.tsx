@@ -21,10 +21,10 @@ const ProPlayersCarousel = () => {
   const duplicatedPlayers = [...proPlayers, ...proPlayers];
 
   return (
-    <div className="w-full py-2 overflow-hidden">
+    <section className="w-full py-2 overflow-hidden" aria-label="Professional players using ValoBrain">
       {/* Header Text */}
-      <p className="text-center text-slate-400 text-sm mb-8">
-        Used by top and former Valorant professionals and coaches
+      <p className="text-center text-slate-300 text-base mb-8">
+        Trusted by professional Valorant players and coaches
       </p>
       
       <div className="relative">
@@ -42,6 +42,7 @@ const ProPlayersCarousel = () => {
               ease: "linear",
             },
           }}
+          aria-label="Scrolling list of professional players"
         >
           {duplicatedPlayers.map((player, index) => (
             <div
@@ -52,7 +53,7 @@ const ProPlayersCarousel = () => {
               <div className="w-32 h-32 rounded-lg overflow-hidden border-2 border-white/10 bg-slate-900/50 backdrop-blur-sm">
                 <img
                   src={player.image}
-                  alt={player.name}
+                  alt={`${player.name}, professional player from ${player.team}`}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     // Fallback if image fails to load
@@ -64,13 +65,13 @@ const ProPlayersCarousel = () => {
               {/* Player Name */}
               <div className="text-center">
                 <p className="text-sm font-semibold text-white">{player.name}</p>
-                <p className="text-xs text-blue-200/70">{player.team}</p>
+                <p className="text-xs text-slate-400">{player.team}</p>
               </div>
             </div>
           ))}
         </motion.div>
       </div>
-    </div>
+    </section>
   );
 };
 

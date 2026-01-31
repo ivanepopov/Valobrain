@@ -98,22 +98,37 @@ const Home = () => {
           </p>
 
           {/* Search Bar */}
-          <form onSubmit={handleSubmit} className="max-w-2xl mx-auto relative">
+          <form onSubmit={handleSubmit} className="max-w-2xl mx-auto relative" ref={dropdownRef}>
+            <label htmlFor="team-search" className="sr-only">Search for a Valorant team</label>
             <div
-                className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-3 hover:border-blue-400/50 transition-all duration-300">
+                className="backdrop-blur-md bg-white/5 border-2 border-white/10 rounded-2xl p-3 hover:border-blue-400/50 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-400/30 transition-all duration-300">
               <div className="flex items-center gap-3">
-                <Search className="w-6 h-6 text-blue-400 ml-3"/>
+                <Search className="w-6 h-6 text-blue-400 ml-3" aria-hidden="true"/>
                 <input
+                    id="team-search"
                     type="text"
                     value={teamName}
                     onChange={(e) => setTeamName(e.target.value)}
                     onFocus={() => teamsDropdown.length > 0 && setIsOpen(true)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        setIsOpen(false);
+                      } else if (e.key === 'ArrowDown' && teamsDropdown.length > 0) {
+                        e.preventDefault();
+                        setIsOpen(true);
+                      }
+                    }}
                     placeholder="Search for a team name..."
-                    className="flex-1 bg-transparent text-white placeholder-blue-200/50 outline-none text-lg py-3"
+                    className="flex-1 bg-transparent text-white placeholder-slate-400 outline-none text-lg py-3"
+                    aria-label="Search for a Valorant team"
+                    aria-autocomplete="list"
+                    aria-expanded={isOpen}
+                    aria-controls="team-results"
                 />
                 <button
                   type="submit"
-                  className="px-8 py-3 bg-blue-900 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105"
+                  className="px-8 py-3 min-h-[44px] bg-blue-600 text-white font-semibold rounded-xl transition-all duration-300 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-950"
+                  aria-label="Search team"
                 >
                   Search
                 </button>
@@ -125,31 +140,43 @@ const Home = () => {
             </p>
 
             {/* Dropdown */}
-            {teamsDropdown.length > 0 && (
+            {isOpen && teamsDropdown.length > 0 && (
                 <div
-                    className="absolute top-full left-0 right-0 mt-3 backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
+                    id="team-results"
+                    role="listbox"
+                    className="absolute top-full left-0 right-0 mt-3 backdrop-blur-md bg-slate-900/95 border border-white/20 rounded-2xl shadow-2xl overflow-hidden z-50">
                   <div className="py-2">
                     {teamsDropdown.map((t) => (
                         <button
                             key={t.id}
                             type="button"
+                            role="option"
+                            aria-selected={false}
                             onClick={() => {
                               setTeamName(t.name);
                               handleTeamSelect(t);
                             }}
-                            className="w-full flex items-center px-5 py-3 hover:bg-white/10 hover:backdrop-blur-lg transition-all duration-300 text-left group"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleTeamSelect(t);
+                              } else if (e.key === 'Escape') {
+                                setIsOpen(false);
+                              }
+                            }}
+                            className="w-full flex items-center px-5 py-3 min-h-[44px] hover:bg-white/10 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-400 transition-all duration-200 text-left group"
                         >
                           {t.logoUrl ? (
-                              <img src={t.logoUrl} alt=""
+                              <img src={t.logoUrl} alt={`${t.name} logo`}
                                    className="w-8 h-8 rounded-md mr-4 object-contain bg-black/40 p-1"/>
                           ) : (
                               <div
-                                  className="w-8 h-8 rounded-md mr-4 bg-white/10 backdrop-blur-sm flex items-center justify-center text-xs text-blue-200 font-bold uppercase">
+                                  className="w-8 h-8 rounded-md mr-4 bg-white/10 backdrop-blur-sm flex items-center justify-center text-xs text-slate-300 font-bold uppercase"
+                                  aria-hidden="true">
                                 {t.name.substring(0, 1)}
                               </div>
                           )}
                           <span
-                              className="text-sm font-semibold text-blue-200 group-hover:text-white transition-colors">
+                              className="text-base font-medium text-slate-200 group-hover:text-white transition-colors">
                         {t.name}
                       </span>
                         </button>

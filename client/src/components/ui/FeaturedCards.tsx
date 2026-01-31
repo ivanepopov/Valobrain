@@ -122,7 +122,6 @@ const FeaturedCards = () => {
                         >
                             <button
                                 onClick={() => {
-                                    // Find the first image index for this feature
                                     const firstImageIndex = imageToFeatureMap.findIndex(f => f === index);
                                     if (firstImageIndex !== -1) {
                                         setCurrentImageIndex(firstImageIndex);
@@ -159,7 +158,12 @@ const FeaturedCards = () => {
                 className="relative max-w-4xl mx-auto"
             >
                 {/* Carousel Container */}
-                <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4 overflow-hidden">
+                <div 
+                    className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-4 overflow-hidden"
+                    role="region"
+                    aria-label="Feature screenshots carousel"
+                    aria-live="polite"
+                >
                     <div className="relative">
                         <AnimatePresence mode="wait">
                             <motion.div
@@ -172,7 +176,7 @@ const FeaturedCards = () => {
                             >
                                 <img 
                                     src={allImages[currentImageIndex]} 
-                                    alt={features[activeFeature].title}
+                                    alt={`${features[activeFeature].title} - ${features[activeFeature].description}`}
                                     className="w-full h-full object-cover"
                                     loading="lazy"
                                     onError={(e) => {
@@ -188,20 +192,21 @@ const FeaturedCards = () => {
                 {/* Bottom Controls - Outside the glass box */}
                 <div className="flex justify-center items-center gap-4 mt-6">
                     {/* Dots Indicator */}
-                    <div className="flex gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full">
+                    <div className="flex gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full" role="group" aria-label="Carousel navigation">
                         {allImages.map((_, index) => (
                             <button
                                 key={index}
                                 onClick={() => {
                                     setCurrentImageIndex(index);
-                                    setIsPlaying(false); // Pause when user manually navigates
+                                    setIsPlaying(false);
                                 }}
-                                className={`transition-all duration-300 rounded-full ${
+                                className={`transition-all duration-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 ${
                                     currentImageIndex === index
                                         ? "bg-blue-400 w-12 h-2"
                                         : "bg-white/30 hover:bg-white/50 w-2 h-2"
                                 }`}
-                                aria-label={`Go to slide ${index + 1}`}
+                                aria-label={`Go to screenshot ${index + 1} of ${allImages.length}`}
+                                aria-current={currentImageIndex === index ? "true" : "false"}
                             />
                         ))}
                     </div>
@@ -209,15 +214,16 @@ const FeaturedCards = () => {
                     {/* Play/Pause Button */}
                     <button
                         onClick={() => setIsPlaying(!isPlaying)}
-                        className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full transition-all duration-300"
-                        aria-label={isPlaying ? "Pause carousel" : "Play carousel"}
+                        className="p-3 min-h-[44px] min-w-[44px] bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-950"
+                        aria-label={isPlaying ? "Pause carousel auto-play" : "Play carousel auto-play"}
+                        aria-pressed={isPlaying}
                     >
                         {isPlaying ? (
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
                             </svg>
                         ) : (
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M8 5v14l11-7z" />
                             </svg>
                         )}

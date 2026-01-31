@@ -15,7 +15,6 @@ const CTASection = () => {
             className="mb-24"
         >
             <div className="relative backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-12 overflow-hidden hover:border-blue-400/50 transition-all duration-300">
-                {/* Subtle background decoration */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400/5 rounded-full blur-3xl" />
                 <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-400/5 rounded-full blur-3xl" />
 
