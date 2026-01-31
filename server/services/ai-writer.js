@@ -47,7 +47,7 @@ class AiWriterService {
             // Use user's API key if provided, otherwise fall back to env
             const apiKey = userApiKey || defaultApiKey;
             if (!apiKey) {
-                throw new Error('No Gemini API key provided. Please enter your API key or configure GEMINI_API_KEY in the server environment.');
+                throw new Error('No Gemini API key provided. Please enter your API key.');
             }
 
             // Create client with the appropriate key
