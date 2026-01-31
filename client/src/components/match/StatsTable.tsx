@@ -32,7 +32,7 @@ const StatsTable = ({ teamName, isWinner, players, isMultipleAgents = false }: P
         </h3>
 
         <div className="backdrop-blur-sm bg-white/5 rounded-xl overflow-hidden border border-white/5">
-            <table className="w-full text-lg">
+            <table className="w-full text-base">
                 <thead>
                     <tr className="border-b border-white/10">
                         <th className="text-left py-3 px-4 text-blue-200 font-semibold w-[20%]">Player</th>

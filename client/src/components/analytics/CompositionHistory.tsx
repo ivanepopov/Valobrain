@@ -100,7 +100,7 @@ const CompositionHistory = memo(({ team, allSeriesData, selectedMap }: Props) =>
             <h2 className="text-2xl font-bold text-white drop-shadow-md mb-6">Comps</h2>
             <GlassBox className="mb-6 border-white/10">
                 <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
-                    <h3 className="text-white text-lg font-bold flex items-center gap-2">
+                    <h3 className="text-white text-xl font-bold flex items-center gap-2">
                         <Users className="w-5 h-5 text-blue-400" />
                         {selectedMap} Comps
                     </h3>
@@ -125,7 +125,6 @@ const CompositionHistory = memo(({ team, allSeriesData, selectedMap }: Props) =>
                 <div className="space-y-6">
                     {compositionStats.map((comp, idx) => (
                         <div key={idx} className="flex items-center gap-6 group">
-                            {/* 5 Agent Images */}
                             <div className="flex gap-2 shrink-0">
                                 {comp.agents.map((agent, aIdx) => (
                                     <div key={aIdx} className="relative w-8 h-8 rounded border border-white/10 overflow-hidden bg-slate-800 transition-transform duration-300 group-hover:-translate-y-0.5 hover:shadow-xl group-hover:z-10">

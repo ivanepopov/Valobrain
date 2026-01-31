@@ -82,7 +82,7 @@ const Home = () => {
       {/* Neural Network Background */}
       <NeuralNetworkBackground />
 
-      <div className="relative z-10 max-w-6xl mx-auto pt-20">
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-6 pt-20">
         {/* Header with Search */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -91,30 +91,44 @@ const Home = () => {
           className="text-center mb-24"
         >
           <div className="flex items-center justify-center gap-3 mb-6">
-            <h1 className="text-6xl font-bold text-white" >Level up your Valorant IQ.</h1>
-            {/* Grow your Valorant IQ with ValoBrain */}
+            <h1 className="text-6xl font-bold text-white" >Level up your Valorant IQ</h1>
           </div>
           <p className="text-xl text-blue-200 mb-8">
             Discover how teams play, where they excel, and how to counter their strategies with AI-powered match analytics and tactical reports, just with a team name.
           </p>
 
           {/* Search Bar */}
-          <form onSubmit={handleSubmit} className="max-w-2xl mx-auto relative">
+          <form onSubmit={handleSubmit} className="max-w-2xl mx-auto relative" ref={dropdownRef}>
+            <label htmlFor="team-search" className="sr-only">Search for a Valorant team</label>
             <div
-                className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-3 hover:border-blue-400/50 transition-all duration-300">
+                className="backdrop-blur-md bg-white/5 border-2 border-white/10 rounded-2xl p-3 hover:border-blue-400/50 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-400/30 transition-all duration-300">
               <div className="flex items-center gap-3">
-                <Search className="w-6 h-6 text-blue-400 ml-3"/>
+                <Search className="w-6 h-6 text-blue-400 ml-3" aria-hidden="true"/>
                 <input
+                    id="team-search"
                     type="text"
                     value={teamName}
                     onChange={(e) => setTeamName(e.target.value)}
                     onFocus={() => teamsDropdown.length > 0 && setIsOpen(true)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        setIsOpen(false);
+                      } else if (e.key === 'ArrowDown' && teamsDropdown.length > 0) {
+                        e.preventDefault();
+                        setIsOpen(true);
+                      }
+                    }}
                     placeholder="Search for a team name..."
-                    className="flex-1 bg-transparent text-white placeholder-blue-200/50 outline-none text-lg py-3"
+                    className="flex-1 bg-transparent text-white placeholder-slate-400 outline-none text-lg py-3"
+                    aria-label="Search for a Valorant team"
+                    aria-autocomplete="list"
+                    aria-expanded={isOpen}
+                    aria-controls="team-results"
                 />
                 <button
                   type="submit"
                   className="px-8 py-3 bg-blue-900 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105"
+                  aria-label="Search team"
                 >
                   Search
                 </button>
@@ -126,31 +140,43 @@ const Home = () => {
             </p>
 
             {/* Dropdown */}
-            {teamsDropdown.length > 0 && (
+            {isOpen && teamsDropdown.length > 0 && (
                 <div
-                    className="absolute top-full left-0 right-0 mt-3 backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
+                    id="team-results"
+                    role="listbox"
+                    className="absolute top-full left-0 right-0 mt-3 backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl overflow-hidden z-50">
                   <div className="py-2">
                     {teamsDropdown.map((t) => (
                         <button
                             key={t.id}
                             type="button"
+                            role="option"
+                            aria-selected={false}
                             onClick={() => {
                               setTeamName(t.name);
                               handleTeamSelect(t);
                             }}
-                            className="w-full flex items-center px-5 py-3 hover:bg-white/10 hover:backdrop-blur-lg transition-all duration-300 text-left group"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleTeamSelect(t);
+                              } else if (e.key === 'Escape') {
+                                setIsOpen(false);
+                              }
+                            }}
+                            className="w-full flex items-center px-5 py-3 min-h-[44px] hover:bg-white/10 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-400 transition-all duration-200 text-left group"
                         >
                           {t.logoUrl ? (
-                              <img src={t.logoUrl} alt=""
+                              <img src={t.logoUrl} alt={`${t.name} logo`}
                                    className="w-8 h-8 rounded-md mr-4 object-contain bg-black/40 p-1"/>
                           ) : (
                               <div
-                                  className="w-8 h-8 rounded-md mr-4 bg-white/10 backdrop-blur-sm flex items-center justify-center text-xs text-blue-200 font-bold uppercase">
+                                  className="w-8 h-8 rounded-md mr-4 bg-white/10 backdrop-blur-sm flex items-center justify-center text-xs text-slate-300 font-bold uppercase"
+                                  aria-hidden="true">
                                 {t.name.substring(0, 1)}
                               </div>
                           )}
                           <span
-                              className="text-sm font-semibold text-blue-200 group-hover:text-white transition-colors">
+                              className="text-base font-medium text-slate-200 group-hover:text-white transition-colors">
                         {t.name}
                       </span>
                         </button>
@@ -171,27 +197,27 @@ const Home = () => {
         </motion.div>
 
         {/* Pro Players Carousel */}
-        <div className="mb-16">
+        <div className="mb-32">
           <ProPlayersCarousel />
         </div>
 
         {/* Feature Cards */}
-        <div id="features" className="scroll-mt-24">
+        <div id="features" className="scroll-mt-24 mb-32">
           <FeaturedCards />
         </div>
 
         {/* How It Works */}
-        <div id="how-it-works" className="scroll-mt-24">
+        <div id="how-it-works" className="scroll-mt-24 mb-32">
           <HowItWorks />
         </div>
 
         {/* Feature Images Carousel */}
-        <div id="showcase" className="scroll-mt-24">
+        <div id="showcase" className="scroll-mt-24 mb-32">
           <FeaturedImagesCarousel />
         </div>
 
         {/* CTA Section */}
-        <div id="get-started" className="scroll-mt-24">
+        <div id="get-started" className="scroll-mt-24 mb-32">
           <CTASection />
         </div>
 

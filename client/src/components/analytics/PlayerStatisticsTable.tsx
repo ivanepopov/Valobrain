@@ -114,7 +114,7 @@ const PlayerStatisticsTable = memo(({ roster, allSeriesData }: Props) => {
             {!isCollapsed && (
                 <GlassBox className="mt-4 p-0! overflow-hidden border-white/5">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-lg">
+                        <table className="w-full text-base">
                         <thead>
                             <tr className="border-b border-white/10">
                                 <th className="text-left py-3 px-4 text-blue-200 font-semibold">Player</th>

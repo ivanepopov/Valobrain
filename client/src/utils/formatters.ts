@@ -17,10 +17,8 @@ export function formatDuration(isoDuration: string): string {
     const minutes = minutesMatch ? parseInt(minutesMatch[1], 10) : 0;
     const seconds = secondsMatch ? Math.round(parseFloat(secondsMatch[1])) : 0;
 
-    // Convert hours to minutes
     const totalMinutes = hours * 60 + minutes;
 
-    // Pad seconds with leading zero if needed
     const paddedSeconds = seconds.toString().padStart(2, '0');
 
     return `${totalMinutes}:${paddedSeconds}`;
@@ -33,4 +31,18 @@ export function capitalize(str: string): string {
         .split(' ')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
+}
+
+/**
+ * Formats series type string from API format to display format
+ * e.g., "best-of-3" -> "Best of 3", "best-of-5" -> "Best of 5"
+ */
+export function formatSeriesType(format: string): string {
+    if (!format) return '';
+        const match = format.match(/best-of-(\d+)/i);
+    if (match) {
+        return `Best of ${match[1]}`;
+    }
+    
+    return capitalize(format);
 }

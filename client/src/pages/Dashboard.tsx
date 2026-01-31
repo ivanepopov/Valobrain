@@ -120,7 +120,12 @@ const Dashboard = () => {
     // Early return for loading state
     if (isLoadingTeam) {
         return (
-            <div className="relative min-h-screen bg-linear-to-b from-slate-950 via-blue-950 to-slate-900 text-white p-8 overflow-hidden">
+            <div className="relative min-h-screen bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 text-white p-8 overflow-hidden">
+                <div className="fixed inset-0 z-0 opacity-60 pointer-events-none">
+                    <Spline
+                        scene="https://prod.spline.design/Exoc-c1KvXHUx7bJ/scene.splinecode"
+                    />
+                </div>
                 <NeuralNetworkBackground />
                 <div className="relative z-10 flex flex-col items-center justify-center min-h-[60vh] space-y-6">
                     <div className="relative">
@@ -130,8 +135,8 @@ const Dashboard = () => {
                         </div>
                     </div>
                     <div className="text-center">
-                        <h3 className="text-lg font-bold text-white">Loading Team Data</h3>
-                        <p className="text-sm text-blue-200/60 mt-2">
+                        <h3 className="text-xl font-bold text-white">Loading Team Data</h3>
+                        <p className="text-base text-blue-200/60 mt-2">
                             Retrieving team information...
                         </p>
                     </div>
@@ -155,8 +160,8 @@ const Dashboard = () => {
                     </button>
                     <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
                         <div className="text-red-400 text-6xl">⚠️</div>
-                        <h2 className="text-2xl font-bold text-white">{error || "Team Not Found"}</h2>
-                        <p className="text-blue-200">Please try searching for a different team.</p>
+                        <h2 className="text-3xl font-bold text-white">{error || "Team Not Found"}</h2>
+                        <p className="text-base text-blue-200">Please try searching for a different team.</p>
                         <button
                             onClick={() => navigate("/")}
                             className="mt-4 px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-semibold transition-colors"
@@ -206,11 +211,11 @@ const Dashboard = () => {
                             
                             <div className="flex items-center gap-3">
                                 {team.logoUrl && (
-                                    <img src={team.logoUrl} alt={`${team.name} logo`} className="w-10 h-10 object-contain" />
+                                    <img src={team.logoUrl} alt={`${team.name} logo`} className="w-15 h-15 object-contain" />
                                 )}
                                 <div>
-                                    <h1 className="text-2xl font-bold text-white">{team.name}</h1>
-                                    <p className="text-sm text-blue-200">Team Dashboard</p>
+                                    <h1 className="text-3xl font-bold text-white">{team.name}</h1>
+                                    <p className="text-base text-blue-200">Team Dashboard</p>
                                 </div>
                             </div>
                         </div>
@@ -250,8 +255,8 @@ const Dashboard = () => {
                             </div>
                         </div>
                         <div className="text-center">
-                            <h3 className="text-lg font-bold text-white">Aggregating Intelligence</h3>
-                            <p className="text-sm text-blue-200/60 mt-2">
+                            <h3 className="text-xl font-bold text-white">Aggregating Intelligence</h3>
+                            <p className="text-base text-blue-200/60 mt-2">
                                 Processing {stats.aggregationSeriesIds?.length || 0} historical series...
                             </p>
                         </div>

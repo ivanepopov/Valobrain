@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import type { Team } from "../../types/Team.ts";
 import type { SeriesStats } from "../../types/SeriesStats.ts";
+import { formatSeriesType } from "../../utils/formatters.ts";
 
 type Props = {
     seriesData: SeriesStats;
@@ -36,9 +37,9 @@ const Series = memo(({ seriesData, team, isSelected = false }: Props) => {
         `}>
             {/* Header: Team vs. Opponent with Result */}
             <div className="flex items-center justify-between mb-2">
-                <span className="text-white font-semibold">{team.name} vs {opponent?.name || 'Unknown'}</span>
+                <span className="text-white font-semibold text-lg">{team.name} vs {opponent?.name || 'Unknown'}</span>
                 <span className={`
-                    px-3 py-1 rounded-full text-base font-bold
+                    px-4 py-2 rounded-lg text-lg font-bold
                     ${isWin 
                         ? 'bg-green-500/20 text-green-400' 
                         : 'bg-red-500/20 text-red-400'
@@ -50,7 +51,7 @@ const Series = memo(({ seriesData, team, isSelected = false }: Props) => {
 
             {/* Format and Date Row */}
             <div className="flex items-center justify-between text-base mb-2">
-                <span className="text-blue-300 font-semibold">{series.format}</span>
+                <span className="text-blue-300 font-semibold text-base">{formatSeriesType(series.format)}</span>
             </div>
 
             {/* Map results mini display */}
