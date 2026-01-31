@@ -1,10 +1,10 @@
-import React, { memo } from 'react';
+import React, {memo, useState} from 'react';
 import type { Team } from "../../types/Team.ts";
 import type { SeriesStats } from "../../types/SeriesStats.ts";
 import GlassBox from "../ui/GlassBox.tsx";
 import {getAgentLogo} from "../../utils/agentLogos.ts";
 import { motion } from "motion/react";
-import { Users } from "lucide-react";
+import {ChevronDown, ChevronUp, Users} from "lucide-react";
 
 type Props = {
     team: Team;
@@ -23,6 +23,8 @@ type Props = {
  * @param selectedMap Map to display stats for
  */
 const CompositionHistory = memo(({ team, allSeriesData, selectedMap }: Props) => {
+
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     // Visibility toggles for each metric
     const [visibility, setVisibility] = React.useState({ pickRate: true, winRate: true });
@@ -97,91 +99,101 @@ const CompositionHistory = memo(({ team, allSeriesData, selectedMap }: Props) =>
             transition={{ duration: 0.5 }}
             className="mb-6"
         >
-            <h2 className="text-2xl font-bold text-white drop-shadow-md mb-6">Comps</h2>
-            <GlassBox className="mb-6 border-white/10">
-                <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
-                    <h3 className="text-white text-xl font-bold flex items-center gap-2">
-                        <Users className="w-5 h-5 text-blue-400" />
-                        {selectedMap} Comps
-                    </h3>
-                    <div className="flex gap-4 bg-linear-to-r from-slate-950/60 to-slate-900/60 p-2.5 rounded-lg border border-white/10 backdrop-blur-sm">
-                        <button 
-                            onClick={() => toggle('pickRate')}
-                            className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 cursor-pointer ${visibility.pickRate ? 'opacity-100' : 'opacity-40'}`}
-                        >
-                            <div className="w-3.5 h-3.5 rounded-md bg-purple-400" />
-                            <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Pick Rate</span>
-                        </button>
-                        <button 
-                            onClick={() => toggle('winRate')}
-                            className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 cursor-pointer ${visibility.winRate ? 'opacity-100' : 'opacity-40'}`}
-                        >
-                            <div className="w-3.5 h-3.5 rounded-md bg-green-400" />
-                            <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Win Rate</span>
-                        </button>
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-white drop-shadow-md">Compositions</h2>
+                <button
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className="text-white/70 hover:text-white transition-colors"
+                >
+                    {isCollapsed ? <ChevronDown className="w-6 h-6" /> : <ChevronUp className="w-6 h-6" />}
+                </button>
+            </div>
+            {!isCollapsed &&
+                <GlassBox className="mb-6 border-white/10">
+                    <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
+                        <h3 className="text-white text-xl font-bold flex items-center gap-2">
+                            <Users className="w-5 h-5 text-blue-400" />
+                            {selectedMap} Comps
+                        </h3>
+                        <div className="flex gap-4 bg-linear-to-r from-slate-950/60 to-slate-900/60 p-2.5 rounded-lg border border-white/10 backdrop-blur-sm">
+                            <button
+                                onClick={() => toggle('pickRate')}
+                                className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 cursor-pointer ${visibility.pickRate ? 'opacity-100' : 'opacity-40'}`}
+                            >
+                                <div className="w-3.5 h-3.5 rounded-md bg-purple-400" />
+                                <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Pick Rate</span>
+                            </button>
+                            <button
+                                onClick={() => toggle('winRate')}
+                                className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 cursor-pointer ${visibility.winRate ? 'opacity-100' : 'opacity-40'}`}
+                            >
+                                <div className="w-3.5 h-3.5 rounded-md bg-green-400" />
+                                <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Win Rate</span>
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <div className="space-y-6">
-                    {compositionStats.map((comp, idx) => (
-                        <div key={idx} className="flex items-center gap-6 group">
-                            <div className="flex gap-2 shrink-0">
-                                {comp.agents.map((agent, aIdx) => (
-                                    <div key={aIdx} className="relative w-8 h-8 rounded border border-white/10 overflow-hidden bg-slate-800 transition-transform duration-300 group-hover:-translate-y-0.5 hover:shadow-xl group-hover:z-10">
-                                        <img
-                                            src={getAgentLogo(agent)}
-                                            alt={agent}
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => (e.currentTarget.src = "/assets/agents/placeholder.png")}
-                                        />
-                                        <div className="absolute inset-0 bg-linear-to-t from-slate-900/40 to-transparent" />
-                                    </div>
-                                ))}
-                            </div>
+                    <div className="space-y-6">
+                        {compositionStats.map((comp, idx) => (
+                            <div key={idx} className="flex items-center gap-6 group">
+                                <div className="flex gap-2 shrink-0">
+                                    {comp.agents.map((agent, aIdx) => (
+                                        <div key={aIdx} className="relative w-8 h-8 rounded border border-white/10 overflow-hidden bg-slate-800 transition-transform duration-300 group-hover:-translate-y-0.5 hover:shadow-xl group-hover:z-10">
+                                            <img
+                                                src={getAgentLogo(agent)}
+                                                alt={agent}
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => (e.currentTarget.src = "/assets/agents/placeholder.png")}
+                                            />
+                                            <div className="absolute inset-0 bg-linear-to-t from-slate-900/40 to-transparent" />
+                                        </div>
+                                    ))}
+                                </div>
 
-                            {/* 2 Horizontal Bars on the right */}
-                            <div className="flex-1 space-y-2.5">
-                                {visibility.pickRate && (
-                                    <div className="relative h-2.5 bg-slate-900/70 rounded-lg overflow-visible border border-white/10 hover:border-white/20 transition-all duration-300">
-                                        <div
-                                            className="absolute inset-y-0 left-0 bg-purple-400 rounded-lg transition-all duration-300 ease-out group/bar hover:brightness-110 cursor-pointer"
-                                            style={{ width: `${comp.pickRate}%` }}
-                                        >
-                                            {/* Tooltip */}
-                                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover/bar:opacity-100 transition-opacity duration-200 pointer-events-none z-20">
-                                                <div className="bg-slate-900 border border-white/20 rounded-lg px-2 py-1 shadow-xl">
-                                                    <span className="text-white text-xs font-bold whitespace-nowrap">{comp.pickRate.toFixed(1)}%</span>
+                                {/* 2 Horizontal Bars on the right */}
+                                <div className="flex-1 space-y-2.5">
+                                    {visibility.pickRate && (
+                                        <div className="relative h-2.5 bg-slate-900/70 rounded-lg overflow-visible border border-white/10 hover:border-white/20 transition-all duration-300">
+                                            <div
+                                                className="absolute inset-y-0 left-0 bg-purple-400 rounded-lg transition-all duration-300 ease-out group/bar hover:brightness-110 cursor-pointer"
+                                                style={{ width: `${comp.pickRate}%` }}
+                                            >
+                                                {/* Tooltip */}
+                                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover/bar:opacity-100 transition-opacity duration-200 pointer-events-none z-20">
+                                                    <div className="bg-slate-900 border border-white/20 rounded-lg px-2 py-1 shadow-xl">
+                                                        <span className="text-white text-xs font-bold whitespace-nowrap">{comp.pickRate.toFixed(1)}%</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-white z-10 leading-none pointer-events-none">
+                                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-white z-10 leading-none pointer-events-none">
                                             {comp.pickRate.toFixed(0)}%
                                         </span>
-                                    </div>
-                                )}
-                                {visibility.winRate && (
-                                    <div className="relative h-2.5 bg-slate-900/70 rounded-lg overflow-visible border border-white/10 hover:border-white/20 transition-all duration-300">
-                                        <div
-                                            className="absolute inset-y-0 left-0 bg-green-400 rounded-lg transition-all duration-300 ease-out group/bar hover:brightness-110 cursor-pointer"
-                                            style={{ width: `${comp.winRate}%` }}
-                                        >
-                                            {/* Tooltip */}
-                                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover/bar:opacity-100 transition-opacity duration-200 pointer-events-none z-20">
-                                                <div className="bg-slate-900 border border-white/20 rounded-lg px-2 py-1 shadow-xl">
-                                                    <span className="text-white text-xs font-bold whitespace-nowrap">{comp.winRate.toFixed(1)}%</span>
+                                        </div>
+                                    )}
+                                    {visibility.winRate && (
+                                        <div className="relative h-2.5 bg-slate-900/70 rounded-lg overflow-visible border border-white/10 hover:border-white/20 transition-all duration-300">
+                                            <div
+                                                className="absolute inset-y-0 left-0 bg-green-400 rounded-lg transition-all duration-300 ease-out group/bar hover:brightness-110 cursor-pointer"
+                                                style={{ width: `${comp.winRate}%` }}
+                                            >
+                                                {/* Tooltip */}
+                                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover/bar:opacity-100 transition-opacity duration-200 pointer-events-none z-20">
+                                                    <div className="bg-slate-900 border border-white/20 rounded-lg px-2 py-1 shadow-xl">
+                                                        <span className="text-white text-xs font-bold whitespace-nowrap">{comp.winRate.toFixed(1)}%</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-white z-10 leading-none pointer-events-none">
+                                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-white z-10 leading-none pointer-events-none">
                                             {comp.winRate.toFixed(0)}%
                                         </span>
-                                    </div>
-                                )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            </GlassBox>
+                        ))}
+                    </div>
+                </GlassBox>
+            }
         </motion.div>
     );
 });
