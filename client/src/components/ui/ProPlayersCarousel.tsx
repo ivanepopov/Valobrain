@@ -24,7 +24,7 @@ const ProPlayersCarousel = () => {
   return (
     <section className="w-full py-2 overflow-hidden" aria-label="Professional players using ValoBrain">
       {/* Header Text */}
-      <p className="text-center text-slate-300 text-base mb-8">
+      <p className="text-center text-white text-xl mb-8">
         Trusted by professional Valorant players and coaches
       </p>
       

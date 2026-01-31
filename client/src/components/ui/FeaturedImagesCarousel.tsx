@@ -28,6 +28,9 @@ const FeaturedImagesCarousel = ({
         >
             <div className="text-center mb-12">
                 <h2 className="text-4xl font-bold text-white mb-4">{title}</h2>
+                <p className="text-gray-200 text-xl">
+                    See the game through the eyes of professional players
+                </p>
             </div>
 
             {/* 2x2 Grid */}

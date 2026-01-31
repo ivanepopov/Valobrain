@@ -34,7 +34,7 @@ const Footer = () => {
                             <Brain className="w-8 h-8 text-blue-400" aria-hidden="true" />
                             <h3 className="text-xl font-bold text-white">ValoBrain</h3>
                         </Link>
-                        <p className="text-slate-300 text-sm leading-relaxed">
+                        <p className="text-white text-sm leading-relaxed">
                             Advanced Valorant team analytics powered by AI. Gain insights, analyze performance, and elevate your strategic understanding.
                         </p>
                     </div>
@@ -47,7 +47,7 @@ const Footer = () => {
                                 <li>
                                     <button
                                         onClick={() => scrollToSection('how-it-works')}
-                                        className="text-slate-300 hover:text-white transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 rounded px-1 min-h-[44px] inline-flex items-center"
+                                        className="text-white hover:text-blue-300 transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 rounded px-1 min-h-[44px] inline-flex items-center"
                                     >
                                         How It Works
                                     </button>
@@ -55,7 +55,7 @@ const Footer = () => {
                                 <li>
                                     <button
                                         onClick={() => scrollToSection('features')}
-                                        className="text-slate-300 hover:text-white transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 rounded px-1 min-h-[44px] inline-flex items-center"
+                                        className="text-white hover:text-blue-300 transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 rounded px-1 min-h-[44px] inline-flex items-center"
                                     >
                                         Features
                                     </button>
@@ -71,7 +71,7 @@ const Footer = () => {
                             href="https://github.com/ivanepopov/Valobrain"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded px-1 min-h-[44px]"
+                            className="inline-flex items-center gap-2 text-white hover:text-blue-300 transition-colors mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded px-1 min-h-[44px]"
                             aria-label="View ValoBrain on GitHub (opens in new tab)"
                         >
                             <Github className="w-5 h-5" aria-hidden="true" />

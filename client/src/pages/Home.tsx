@@ -93,7 +93,7 @@ const Home = () => {
           <div className="flex items-center justify-center gap-3 mb-6">
             <h1 className="text-6xl font-bold text-white" >Level up your Valorant IQ</h1>
           </div>
-          <p className="text-xl text-blue-200 mb-8">
+          <p className="text-2xl text-gray-200 mb-8">
             Discover how teams play, where they excel, and how to counter their strategies with AI-powered match analytics and tactical reports, just with a team name.
           </p>
 
@@ -135,7 +135,7 @@ const Home = () => {
               </div>
             </div>
 
-            <p className="text-blue-200/70 text-sm mt-4">
+            <p className="text-white/70 text-sm mt-4">
               Try searching: Sentinels, Team Liquid, FNATIC, or any team name
             </p>
 
@@ -170,13 +170,13 @@ const Home = () => {
                                    className="w-8 h-8 rounded-md mr-4 object-contain bg-black/40 p-1"/>
                           ) : (
                               <div
-                                  className="w-8 h-8 rounded-md mr-4 bg-white/10 backdrop-blur-sm flex items-center justify-center text-xs text-slate-300 font-bold uppercase"
+                                  className="w-8 h-8 rounded-md mr-4 bg-white/10 backdrop-blur-sm flex items-center justify-center text-xs text-white font-bold uppercase"
                                   aria-hidden="true">
                                 {t.name.substring(0, 1)}
                               </div>
                           )}
                           <span
-                              className="text-base font-medium text-slate-200 group-hover:text-white transition-colors">
+                              className="text-base font-medium text-white">
                         {t.name}
                       </span>
                         </button>

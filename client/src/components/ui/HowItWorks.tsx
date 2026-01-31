@@ -46,7 +46,7 @@ const HowItWorks = () => {
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.4 }}
-                    className="text-blue-200/70 text-base"
+                    className="text-gray-200 text-xl"
                 >
                     Get started with ValoBrain in three simple steps
                 </motion.p>
@@ -76,14 +76,14 @@ const HowItWorks = () => {
                             <div className="hidden md:block absolute top-16 left-1/2 w-full h-0.5 bg-gradient-to-r from-blue-400/50 to-transparent" />
                         )}
 
-                        <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-8 hover:border-blue-400/50 transition-all duration-300 relative z-10">
+                        <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-8 hover:border-blue-400/50 transition-all duration-300 relative z-10 h-full min-h-[380px] flex flex-col">
                             {/* Step number */}
                             <motion.div 
                                 initial={{ opacity: 0 }}
                                 whileInView={{ opacity: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: index * 0.2 + 0.3 }}
-                                className="text-6xl font-bold text-blue-400/20 mb-4"
+                                className="text-6xl font-bold text-white mb-4"
                             >
                                 {step.number}
                             </motion.div>
@@ -116,7 +116,7 @@ const HowItWorks = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: index * 0.2 + 0.6 }}
-                                className="text-blue-200/70 leading-relaxed"
+                                className="text-white leading-relaxed"
                             >
                                 {step.description}
                             </motion.p>

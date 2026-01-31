@@ -62,7 +62,7 @@ const Header = () => {
               <button
                 onClick={() => scrollToSection('features')}
                 className={`transition-colors text-sm font-medium ${
-                  activeSection === 'features' ? 'text-blue-400' : 'text-blue-200 hover:text-white'
+                  activeSection === 'features' ? 'text-blue-400' : 'text-white hover:text-blue-300'
                 }`}
               >
                 Features
@@ -70,7 +70,7 @@ const Header = () => {
               <button
                 onClick={() => scrollToSection('how-it-works')}
                 className={`transition-colors text-sm font-medium ${
-                  activeSection === 'how-it-works' ? 'text-blue-400' : 'text-blue-200 hover:text-white'
+                  activeSection === 'how-it-works' ? 'text-blue-400' : 'text-white hover:text-blue-300'
                 }`}
               >
                 How It Works
@@ -78,7 +78,7 @@ const Header = () => {
               <button
                 onClick={() => scrollToSection('get-started')}
                 className={`transition-colors text-sm font-medium ${
-                  activeSection === 'get-started' ? 'text-blue-400' : 'text-blue-200 hover:text-white'
+                  activeSection === 'get-started' ? 'text-blue-400' : 'text-white hover:text-blue-300'
                 }`}
               >
                 Get Started

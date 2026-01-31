@@ -23,7 +23,7 @@ const CTASection = () => {
                         Analyze Opponents. Play Smarter. Win More.
                     </h2>
 
-                    <p className="text-base text-blue-200/70 mb-8">
+                    <p className="text-xl text-gray-200 mb-8">
                         Start finding counters to teams with AI-powered insights and comprehensive statistics.
                     </p>
 
