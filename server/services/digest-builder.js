@@ -8,6 +8,104 @@
 const zoneEngine = require('./zone-state-engine');
 
 /**
+ * Fuzzy match a target team name against teams found in the JSONL data.
+ * Handles cases where Statistics API has "Cloud9" but JSONL has "Cloud9 Blue".
+ * @param {string} targetTeam - Team name from Statistics API
+ * @param {Object} players - Players object with team info { playerName: { agent, teamName } }
+ * @param {Array} rounds - Array of round objects with winInfo
+ * @returns {string} - Best matching team name from JSONL data, or original if no match found
+ */
+function resolveTeamName(targetTeam, players, rounds) {
+  if (!targetTeam) return targetTeam;
+  
+  // 1. Collect all unique team names from JSONL data
+  const teamsInData = new Set();
+  
+  // From players roster
+  for (const playerInfo of Object.values(players)) {
+    if (typeof playerInfo === 'object' && playerInfo.teamName) {
+      teamsInData.add(playerInfo.teamName);
+    }
+  }
+  
+  // From round win info
+  for (const round of rounds) {
+    if (round.winInfo?.winner) {
+      teamsInData.add(round.winInfo.winner);
+    }
+  }
+  
+  const teamsArray = Array.from(teamsInData);
+  console.log(`[Digest] Resolving team "${targetTeam}" against JSONL teams: [${teamsArray.join(', ')}]`);
+  
+  if (teamsArray.length === 0) {
+    console.warn(`[Digest] No teams found in JSONL data, using original: "${targetTeam}"`);
+    return targetTeam;
+  }
+  
+  // 2. Check for exact match (case-insensitive)
+  const exactMatch = teamsArray.find(t => t.toLowerCase() === targetTeam.toLowerCase());
+  if (exactMatch) {
+    console.log(`[Digest] Exact match found: "${exactMatch}"`);
+    return exactMatch;
+  }
+  
+  // 3. Check if target team is a substring of any JSONL team (e.g., "Cloud9" matches "Cloud9 Blue")
+  const substringMatch = teamsArray.find(t => 
+    t.toLowerCase().includes(targetTeam.toLowerCase()) ||
+    targetTeam.toLowerCase().includes(t.toLowerCase())
+  );
+  if (substringMatch) {
+    console.log(`[Digest] Substring match found: "${substringMatch}" for target "${targetTeam}"`);
+    return substringMatch;
+  }
+  
+  // 4. Try normalizing common variations
+  const normalizeTeamName = (name) => {
+    return name
+      .toLowerCase()
+      .replace(/\s+(esports|gaming|team|e-sports|club)$/i, '')  // Remove common suffixes
+      .replace(/\s+/g, '')  // Remove spaces
+      .replace(/[^a-z0-9]/g, '');  // Remove special chars
+  };
+  
+  const normalizedTarget = normalizeTeamName(targetTeam);
+  const normalizedMatch = teamsArray.find(t => 
+    normalizeTeamName(t) === normalizedTarget ||
+    normalizeTeamName(t).includes(normalizedTarget) ||
+    normalizedTarget.includes(normalizeTeamName(t))
+  );
+  if (normalizedMatch) {
+    console.log(`[Digest] Normalized match found: "${normalizedMatch}" for target "${targetTeam}"`);
+    return normalizedMatch;
+  }
+  
+  // 5. Check word overlap (e.g., "Team Liquid" vs "Liquid")
+  const targetWords = targetTeam.toLowerCase().split(/\s+/);
+  let bestMatch = null;
+  let bestOverlap = 0;
+  
+  for (const team of teamsArray) {
+    const teamWords = team.toLowerCase().split(/\s+/);
+    const overlap = targetWords.filter(w => teamWords.some(tw => tw.includes(w) || w.includes(tw))).length;
+    if (overlap > bestOverlap) {
+      bestOverlap = overlap;
+      bestMatch = team;
+    }
+  }
+  
+  if (bestMatch && bestOverlap > 0) {
+    console.log(`[Digest] Word overlap match found: "${bestMatch}" (overlap: ${bestOverlap} words) for target "${targetTeam}"`);
+    return bestMatch;
+  }
+  
+  // 6. Fallback: If exactly 2 teams in data, match target by win/loss count expectation
+  //    or log a warning and use original
+  console.warn(`[Digest] No fuzzy match found for "${targetTeam}". Available teams: [${teamsArray.join(', ')}]. Using original.`);
+  return targetTeam;
+}
+
+/**
  * Build a compact match digest from raw processed rounds
  * @param {Object} matchData - Output from processing JSONL (rounds, players, mapName)
  * @param {string} targetTeam - Team to focus analysis on
@@ -16,7 +114,13 @@ function buildMatchDigest(matchData, targetTeam) {
   const { rounds, players } = matchData;
   let mapName = matchData.mapName;
   
-  // 0. Auto-Detect Map if Unknown
+  // 0. Resolve target team name against JSONL data (handles "Cloud9" vs "Cloud9 Blue" mismatches)
+  const resolvedTeam = resolveTeamName(targetTeam, players, rounds);
+  if (resolvedTeam !== targetTeam) {
+    console.log(`[Digest] Using resolved team name: "${resolvedTeam}" (original: "${targetTeam}")`);
+  }
+  
+  // 0b. Auto-Detect Map if Unknown
   if (!mapName || mapName === 'Unknown') {
       mapName = detectMap(rounds);
       console.log(`[Digest] Auto-Detected Map: ${mapName}`);
@@ -25,11 +129,11 @@ function buildMatchDigest(matchData, targetTeam) {
   // 1. Convert each round into a dense summary FIRST
   const roundSummaries = [];
   for (const round of rounds) {
-    roundSummaries.push(summarizeRound(round, targetTeam, mapName));
+    roundSummaries.push(summarizeRound(round, resolvedTeam, mapName));
   }
 
   // 2. Build stats using the summaries (for trade aggregation) and raw rounds (for wins)
-  const stats = buildTeamStats(rounds, roundSummaries, targetTeam);
+  const stats = buildTeamStats(rounds, roundSummaries, resolvedTeam);
 
   // Normalize roster to include team info and filter to target team's players
   const normalizedRoster = {};
@@ -38,8 +142,8 @@ function buildMatchDigest(matchData, targetTeam) {
     // Handle both old format (string) and new format (object with agent and teamName)
     if (typeof playerInfo === 'object' && playerInfo.agent) {
       normalizedRoster[playerName] = playerInfo;
-      // Filter target team's roster
-      if (playerInfo.teamName?.toLowerCase() === targetTeam?.toLowerCase()) {
+      // Filter target team's roster (use resolvedTeam for matching)
+      if (playerInfo.teamName?.toLowerCase() === resolvedTeam?.toLowerCase()) {
         targetTeamRoster[playerName] = playerInfo.agent;
       }
     } else {
@@ -51,7 +155,8 @@ function buildMatchDigest(matchData, targetTeam) {
   const digest = {
     meta: {
       map: mapName,
-      targetTeam,
+      targetTeam: resolvedTeam,  // Use resolved name so it matches throughout
+      originalTeam: targetTeam,  // Keep original for reference
       tournament: matchData.tournamentName || 'Unknown Tournament',
       date: matchData.seriesDate || new Date().toISOString(),
       roster: targetTeamRoster, // Target team's Name -> Agent map (simplified)
@@ -110,6 +215,12 @@ function buildTeamStats(rounds, roundSummaries, targetTeam) {
   const wins = rounds.filter(r =>
     r.winInfo?.winner?.toLowerCase() === targetTeam?.toLowerCase()
   ).length;
+  
+  // Warn if no wins detected (likely a team name resolution issue)
+  if (wins === 0 && rounds.length > 0) {
+    const allWinners = [...new Set(rounds.map(r => r.winInfo?.winner).filter(Boolean))];
+    console.warn(`[Digest] WARNING: 0 wins for "${targetTeam}". Winners in data: [${allWinners.join(', ')}]`);
+  }
   
   // 1. Site Conditioning (Attack Side)
   const siteSequence = rounds
