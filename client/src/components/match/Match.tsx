@@ -1,8 +1,8 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import type { MatchStats } from '../../types/MatchStats';
 import StatsTable from "./StatsTable.tsx";
 
-interface MatchProps {
+type Props = {
     match: MatchStats | null;
     allMaps?: MatchStats[]; // For "All Maps" aggregation
 }
@@ -65,7 +65,15 @@ const aggregatePlayerStats = (games: MatchStats[], teamName: string) => {
     })).sort((a, b) => b.kills - a.kills);
 };
 
-const Match: React.FC<MatchProps> = memo(({ match, allMaps }) => {
+/**
+ * A React memoized functional component for displaying match statistics in either aggregated or single-match format.
+ * The component dynamically renders stats tables for teams and players, with support for multi-map scenarios
+ * where aggregated statistics are shown or single-match scenarios with detailed player metrics.
+ *
+ * @param match The match data object for a single match. If `null`, the component handles multi-map scenarios using `allMaps`.
+ * @param allMaps An array of map data objects. If provided and non-empty, aggregated statistics across multiple maps are displayed.
+ */
+const Match = memo(({ match, allMaps }: Props) => {
     // If allMaps is provided, show aggregated stats
     const isAllMaps = allMaps && allMaps.length > 0;
 

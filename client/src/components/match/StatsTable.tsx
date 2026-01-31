@@ -1,8 +1,7 @@
-import React from "react";
 import { getAgentLogo } from "../../utils/agentLogos.ts";
 import { capitalize } from "../../utils/formatters.ts";
 
-const StatsTable: React.FC<{
+type Props = {
     teamName: string;
     isWinner: boolean;
     players: Array<{
@@ -15,7 +14,17 @@ const StatsTable: React.FC<{
         fk?: number;
     }>;
     isMultipleAgents?: boolean;
-}> = ({ teamName, isWinner, players, isMultipleAgents = false }) => (
+}
+
+/**
+ * Renders a statistics table for a team, showcasing players' performance data such as kills, deaths, assists, and other metrics.
+ *
+ * @param teamName The name of the team being displayed.
+ * @param isWinner Whether the team has won the match; controls the visual styling.
+ * @param players An array of player objects, each containing performance metrics and character details.
+ * @param isMultipleAgents Determines if players can have multiple agents; controls how agent data is displayed.
+ */
+const StatsTable = ({ teamName, isWinner, players, isMultipleAgents = false }: Props) => (
     <div className="relative">
         <h3 className={`text-[14px] font-black uppercase tracking-[0.3em] mb-3 flex items-center gap-3 ${isWinner ? 'text-emerald-400' : 'text-rose-400'}`}>
             <span className={`w-1 h-3 rounded-full ${isWinner ? 'bg-emerald-400' : 'bg-rose-400'}`}></span>

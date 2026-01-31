@@ -34,6 +34,10 @@ interface PlayerRosterItem {
  * Sub-Feature #3: Player Statistics Tables
  * Sub-Feature #4: Map Performance Graphs
  * Sub-Feature #5: Win Condition Distribution
+ *
+ * @param team Team to display stats for
+ * @param allSeriesData All series data to display
+ * @param isLoadingSeries Whether the series data is still loading
  */
 const AnalyticsBreakdown = memo(({ team, allSeriesData, isLoadingSeries }: Props) => {
     const [selectedMap, setSelectedMap] = useState<string>("All");
