@@ -22,7 +22,10 @@ type GetTeamsResponse = {
  *
  * @returns Team[]
  */
-async function getTeams(contains: string, signal?: AbortSignal): Promise<Team[]> {
+async function getTeams(
+    contains: string,
+    signal?: AbortSignal
+): Promise<Team[]> {
     if (!contains.trim()) return [];
 
     try {

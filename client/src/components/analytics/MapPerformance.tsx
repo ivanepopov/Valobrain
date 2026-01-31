@@ -9,12 +9,23 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 type Props = {
     team: Team;
     allSeriesData: SeriesStats[];
-    selectedMap?: string;
+    selectedMap: string;
 }
 
+/**
+ * Analytics Breakdown Page Sub-Feature #4: Map Performance Graphs
+ *
+ * This component displays performance metrics for a team on a specific map.
+ * It shows match win rate, attack round win rate, defense round win rate, and play rate.
+ *
+ * @param team Team to display stats for
+ * @param allSeriesData All (or filtered) series data to display
+ * @param selectedMap Map to display stats for. Defaults to "All" to display stats for all maps.
+ */
 const MapPerformance = memo(({ team, allSeriesData, selectedMap = "All" }: Props) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
+    // Visibility toggles for each metric
     const [visibleMetrics, setVisibleMetrics] = useState({
         matchWinRate: true,
         atkWinRate: true,
@@ -29,6 +40,7 @@ const MapPerformance = memo(({ team, allSeriesData, selectedMap = "All" }: Props
         }));
     };
 
+    // Get win rates and play rates for each played map
     const mapStats = useMemo(() => {
         const stats: Record<string, {
             wins: number;
@@ -106,28 +118,28 @@ const MapPerformance = memo(({ team, allSeriesData, selectedMap = "All" }: Props
             <GlassBox className="mt-4 border-white/10">
             <div className="flex justify-end items-center mb-8">
                 <div className="flex gap-4 bg-linear-to-r from-slate-950/60 to-slate-900/60 p-3.5 rounded-xl border border-white/10 backdrop-blur-sm">
-                    <button 
+                    <button
                         onClick={() => toggleMetric('matchWinRate')}
                         className={`flex items-center gap-2.5 transition-all duration-300 cursor-pointer hover:scale-105 ${visibleMetrics.matchWinRate ? 'opacity-100' : 'opacity-40'}`}
                     >
                         <div className="w-3.5 h-3.5 rounded-md bg-green-400 shadow-lg shadow-green-400/40" />
                         <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Match Win Rate</span>
                     </button>
-                    <button 
+                    <button
                         onClick={() => toggleMetric('atkWinRate')}
                         className={`flex items-center gap-2.5 transition-all duration-300 cursor-pointer hover:scale-105 ${visibleMetrics.atkWinRate ? 'opacity-100' : 'opacity-40'}`}
                     >
                         <div className="w-3.5 h-3.5 rounded-md bg-red-400 shadow-lg shadow-red-400/40" />
                         <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Atk Win Rate</span>
                     </button>
-                    <button 
+                    <button
                         onClick={() => toggleMetric('defWinRate')}
                         className={`flex items-center gap-2.5 transition-all duration-300 cursor-pointer hover:scale-105 ${visibleMetrics.defWinRate ? 'opacity-100' : 'opacity-40'}`}
                     >
                         <div className="w-3.5 h-3.5 rounded-md bg-blue-400 shadow-lg shadow-blue-400/40" />
                         <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wide">Def Win Rate</span>
                     </button>
-                    <button 
+                    <button
                         onClick={() => toggleMetric('playRate')}
                         className={`flex items-center gap-2.5 transition-all duration-300 cursor-pointer hover:scale-105 ${visibleMetrics.playRate ? 'opacity-100' : 'opacity-40'}`}
                     >
@@ -136,44 +148,43 @@ const MapPerformance = memo(({ team, allSeriesData, selectedMap = "All" }: Props
                     </button>
                 </div>
             </div>
-        
+
             <div className="px-2">
                 {mapStats.length > 0 ? (
                     <div className="relative pt-2">
                         {/* Y-Axis Labels */}
-                        <div className="absolute left-0 top-0 h-80 flex flex-col justify-between w-12 text-right pr-1">
+                        <div className="absolute left-0 top-0 h-80 flex flex-col justify-between w-12 text-right pr-2">
                             {[100, 75, 50, 25, 0].map((v) => (
-                                <span key={v} className="text-[10px] font-bold text-blue-200/50 -translate-y-2">{v}%</span>
+                                <span key={v} className="text-[10px] font-bold text-blue-200/50 leading-none flex items-center justify-end h-0 uppercase">{v}%</span>
                             ))}
                         </div>
 
                         {/* Chart Container */}
-                        <div className="ml-12">
+                        <div className="ml-12 relative">
                             {/* Horizontal Grid Lines */}
-                            <div className="absolute left-12 right-0 h-80 flex flex-col justify-between pointer-events-none">
+                            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none h-80">
                                 {[0, 1, 2, 3, 4].map((i) => (
                                     <div key={i} className="w-full border-t border-white/5" />
                                 ))}
                             </div>
 
-                            {/* Bars */}
+                            {/* Bars Container */}
                             <div className="flex gap-6 items-end h-80 relative">
                                 {mapStats.map((map) => (
-                                    <div key={map.name} className="flex-1 flex flex-col items-center gap-2 min-w-0">
-                                        {/* Bars Container */}
-                                        <div className="flex-1 w-full flex items-end justify-center gap-1.5">
+                                    <div key={map.name} className="flex-1 flex flex-col items-center h-full justify-end min-w-0">
+                                        <div className="w-full flex items-end justify-center gap-1.5 h-full">
                                             {[
                                                 { val: map.matchWinRate, color: "bg-green-400", shadow: "shadow-green-400/40", key: 'matchWinRate' as const },
                                                 { val: map.atkWinRate, color: "bg-red-400", shadow: "shadow-red-400/40", key: 'atkWinRate' as const },
                                                 { val: map.defWinRate, color: "bg-blue-400", shadow: "shadow-blue-400/40", key: 'defWinRate' as const },
                                                 { val: map.playRate, color: "bg-purple-400", shadow: "shadow-purple-400/40", key: 'playRate' as const }
                                             ].filter(bar => visibleMetrics[bar.key]).map((bar) => {
-                                                const heightPx = (bar.val / 100) * 290; // 320px = h-80
+                                                const heightPercent = bar.val;
                                                 return (
-                                                    <div 
-                                                        key={bar.key} 
-                                                        className={`w-full flex-1 ${bar.color} rounded-t-lg border border-white/10 hover:border-white/20 hover:brightness-110 cursor-pointer transition-all duration-300 relative overflow-visible min-w-[12px] max-w-[40px] group/bar`}
-                                                        style={{ height: `${heightPx}px` }}
+                                                    <div
+                                                        key={bar.key}
+                                                        className={`w-full flex-1 ${bar.color} rounded-t-lg border border-white/10 hover:border-white/20 hover:brightness-110 cursor-pointer transition-all duration-300 relative overflow-visible min-w-3 max-w-[40px] group/bar`}
+                                                        style={{ height: `${heightPercent}%` }}
                                                     >
                                                         {/* Tooltip */}
                                                         <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover/bar:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
@@ -185,13 +196,17 @@ const MapPerformance = memo(({ team, allSeriesData, selectedMap = "All" }: Props
                                                 );
                                             })}
                                         </div>
+                                    </div>
+                                ))}
+                            </div>
 
-                                        {/* Map Name */}
-                                        <div className="text-center w-full">
-                                            <span className="block text-white font-bold text-lg tracking-tight hover:text-blue-400 transition-all duration-300">
-                                                {capitalize(map.name)}
-                                            </span>
-                                        </div>
+                            {/* Map Names (X-Axis) */}
+                            <div className="flex gap-6 mt-4">
+                                {mapStats.map((map) => (
+                                    <div key={map.name} className="flex-1 text-center min-w-0">
+                                        <span className="block text-white font-bold text-lg tracking-tight hover:text-blue-400 transition-all duration-300 truncate">
+                                            {capitalize(map.name)}
+                                        </span>
                                     </div>
                                 ))}
                             </div>

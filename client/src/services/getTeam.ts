@@ -16,7 +16,10 @@ type GetTeamResponse = {
  *
  * @returns Team | null
  */
-async function getTeam(teamId: string, signal?: AbortSignal): Promise<Team | null> {
+async function getTeam(
+    teamId: string,
+    signal?: AbortSignal
+): Promise<Team | null> {
     try {
         const res = await axios.get<GetTeamResponse>(`/api/central/team/${teamId}`, { signal });
 
