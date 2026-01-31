@@ -58,9 +58,12 @@ class AiAnalystService {
                 .map(([name, agent]) => `  - ${name}: ${agent}`)
                 .join('\n');
 
+            // Replace placeholder in system prompt with actual team name
+            const processedSystemPrompt = systemPrompt.replace(/\{\{TARGET_TEAM\}\}/g, targetTeam);
+
             // Construct the final prompt with explicit roster enforcement
             const prompt = `
-${systemPrompt}
+${processedSystemPrompt}
 
 ---
 ## CRITICAL: PLAYER ROSTER FOR ${targetTeam}
