@@ -91,8 +91,7 @@ const Home = () => {
           className="text-center mb-24"
         >
           <div className="flex items-center justify-center gap-3 mb-6">
-            <h1 className="text-6xl font-bold text-white" >Level up your Valorant IQ.</h1>
-            {/* Grow your Valorant IQ with ValoBrain */}
+            <h1 className="text-6xl font-bold text-white" >Level up your Valorant IQ</h1>
           </div>
           <p className="text-xl text-blue-200 mb-8">
             Discover how teams play, where they excel, and how to counter their strategies with AI-powered match analytics and tactical reports, just with a team name.
@@ -171,27 +170,27 @@ const Home = () => {
         </motion.div>
 
         {/* Pro Players Carousel */}
-        <div className="mb-16">
+        <div className="mb-32">
           <ProPlayersCarousel />
         </div>
 
         {/* Feature Cards */}
-        <div id="features" className="scroll-mt-24">
+        <div id="features" className="scroll-mt-24 mb-32">
           <FeaturedCards />
         </div>
 
         {/* How It Works */}
-        <div id="how-it-works" className="scroll-mt-24">
+        <div id="how-it-works" className="scroll-mt-24 mb-32">
           <HowItWorks />
         </div>
 
         {/* Feature Images Carousel */}
-        <div id="showcase" className="scroll-mt-24">
+        <div id="showcase" className="scroll-mt-24 mb-32">
           <FeaturedImagesCarousel />
         </div>
 
         {/* CTA Section */}
-        <div id="get-started" className="scroll-mt-24">
+        <div id="get-started" className="scroll-mt-24 mb-32">
           <CTASection />
         </div>
 

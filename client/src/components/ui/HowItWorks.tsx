@@ -26,15 +26,15 @@ const HowItWorks = () => {
     return (
         <div className="mb-24">
             <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 40 }}
-                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 className="text-center mb-12"
             >
                 <motion.h2 
-                    initial={{ opacity: 0, y: -20, rotateX: 90 }}
-                    whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+                    initial={{ opacity: 0, y: -20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
                     className="text-4xl font-bold text-white mb-4"
@@ -56,8 +56,8 @@ const HowItWorks = () => {
                 {steps.map((step, index) => (
                     <motion.div
                         key={step.number}
-                        initial={{ opacity: 0, y: 60, scale: 0.85, rotateY: -15 }}
-                        whileInView={{ opacity: 1, y: 0, scale: 1, rotateY: 0 }}
+                        initial={{ opacity: 0, y: 60 }}
+                        whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, margin: "-80px" }}
                         transition={{ 
                             duration: 0.8, 
@@ -65,9 +65,8 @@ const HowItWorks = () => {
                             ease: [0.25, 0.46, 0.45, 0.94]
                         }}
                         whileHover={{ 
-                            scale: 1.05, 
+                            scale: 1.02, 
                             y: -12,
-                            rotateY: 5,
                             transition: { duration: 0.3 }
                         }}
                         className="relative"
@@ -80,8 +79,8 @@ const HowItWorks = () => {
                         <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-8 hover:border-blue-400/50 transition-all duration-300 relative z-10">
                             {/* Step number */}
                             <motion.div 
-                                initial={{ opacity: 0, scale: 0 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
+                                initial={{ opacity: 0 }}
+                                whileInView={{ opacity: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: index * 0.2 + 0.3 }}
                                 className="text-6xl font-bold text-blue-400/20 mb-4"
@@ -91,8 +90,8 @@ const HowItWorks = () => {
 
                             {/* Icon */}
                             <motion.div 
-                                initial={{ opacity: 0, scale: 0, rotate: -180 }}
-                                whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+                                initial={{ opacity: 0 }}
+                                whileInView={{ opacity: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.6, delay: index * 0.2 + 0.4, ease: "easeOut" }}
                                 className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-400/10 border border-blue-400/30 text-blue-400 mb-6"
@@ -102,8 +101,8 @@ const HowItWorks = () => {
 
                             {/* Title */}
                             <motion.h3 
-                                initial={{ opacity: 0, x: -20 }}
-                                whileInView={{ opacity: 1, x: 0 }}
+                                initial={{ opacity: 0 }}
+                                whileInView={{ opacity: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: index * 0.2 + 0.5 }}
                                 className="text-xl font-semibold text-white mb-3"

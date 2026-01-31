@@ -1,8 +1,28 @@
 import { Brain, Github } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
+    const location = useLocation();
+    const navigate = useNavigate();
+    const isHomePage = location.pathname === '/';
+
+    const scrollToSection = (sectionId: string) => {
+        if (isHomePage) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        } else {
+            navigate('/');
+            setTimeout(() => {
+                const element = document.getElementById(sectionId);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+        }
+    };
 
     return (
         <footer className="relative border-t border-white/10 mt-20">
@@ -24,20 +44,20 @@ const Footer = () => {
                         <h4 className="text-white font-semibold mb-4">About</h4>
                         <ul className="space-y-2">
                             <li>
-                                <a
-                                    href="#"
+                                <button
+                                    onClick={() => scrollToSection('how-it-works')}
                                     className="text-blue-200/60 hover:text-blue-400 transition-colors text-sm"
                                 >
                                     How It Works
-                                </a>
+                                </button>
                             </li>
                             <li>
-                                <a
-                                    href="#"
+                                <button
+                                    onClick={() => scrollToSection('features')}
                                     className="text-blue-200/60 hover:text-blue-400 transition-colors text-sm"
                                 >
                                     Features
-                                </a>
+                                </button>
                             </li>
                             <li>
                                 <a
