@@ -39,7 +39,7 @@ const SeriesFilters = (
                     {/* Map Filter */}
                     {setSelectedMap !== undefined && selectedMap !== undefined &&
                         <div className="flex items-center gap-6">
-                            <label className="text-blue-200 text-xs font-medium uppercase tracking-wider whitespace-nowrap w-20">Map</label>
+                            <label className="text-blue-200 text-xs font-medium tracking-wider whitespace-nowrap w-28">Filter by Map</label>
                             <div className="flex gap-1.5 flex-wrap">
                                 {VALORANT_MAPS.map((map) => (
                                     <button
@@ -63,7 +63,7 @@ const SeriesFilters = (
                     {/* Timeframe Filter */}
                     {setTimeRange !== undefined && timeRange !== undefined &&
                         <div className="flex items-center gap-6">
-                            <label className="text-blue-200 text-xs font-medium uppercase tracking-wider whitespace-nowrap w-20">Timeframe</label>
+                            <label className="text-blue-200 text-xs font-medium tracking-wider whitespace-nowrap w-28">Filter by Timeframe</label>
                             <div className="flex gap-1.5 flex-wrap">
                                 {TIME_FILTERS.map((timeframe) => (
                                     <button
