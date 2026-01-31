@@ -38,7 +38,7 @@ const Series = memo(({ seriesData, team, isSelected = false }: Props) => {
             {/* Header: Team vs. Opponent with Result */}
             <div className="flex items-center justify-between mb-3">
                 <div className="flex flex-col">
-                    <span className="text-blue-200/60 text-[10px] font-bold uppercase tracking-wider mb-0.5">Matchup</span>
+                    <span className="text-blue-200/60 text-[10px] font-bold tracking-wider mb-0.5">{team.name} vs</span>
                     <span className="text-white font-bold text-lg leading-tight">
                         {opponent?.name || 'Unknown'}
                     </span>
@@ -56,7 +56,7 @@ const Series = memo(({ seriesData, team, isSelected = false }: Props) => {
 
             {/* Format and Date Row */}
             <div className="flex items-center justify-between text-base mb-3 bg-white/5 rounded-md px-2 py-1">
-                <span className="text-blue-300 font-bold text-xs uppercase tracking-tighter">{formatSeriesType(series.format)}</span>
+                <span className="text-blue-300 font-bold text-xs tracking-tighter">{formatSeriesType(series.format)}</span>
                 <span className="text-blue-200/40 text-[11px] font-semibold">{formatDate(series.startedAt)}</span>
             </div>
 
