@@ -30,24 +30,29 @@ const Footer = () => {
                 <div className="grid md:grid-cols-3 gap-8 mb-8">
                     {/* Brand */}
                     <div>
-                        <Link to="/" className="flex items-center gap-3 mb-4 w-fit hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-lg" aria-label="ValoBrain home">
-                            <Brain className="w-8 h-8" style={{ color: '#80B9FF' }} aria-hidden="true" />
-                            <h3 className="text-xl font-bold text-white">ValoBrain</h3>
+                        <Link to="/" className="flex items-center gap-3 mb-4 w-fit hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 rounded-lg" style={{ outlineColor: '#7f5af0' }} aria-label="ValoBrain home">
+                            <Brain className="w-8 h-8" style={{ color: '#7f5af0' }} aria-hidden="true" />
+                            <h3 className="text-xl font-bold" style={{ color: '#ffffff' }}>ValoBrain</h3>
                         </Link>
-                        <p className="text-white text-sm leading-relaxed">
+                        <p className="text-sm leading-relaxed" style={{ color: '#ffffff' }}>
                             Advanced Valorant team analytics powered by AI. Gain insights, analyze performance, and elevate your strategic understanding.
                         </p>
                     </div>
 
                     {/* About */}
                     <div>
-                        <h4 className="text-white font-semibold mb-4">About</h4>
+                        <h4 className="font-semibold mb-4" style={{ color: '#ffffff' }}>About</h4>
                         <nav aria-label="Footer navigation">
                             <ul className="space-y-3">
                                 <li>
                                     <button
                                         onClick={() => scrollToSection('how-it-works')}
-                                        className="text-white hover:text-blue-300 transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 rounded px-1 min-h-[44px] inline-flex items-center"
+                                        className="text-white transition-colors text-sm focus:outline-none rounded px-1 min-h-[44px] inline-flex items-center"
+                                        style={{ color: '#ffffff' }}
+                                        onMouseEnter={(e) => e.currentTarget.style.color = '#7f5af0'}
+                                        onMouseLeave={(e) => e.currentTarget.style.color = '#ffffff'}
+                                        onFocus={(e) => e.currentTarget.style.outline = '2px solid #7f5af0'}
+                                        onBlur={(e) => e.currentTarget.style.outline = 'none'}
                                     >
                                         How It Works
                                     </button>
@@ -55,7 +60,12 @@ const Footer = () => {
                                 <li>
                                     <button
                                         onClick={() => scrollToSection('features')}
-                                        className="text-white hover:text-blue-300 transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 rounded px-1 min-h-[44px] inline-flex items-center"
+                                        className="text-white transition-colors text-sm focus:outline-none rounded px-1 min-h-[44px] inline-flex items-center"
+                                        style={{ color: '#ffffff' }}
+                                        onMouseEnter={(e) => e.currentTarget.style.color = '#7f5af0'}
+                                        onMouseLeave={(e) => e.currentTarget.style.color = '#ffffff'}
+                                        onFocus={(e) => e.currentTarget.style.outline = '2px solid #7f5af0'}
+                                        onBlur={(e) => e.currentTarget.style.outline = 'none'}
                                     >
                                         Features
                                     </button>
@@ -66,13 +76,18 @@ const Footer = () => {
 
                     {/* GitHub & Credits */}
                     <div>
-                        <h4 className="text-white font-semibold mb-4">Connect</h4>
+                        <h4 className="font-semibold mb-4" style={{ color: '#ffffff' }}>Connect</h4>
                         <a
                             href="https://github.com/ivanepopov/Valobrain"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-white hover:text-blue-300 transition-colors mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded px-1 min-h-[44px]"
+                            className="inline-flex items-center gap-2 text-white transition-colors mb-4 focus:outline-none rounded px-1 min-h-[44px]"
                             aria-label="View ValoBrain on GitHub (opens in new tab)"
+                            style={{ color: '#ffffff' }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#7f5af0'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = '#ffffff'}
+                            onFocus={(e) => e.currentTarget.style.outline = '2px solid #7f5af0'}
+                            onBlur={(e) => e.currentTarget.style.outline = 'none'}
                         >
                             <Github className="w-5 h-5" aria-hidden="true" />
                             <span className="text-sm">View on GitHub</span>

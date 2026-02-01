@@ -39,19 +39,24 @@ const SeriesFilters = (
                     {/* Map Filter */}
                     {setSelectedMap !== undefined && selectedMap !== undefined &&
                         <div className="flex items-center gap-6">
-                            <label className="text-blue-200 text-xs font-medium tracking-wider whitespace-nowrap w-28">Filter by Map</label>
+                            <label className="text-xs font-medium tracking-wider whitespace-nowrap w-28" style={{ color: '#fffffe' }}>Filter by Map</label>
                             <div className="flex gap-1.5 flex-wrap">
                                 {VALORANT_MAPS.map((map) => (
                                     <button
                                         key={map}
                                         onClick={() => setSelectedMap(map)}
-                                        className={`
-                                                px-2.5 py-1 rounded-md text-xs font-semibold transition-all duration-300
-                                                ${selectedMap === map
-                                            ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20'
-                                            : 'bg-white/5 text-blue-200 hover:bg-white/10'
-                                        }
-                                            `}
+                                        className="px-2.5 py-1 rounded-md text-xs font-semibold transition-all duration-300"
+                                        style={{
+                                            backgroundColor: selectedMap === map ? '#7f5af0' : 'rgba(255, 255, 255, 0.05)',
+                                            color: selectedMap === map ? '#fffffe' : '#94a1b2',
+                                            boxShadow: selectedMap === map ? '0 10px 15px -3px rgba(127, 90, 240, 0.2)' : 'none'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (selectedMap !== map) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (selectedMap !== map) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                                        }}
                                     >
                                         {map}
                                     </button>
@@ -63,30 +68,38 @@ const SeriesFilters = (
                     {/* Timeframe Filter */}
                     {setTimeRange !== undefined && timeRange !== undefined &&
                         <div className="flex items-center gap-6">
-                            <label className="text-blue-200 text-xs font-medium tracking-wider whitespace-nowrap w-28">Filter by Timeframe</label>
+                            <label className="text-xs font-medium tracking-wider whitespace-nowrap w-28" style={{ color: '#fffffe' }}>Filter by Timeframe</label>
                             <div className="flex gap-1.5 flex-wrap">
-                                {TIME_FILTERS.map((timeframe) => (
-                                    <button
-                                        key={timeframe}
-                                        onClick={() => setTimeRange(
-                                            timeframe === 'All' ? 'all' :
-                                                timeframe === 'Last 30 Days' ? '30' :
-                                                    timeframe === 'Last 60 Days' ? '60' : '90'
-                                        )}
-                                        className={`
-                                                px-2.5 py-1 rounded-md text-xs font-semibold transition-all duration-300
-                                                ${(timeframe === 'All' && timeRange === 'all') ||
+                                {TIME_FILTERS.map((timeframe) => {
+                                    const isActive = (timeframe === 'All' && timeRange === 'all') ||
                                         (timeframe === 'Last 30 Days' && timeRange === '30') ||
                                         (timeframe === 'Last 60 Days' && timeRange === '60') ||
-                                        (timeframe === 'Last 90 Days' && timeRange === '90')
-                                            ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20'
-                                            : 'bg-white/5 text-blue-200 hover:bg-white/10'
-                                        }
-                                            `}
-                                    >
-                                        {timeframe}
-                                    </button>
-                                ))}
+                                        (timeframe === 'Last 90 Days' && timeRange === '90');
+                                    return (
+                                        <button
+                                            key={timeframe}
+                                            onClick={() => setTimeRange(
+                                                timeframe === 'All' ? 'all' :
+                                                    timeframe === 'Last 30 Days' ? '30' :
+                                                        timeframe === 'Last 60 Days' ? '60' : '90'
+                                            )}
+                                            className="px-2.5 py-1 rounded-md text-xs font-semibold transition-all duration-300"
+                                            style={{
+                                                backgroundColor: isActive ? '#7f5af0' : 'rgba(255, 255, 255, 0.05)',
+                                                color: isActive ? '#fffffe' : '#94a1b2',
+                                                boxShadow: isActive ? '0 10px 15px -3px rgba(127, 90, 240, 0.2)' : 'none'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isActive) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (!isActive) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                                            }}
+                                        >
+                                            {timeframe}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
                     }

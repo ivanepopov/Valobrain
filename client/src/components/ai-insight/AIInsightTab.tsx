@@ -503,8 +503,8 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
       >
         <GlassBox>
           <div className="flex items-center gap-3 mb-3">
-            <Key className="w-5 h-5 text-blue-400" />
-            <span className="text-blue-200 text-sm font-semibold">Gemini API Key</span>
+            <Key className="w-5 h-5" style={{ color: '#7f5af0' }} />
+            <span className="text-sm font-semibold" style={{ color: '#fffffe' }}>Gemini API Key</span>
             {userApiKey && (
               <span className="text-green-400 text-xs bg-green-400/10 px-2 py-0.5 rounded-full">
                 Key provided
@@ -517,23 +517,34 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
               value={userApiKey}
               onChange={(e) => setUserApiKey(e.target.value)}
               placeholder="Enter your Gemini API key..."
-              className="w-full px-4 py-2.5 pr-12 rounded-lg bg-white/5 border border-white/10 text-white placeholder-blue-400/50 focus:outline-none focus:border-blue-400/50 transition-colors"
+              className="w-full px-4 py-2.5 pr-12 rounded-lg bg-white/5 border border-white/10 text-white transition-colors"
+              style={{
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+              }}
+              onFocus={(e) => e.target.style.borderColor = 'rgba(127, 90, 240, 0.5)'}
+              onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
             />
             <button
               type="button"
               onClick={() => setShowApiKey(!showApiKey)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400 hover:text-blue-300 transition-colors"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors"
+              style={{ color: '#7f5af0' }}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#9d7ff5'}
+              onMouseLeave={(e) => e.currentTarget.style.color = '#7f5af0'}
             >
               {showApiKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
-          <p className="text-blue-300/60 text-xs mt-2">
+          <p className="text-xs mt-2" style={{ color: 'rgba(127, 90, 240, 0.6)' }}>
             Get a free API key from{' '}
             <a
               href="https://aistudio.google.com/app/apikey"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300 underline"
+              className="underline transition-colors"
+              style={{ color: '#7f5af0' }}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#9d7ff5'}
+              onMouseLeave={(e) => e.currentTarget.style.color = '#7f5af0'}
             >
               Google AI Studio
             </a>
@@ -566,14 +577,14 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
         {!isSeriesCollapsed && (
           <GlassBox>
             <div className="flex justify-start mb-3">
-              <span className="text-blue-300 text-sm">
+              <span className="text-sm" style={{ color: '#ffffff' }}>
                 {isCheckingAvailability ? 'Checking...' : `${filteredSeries.length} series with match data`}
               </span>
             </div>
             {isCheckingAvailability ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 text-blue-900 animate-spin mb-3" />
-              <p className="text-blue-200">Checking match data availability...</p>
+              <Loader2 className="w-8 h-8 animate-spin mb-3" style={{ color: '#7f5af0' }} />
+              <p style={{ color: '#fffffe' }}>Checking match data availability...</p>
             </div>
           ) : filteredSeries.length > 0 ? (
             <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
@@ -586,15 +597,21 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                     setReportData(null);
                     setError(null);
                   }}
-                  className={`
-                    w-full text-left p-4 rounded-lg border-2 transition-all duration-300
-                    ${selectedSeries?.id === series.id
-                      ? 'border-blue-400 bg-blue-400/10'
-                      : series.result === 'win'
-                        ? 'border-green-400/30 bg-green-400/5 hover:border-green-400/50'
-                        : 'border-red-400/30 bg-red-400/5 hover:border-red-400/50'
+                  className="w-full text-left p-4 rounded-lg border-2 transition-all duration-300"
+                  style={{
+                    borderColor: selectedSeries?.id === series.id ? '#7f5af0' : (series.result === 'win' ? 'rgba(74, 222, 128, 0.3)' : 'rgba(248, 113, 113, 0.3)'),
+                    backgroundColor: selectedSeries?.id === series.id ? 'rgba(127, 90, 240, 0.1)' : (series.result === 'win' ? 'rgba(74, 222, 128, 0.05)' : 'rgba(248, 113, 113, 0.05)')
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedSeries?.id !== series.id) {
+                      e.currentTarget.style.borderColor = series.result === 'win' ? 'rgba(74, 222, 128, 0.5)' : 'rgba(248, 113, 113, 0.5)';
                     }
-                  `}
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedSeries?.id !== series.id) {
+                      e.currentTarget.style.borderColor = series.result === 'win' ? 'rgba(74, 222, 128, 0.3)' : 'rgba(248, 113, 113, 0.3)';
+                    }
+                  }}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
@@ -609,21 +626,20 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                         {series.score}
                       </span>
                     </div>
-                    <span className="text-blue-400 text-sm">{series.date}</span>
+                    <span className="text-sm" style={{ color: '#ffffff' }}>{series.date}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-blue-200 text-sm">Maps:</span>
+                    <span className="text-sm" style={{ color: '#fffffe' }}>Maps:</span>
                     <div className="flex gap-2 flex-wrap">
                       {series.maps.map((map, i) => (
                         <span
                           key={i}
-                          className={`
-                            text-sm px-2 py-1 rounded
-                            ${selectedMap === map
-                              ? 'bg-blue-500/30 text-blue-200 font-semibold'
-                              : 'bg-white/5 text-blue-300'
-                            }
-                          `}
+                          className="text-sm px-2 py-1 rounded"
+                          style={{
+                            backgroundColor: selectedMap === map ? 'rgba(127, 90, 240, 0.3)' : 'rgba(255, 255, 255, 0.05)',
+                            color: selectedMap === map ? '#fffffe' : '#BEABF7',
+                            fontWeight: selectedMap === map ? '600' : '400'
+                          }}
                         >
                           {capitalize(map)}
                         </span>
@@ -635,9 +651,9 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
             </div>
           ) : (
             <div className="text-center py-12">
-              <AlertCircle className="w-12 h-12 text-blue-400/30 mx-auto mb-3" />
-              <p className="text-blue-200">No series with downloadable match data</p>
-              <p className="text-blue-400 text-sm mt-2">
+              <AlertCircle className="w-12 h-12 mx-auto mb-3" style={{ color: 'rgba(127, 90, 240, 0.3)' }} />
+              <p style={{ color: '#fffffe' }}>No series with downloadable match data</p>
+              <p className="text-sm mt-2" style={{ color: '#7f5af0' }}>
                 {transformedSeries.length > 0
                   ? 'Recent matches may not have public data available yet'
                   : 'No matches found for this team'}
@@ -697,7 +713,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
 
             {/* Map Selection */}
             <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-blue-200 text-sm">Generate report for:</span>
+              <span className="text-white text-sm">Generate report for:</span>
               {isLoadingMaps ? (
                 <div className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 text-blue-900 animate-spin" />
@@ -714,7 +730,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                         px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
                         ${selectedReportMap === map
                           ? 'bg-blue-900 text-white'
-                          : 'bg-white/5 text-blue-200 hover:bg-white/10'
+                          : 'bg-white/5 text-white hover:bg-white/10'
                         }
                         ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}
                       `}
@@ -814,14 +830,14 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
         >
           <GlassBox>
             <div className="flex items-center gap-4 py-2">
-              <div className="p-3 rounded-lg bg-blue-400/10">
-                <Brain className="w-6 h-6 text-blue-400" />
+              <div className="p-3 rounded-lg" style={{ backgroundColor: 'rgba(127, 90, 240, 0.1)' }}>
+                <Brain className="w-6 h-6" style={{ color: '#7f5af0' }} />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-white mb-1">
                   Select a Series to Generate AI Insight
                 </h3>
-                <p className="text-blue-300 text-sm">
+                <p className="text-sm" style={{ color: '#fffffe' }}>
                   Click on any series above to select it, then generate a detailed AI-powered scouting report
                 </p>
               </div>
@@ -977,9 +993,9 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                       <table className="w-full">
                         <thead>
                           <tr className="border-b border-white/10">
-                            <th className="text-left py-2 px-3 text-blue-200 font-semibold">Player</th>
-                            <th className="text-left py-2 px-3 text-blue-200 font-semibold">Agent</th>
-                            <th className="text-left py-2 px-3 text-blue-200 font-semibold">Key Habit / Weakness</th>
+                            <th className="text-left py-2 px-3 text-white font-semibold">Player</th>
+                            <th className="text-left py-2 px-3 text-white font-semibold">Agent</th>
+                            <th className="text-left py-2 px-3 text-white font-semibold">Key Habit / Weakness</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1008,7 +1024,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                       </table>
                     </div>
                   ) : (
-                    <p className="text-blue-200">No player intel available.</p>
+                    <p className="text-white">No player intel available.</p>
                   )}
                 </GlassBox>
               </motion.div>
@@ -1043,7 +1059,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                       ))}
                     </div>
                   ) : (
-                    <p className="text-blue-200">No counter-strategies available.</p>
+                    <p className="text-white">No counter-strategies available.</p>
                   )}
                 </GlassBox>
               </motion.div>

@@ -55,13 +55,18 @@ const SeriesDetailedView = ({ selectedSeriesData, team }: Props) => {
                         <div className="mb-6 bg-white/5 p-4 rounded-xl border border-white/5">
                             <div className="flex items-center justify-between mb-2">
                                 <div className="flex flex-col">
-                                    <span className="text-blue-200/40 text-[10px] font-black tracking-[0.2em] mb-1">Detailed Series Overview</span>
+                                    <span className="text-[10px] font-black tracking-[0.2em] mb-1" style={{ color: '#ffffff' }}>Detailed Series Overview</span>
                                     <h2 className="text-2xl font-black text-white flex items-center gap-3">
-                                        <span className="text-blue-400">{team.name}</span>
-                                        <span className="text-white/20 text-lg">VS</span>
+                                        <span style={{ color: '#BEABF7' }}>{team.name}</span>
+                                        <span className="text-lg" style={{ color: '#ffffff' }}>VS</span>
                                         <span 
                                             onClick={() => opponent && navigate(`/dashboard/${opponent.id}`)}
-                                            className={`transition-colors duration-300 ${opponent ? 'cursor-pointer hover:text-blue-400' : ''}`}
+                                            className="transition-colors duration-300"
+                                            style={{
+                                                cursor: opponent ? 'pointer' : 'default'
+                                            }}
+                                            onMouseEnter={(e) => opponent && (e.currentTarget.style.color = '#7f5af0')}
+                                            onMouseLeave={(e) => opponent && (e.currentTarget.style.color = '#fffffe')}
                                         >
                                             {opponent?.name || 'Unknown'}
                                         </span>
@@ -79,9 +84,9 @@ const SeriesDetailedView = ({ selectedSeriesData, team }: Props) => {
 
                             </div>
                             <div className="flex items-center gap-4 text-xs font-bold">
-                                <span className="text-blue-300/60 tracking-widest">{formatSeriesType(selectedSeriesData.seriesState.format)}</span>
+                                <span className="tracking-widest" style={{ color: '#ffffff' }}>{formatSeriesType(selectedSeriesData.seriesState.format)}</span>
                                 <span className="w-1 h-1 rounded-full bg-white/10"></span>
-                                <span className="text-blue-200/40">{formatDate(selectedSeriesData.seriesState.startedAt)}</span>
+                                <span style={{ color: 'rgba(255, 255, 254, 0.8)' }}>{formatDate(selectedSeriesData.seriesState.startedAt)}</span>
                             </div>
                         </div>
 
@@ -94,14 +99,15 @@ const SeriesDetailedView = ({ selectedSeriesData, team }: Props) => {
                                         setSelectedMapTab('All Maps');
                                         setSelectedGameIndex(0);
                                     }}
-                                    className={`
-                                            group relative rounded-lg py-2 px-6 border transition-all duration-300 hover:scale-105 overflow-hidden cursor-pointer flex flex-col items-center justify-center gap-2
-                                            ${(selectedSeriesData.seriesState?.games?.length || 0) <= 3 ? 'flex-1' : 'shrink-0 min-w-30'}
-                                            ${selectedMapTab === 'All Maps'
-                                        ? 'bg-blue-900/40 border-blue-400 shadow-lg shadow-blue-500/20'
-                                        : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10'
-                                    }
-                                        `}
+                                    className="group relative rounded-lg py-2 px-6 border transition-all duration-300 hover:scale-105 overflow-hidden cursor-pointer flex flex-col items-center justify-center gap-2"
+                                    style={{
+                                        flex: (selectedSeriesData.seriesState?.games?.length || 0) <= 3 ? '1' : undefined,
+                                        minWidth: (selectedSeriesData.seriesState?.games?.length || 0) <= 3 ? undefined : '120px',
+                                        flexShrink: (selectedSeriesData.seriesState?.games?.length || 0) <= 3 ? undefined : 0,
+                                        backgroundColor: selectedMapTab === 'All Maps' ? 'rgba(127, 90, 240, 0.4)' : 'rgba(255, 255, 255, 0.05)',
+                                        borderColor: selectedMapTab === 'All Maps' ? '#7f5af0' : 'rgba(255, 255, 255, 0.1)',
+                                        boxShadow: selectedMapTab === 'All Maps' ? '0 10px 15px -3px rgba(127, 90, 240, 0.2)' : 'none'
+                                    }}
                                 >
                                     <span className="text-white font-black text-xs uppercase tracking-widest">All Maps</span>
                                 </div>
@@ -133,7 +139,7 @@ const SeriesDetailedView = ({ selectedSeriesData, team }: Props) => {
                                                 : 'border-rose-400/30 hover:border-rose-400/60'
                                             }
                                                     ${selectedMapTab === `Map ${idx + 1}`
-                                                ? 'ring-1 ring-blue-400 border-blue-400 shadow-lg shadow-blue-500/20'
+                                                ? 'opacity-100'
                                                 : 'opacity-80 hover:opacity-100'
                                             }
                                                 `}
@@ -141,6 +147,8 @@ const SeriesDetailedView = ({ selectedSeriesData, team }: Props) => {
                                                 backgroundImage: game.map?.name && getMapImage(game.map.name) ? `url(${getMapImage(game.map.name)})` : undefined,
                                                 backgroundSize: 'cover',
                                                 backgroundPosition: 'center',
+                                                boxShadow: selectedMapTab === `Map ${idx + 1}` ? '0 0 0 1px #7f5af0, 0 10px 15px -3px rgba(127, 90, 240, 0.2)' : undefined,
+                                                borderColor: selectedMapTab === `Map ${idx + 1}` ? '#7f5af0' : undefined
                                             }}
                                         >
                                             <div className="absolute inset-0 bg-black/60"></div>
@@ -173,9 +181,9 @@ const SeriesDetailedView = ({ selectedSeriesData, team }: Props) => {
                     </GlassBox>
                 ) : (
                     <GlassBox className="h-full border-dashed border-white/10 flex flex-col items-center justify-center">
-                        <Search className="w-16 h-16 text-blue-400/30 mb-4" />
+                        <Search className="w-16 h-16 mb-4" style={{ color: 'rgba(127, 90, 240, 0.3)' }} />
                         <h3 className="text-xl font-semibold text-white mb-2">No Series Selected</h3>
-                        <p className="text-blue-200/60">Select a series from the list to view detailed statistics</p>
+                        <p style={{ color: 'rgba(255, 255, 254, 0.7)' }}>Select a series from the list to view detailed statistics</p>
                     </GlassBox>
                 )}
             </motion.div>

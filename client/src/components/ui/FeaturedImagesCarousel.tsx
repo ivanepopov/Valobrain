@@ -27,8 +27,8 @@ const FeaturedImagesCarousel = ({
             className="mb-24"
         >
             <div className="text-center mb-12">
-                <h2 className="text-4xl font-bold text-white mb-4">{title}</h2>
-                <p className="text-gray-200 text-xl">
+                <h2 className="text-4xl font-bold mb-4" style={{ color: '#ffffff' }}>{title}</h2>
+                <p className="text-xl" style={{ color: '#ffffff' }}>
                     See the game through the eyes of professional players
                 </p>
             </div>

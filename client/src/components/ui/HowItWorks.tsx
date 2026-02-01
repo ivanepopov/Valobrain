@@ -37,7 +37,8 @@ const HowItWorks = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-                    className="text-4xl font-bold text-white mb-4"
+                    className="text-4xl font-bold mb-4"
+                    style={{ color: '#ffffff' }}
                 >
                     How It Works
                 </motion.h2>
@@ -46,7 +47,8 @@ const HowItWorks = () => {
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.4 }}
-                    className="text-gray-200 text-xl"
+                    className="text-xl"
+                    style={{ color: '#ffffff' }}
                 >
                     Get started with ValoBrain in three simple steps
                 </motion.p>
@@ -73,17 +75,18 @@ const HowItWorks = () => {
                     >
                         {/* Connecting line (hidden on last item and mobile) */}
                         {index < steps.length - 1 && (
-                            <div className="hidden md:block absolute top-16 left-1/2 w-full h-0.5 bg-gradient-to-r from-blue-400/50 to-transparent" />
+                            <div className="hidden md:block absolute top-16 left-1/2 w-full h-0.5 bg-gradient-to-r from-[#7f5af0]/50 to-transparent" />
                         )}
 
-                        <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-8 hover:border-blue-400/50 transition-all duration-300 relative z-10 h-full min-h-[380px] flex flex-col">
+                        <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-8 hover:border-[#7f5af0] transition-all duration-300 relative z-10 h-full min-h-[380px] flex flex-col">
                             {/* Step number */}
                             <motion.div 
                                 initial={{ opacity: 0 }}
                                 whileInView={{ opacity: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: index * 0.2 + 0.3 }}
-                                className="text-6xl font-bold text-white mb-4"
+                                className="text-6xl font-bold mb-4"
+                                style={{ color: '#ffffff' }}
                             >
                                 {step.number}
                             </motion.div>
@@ -94,8 +97,14 @@ const HowItWorks = () => {
                                 whileInView={{ opacity: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.6, delay: index * 0.2 + 0.4, ease: "easeOut" }}
-                                className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-400/10 border border-blue-400/30 mb-6"
-                                style={{ color: '#80B9FF' }}
+                                className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6"
+                                style={{ 
+                                    color: '#BEABF7',
+                                    backgroundColor: 'rgba(127, 90, 240, 0.1)',
+                                    borderWidth: '1px',
+                                    borderStyle: 'solid',
+                                    borderColor: 'rgba(127, 90, 240, 0.3)'
+                                }}
                             >
                                 {step.icon}
                             </motion.div>
@@ -106,7 +115,8 @@ const HowItWorks = () => {
                                 whileInView={{ opacity: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: index * 0.2 + 0.5 }}
-                                className="text-xl font-semibold text-white mb-3"
+                                className="text-2xl font-semibold mb-3"
+                                style={{ color: '#BEABF7' }}
                             >
                                 {step.title}
                             </motion.h3>
@@ -117,7 +127,8 @@ const HowItWorks = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: index * 0.2 + 0.6 }}
-                                className="text-gray-200 leading-relaxed"
+                                className="leading-relaxed"
+                                style={{ color: '#ffffff' }}
                             >
                                 {step.description}
                             </motion.p>
