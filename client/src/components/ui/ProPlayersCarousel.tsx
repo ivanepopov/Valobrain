@@ -4,7 +4,7 @@ import gucc107Image from '../../assets/people/gucc107.png';
 import huynhImage from '../../assets/people/HUYNH.png';
 import fireballopsImage from '../../assets/people/fireballops.png';
 import runiImage from '../../assets/people/runi.png';
-import kessImage from '../../assets/people/kess.png';
+import mobiImage from '../../assets/people/mobi.png';
 import exciteImage from '../../assets/people/excite.png';
 
 const proPlayers = [
@@ -13,7 +13,7 @@ const proPlayers = [
   { name: 'HUYNH', team: 'Former GenG', image: huynhImage },
   { name: 'FireBallOps', team: 'NBG', image: fireballopsImage },
   { name: 'runi', team: 'Former Cloud9', image: runiImage },
-  { name: 'Kess', team: 'LYON', image: kessImage },
+  { name: 'mobi', team: 'MSU', image: mobiImage },
   { name: 'Excite', team: 'WVU', image: exciteImage },
 ];
 
