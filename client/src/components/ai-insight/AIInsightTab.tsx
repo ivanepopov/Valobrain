@@ -293,9 +293,26 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
             }
         }
 
-        // Extract Pistol & Economy
-        const pistolMatch = markdown.match(/## 🔫 Pistol & Economy Analysis\s*([\s\S]*?)(?=## 🎯|\n---\n|\n---$|$)/);
+        // Extract Pistol Round Analysis (supports both old and new header formats)
+        const pistolMatch = markdown.match(/## 🔫 Pistol (?:Round Analysis|& Economy Analysis)\s*([\s\S]*?)(?=## 💰|## 🎯|\n---\n|\n---$|$)/);
         if (pistolMatch) sections.pistolRounds = stripMarkdown(pistolMatch[1].trim());
+
+        // Extract Economy Intel
+        const economyMatch = markdown.match(/## 💰 Economy Intel\s*([\s\S]*?)(?=## 🎯|\n---\n|\n---$|$)/);
+        if (economyMatch) {
+            const economySection = economyMatch[1];
+            const forceMatch = economySection.match(/\*\*Force Buy Tendency:\*\*\s*(.+)/i);
+            const ecoMatch = economySection.match(/\*\*Eco Round Win Rate:\*\*\s*(.+)/i);
+            const opMatch = economySection.match(/\*\*Operator Investment:\*\*\s*(.+)/i);
+            const bonusMatch = economySection.match(/\*\*Bonus Round Style:\*\*\s*(.+)/i);
+            const exploitMatch = economySection.match(/\*\*Economy Exploit:\*\*\s*([\s\S]*?)(?=\n---\n|\n---$|$)/i);
+
+            if (forceMatch) sections.economyIntel.forceBuyTendency = stripMarkdown(forceMatch[1].trim());
+            if (ecoMatch) sections.economyIntel.ecoRoundWinRate = stripMarkdown(ecoMatch[1].trim());
+            if (opMatch) sections.economyIntel.operatorInvestment = stripMarkdown(opMatch[1].trim());
+            if (bonusMatch) sections.economyIntel.bonusRoundStyle = stripMarkdown(bonusMatch[1].trim());
+            if (exploitMatch) sections.economyIntel.economyExploit = stripMarkdown(exploitMatch[1].trim());
+        }
 
         // Extract Player Intel (table)
         // Use \n---\n to match horizontal rules only, not table separators like | :--- |
