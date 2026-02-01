@@ -182,7 +182,14 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
       executiveSummary: '',
       attackProtocols: { defaultPhase: '', executePhase: '', tendencies: [] },
       defenseSetups: { standardSetups: '', aggressivePlays: '', tendencies: [] },
-      pistolEconomy: '',
+      pistolRounds: '',
+      economyIntel: {
+        forceBuyTendency: '',
+        ecoRoundWinRate: '',
+        operatorInvestment: '',
+        bonusRoundStyle: '',
+        economyExploit: '',
+      },
       playerIntel: [],
       counterStrats: [],
       coachNote: '',
@@ -245,9 +252,26 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
       }
     }
 
-    // Extract Pistol & Economy
-    const pistolMatch = markdown.match(/## 🔫 Pistol & Economy Analysis\s*([\s\S]*?)(?=## 🎯|\n---\n|\n---$|$)/);
-    if (pistolMatch) sections.pistolEconomy = stripMarkdown(pistolMatch[1].trim());
+    // Extract Pistol Round Analysis
+    const pistolMatch = markdown.match(/## 🔫 Pistol (?:Round Analysis|& Economy Analysis)\s*([\s\S]*?)(?=## 💰|## 🎯|\n---\n|\n---$|$)/);
+    if (pistolMatch) sections.pistolRounds = stripMarkdown(pistolMatch[1].trim());
+
+    // Extract Economy Intel
+    const economyMatch = markdown.match(/## 💰 Economy Intel\s*([\s\S]*?)(?=## 🎯|\n---\n|\n---$|$)/);
+    if (economyMatch) {
+      const economySection = economyMatch[1];
+      const forceMatch = economySection.match(/\*\*Force Buy Tendency:\*\*\s*(.+)/i);
+      const ecoMatch = economySection.match(/\*\*Eco Round Win Rate:\*\*\s*(.+)/i);
+      const opMatch = economySection.match(/\*\*Operator Investment:\*\*\s*(.+)/i);
+      const bonusMatch = economySection.match(/\*\*Bonus Round Style:\*\*\s*(.+)/i);
+      const exploitMatch = economySection.match(/\*\*Economy Exploit:\*\*\s*([\s\S]*?)(?=\n---\n|\n---$|$)/i);
+
+      if (forceMatch) sections.economyIntel.forceBuyTendency = stripMarkdown(forceMatch[1].trim());
+      if (ecoMatch) sections.economyIntel.ecoRoundWinRate = stripMarkdown(ecoMatch[1].trim());
+      if (opMatch) sections.economyIntel.operatorInvestment = stripMarkdown(opMatch[1].trim());
+      if (bonusMatch) sections.economyIntel.bonusRoundStyle = stripMarkdown(bonusMatch[1].trim());
+      if (exploitMatch) sections.economyIntel.economyExploit = stripMarkdown(exploitMatch[1].trim());
+    }
 
     // Extract Player Intel (table)
     // Use \n---\n to match horizontal rules only, not table separators like | :--- |
@@ -276,7 +300,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
     }
 
     // Extract Counter-Strats
-    const counterMatch = markdown.match(/## 🧠 Counter-Strat Playbook[\s\S]*?\s*([\s\S]*?)(?=## 📝|\n---\n|\n---$|$)/);
+    const counterMatch = markdown.match(/## 🧠 Counter-Strat Playbook(?:.*)\s*([\s\S]*?)(?=## 📝|\n---\n|\n---$|$)/);
     if (counterMatch) {
       // Match each TIP block
       const tipBlocks = counterMatch[1].split(/>\s*\[!TIP\]/).filter(Boolean);
@@ -958,7 +982,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                 </GlassBox>
               </motion.div>
 
-              {/* 4. Pistol & Economy - 1 Column */}
+              {/* 4. Pistol Round Analysis - 1 Column */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -967,21 +991,75 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
               >
                 <GlassBox className="h-full">
                   <div className="flex items-center gap-3 mb-4">
-                    <DollarSign className="w-6 h-6 text-green-400" />
-                    <h2 className="text-2xl font-bold text-white">Pistol & Economy</h2>
+                    <Crosshair className="w-6 h-6 text-yellow-400" />
+                    <h2 className="text-2xl font-bold text-white">Pistol Rounds</h2>
                   </div>
                   <p className="text-blue-100 whitespace-pre-wrap">
-                    {reportData.pistolEconomy || 'No economy analysis available.'}
+                    {reportData.pistolRounds || 'No pistol round analysis available.'}
                   </p>
                 </GlassBox>
               </motion.div>
 
-              {/* 5. Player Intel - 2 Columns */}
+              {/* 5. Economy Intel - 2 Columns */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.45 }}
+                className="lg:col-span-2"
+              >
+                <GlassBox className="h-full">
+                  <div className="flex items-center gap-3 mb-4">
+                    <DollarSign className="w-6 h-6 text-green-400" />
+                    <h2 className="text-2xl font-bold text-white">Economy Intel</h2>
+                  </div>
+                  {(reportData.economyIntel.forceBuyTendency || reportData.economyIntel.economyExploit) ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        {reportData.economyIntel.forceBuyTendency && (
+                          <div className="flex items-start gap-2">
+                            <span className="text-blue-300 text-sm font-semibold min-w-[120px]">Force Buy:</span>
+                            <span className="text-blue-100 text-sm">{reportData.economyIntel.forceBuyTendency}</span>
+                          </div>
+                        )}
+                        {reportData.economyIntel.ecoRoundWinRate && (
+                          <div className="flex items-start gap-2">
+                            <span className="text-blue-300 text-sm font-semibold min-w-[120px]">Eco Win Rate:</span>
+                            <span className="text-blue-100 text-sm">{reportData.economyIntel.ecoRoundWinRate}</span>
+                          </div>
+                        )}
+                        {reportData.economyIntel.operatorInvestment && (
+                          <div className="flex items-start gap-2">
+                            <span className="text-blue-300 text-sm font-semibold min-w-[120px]">Op Investment:</span>
+                            <span className="text-blue-100 text-sm">{reportData.economyIntel.operatorInvestment}</span>
+                          </div>
+                        )}
+                        {reportData.economyIntel.bonusRoundStyle && (
+                          <div className="flex items-start gap-2">
+                            <span className="text-blue-300 text-sm font-semibold min-w-[120px]">Bonus Style:</span>
+                            <span className="text-blue-100 text-sm">{reportData.economyIntel.bonusRoundStyle}</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {reportData.economyIntel.economyExploit && (
+                        <div className="p-4 rounded-lg bg-green-400/10 border border-green-400/20 flex flex-col justify-center">
+                          <span className="text-green-400 text-sm font-semibold block mb-2">💡 Exploit Strategy:</span>
+                          <p className="text-blue-100 text-sm italic">"{reportData.economyIntel.economyExploit}"</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-blue-200">No economy intel available.</p>
+                  )}
+                </GlassBox>
+              </motion.div>
+
+              {/* 6. Player Intel - Full Width */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.5 }}
-                className="lg:col-span-2"
+                className="lg:col-span-3"
               >
                 <GlassBox className="h-full">
                   <div className="flex items-center gap-3 mb-4">
@@ -995,7 +1073,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                           <tr className="border-b border-white/10">
                             <th className="text-left py-2 px-3 text-white font-semibold">Player</th>
                             <th className="text-left py-2 px-3 text-white font-semibold">Agent</th>
-                            <th className="text-left py-2 px-3 text-white font-semibold">Key Habit / Weakness</th>
+                            <th className="text-left py-2 px-3 text-white font-semibold">Key Insight</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1029,7 +1107,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                 </GlassBox>
               </motion.div>
 
-              {/* 6. Counter-Strat Playbook - Full Width */}
+              {/* 7. Counter-Strat Playbook - Full Width */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1064,7 +1142,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                 </GlassBox>
               </motion.div>
 
-              {/* 7. Coach's Final Note - Full Width */}
+              {/* 8. Coach's Final Note - Full Width */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
