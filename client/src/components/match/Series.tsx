@@ -28,17 +28,18 @@ const Series = memo(({ seriesData, team, isSelected = false }: Props) => {
     const isWin = winCount > lossCount;
 
     return (
-        <div className={`
-            w-full text-left p-4 rounded-xl border transition-all duration-300 group
-            ${isSelected
-                ? 'border-blue-400/50 bg-blue-400/10 shadow-lg shadow-blue-500/10'
-                : 'border-white/5 hover:border-white/20 bg-white/5'
-            }
-        `}>
+        <div 
+            className="w-full text-left p-4 rounded-xl border transition-all duration-300 group"
+            style={{
+                borderColor: isSelected ? 'rgba(127, 90, 240, 0.5)' : 'rgba(255, 255, 255, 0.05)',
+                backgroundColor: isSelected ? 'rgba(127, 90, 240, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                boxShadow: isSelected ? '0 10px 15px -3px rgba(127, 90, 240, 0.1)' : 'none'
+            }}
+        >
             {/* Header: Team vs. Opponent with Result */}
             <div className="flex items-center justify-between mb-3">
                 <div className="flex flex-col">
-                    <span className="text-blue-200/60 text-[10px] font-bold tracking-wider mb-0.5">{team.name} vs</span>
+                    <span className="text-[10px] font-bold tracking-wider mb-0.5" style={{ color: '#ffffff' }}>{team.name} vs</span>
                     <span className="text-white font-bold text-lg leading-tight">
                         {opponent?.name || 'Unknown'}
                     </span>
@@ -56,8 +57,8 @@ const Series = memo(({ seriesData, team, isSelected = false }: Props) => {
 
             {/* Format and Date Row */}
             <div className="flex items-center justify-between text-base mb-3 bg-white/5 rounded-md px-2 py-1">
-                <span className="text-blue-300 font-bold text-xs tracking-tighter">{formatSeriesType(series.format)}</span>
-                <span className="text-blue-200/40 text-[11px] font-semibold">{formatDate(series.startedAt)}</span>
+                <span className="font-bold text-xs tracking-tighter" style={{ color: '#BEABF7' }}>{formatSeriesType(series.format)}</span>
+                <span className="text-[11px] font-semibold" style={{ color: 'rgba(255, 255, 254, 0.8)' }}>{formatDate(series.startedAt)}</span>
             </div>
 
             {/* Map results mini display */}

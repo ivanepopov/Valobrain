@@ -53,41 +53,45 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-6 h-full flex items-center">
         <div className="w-full flex items-center justify-center relative">
           <Link to="/" className="absolute left-6 flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <Brain className="w-8 h-8 text-blue-400" />
-            <h1 className="text-2xl font-bold text-white">ValoBrain</h1>
+            <Brain className="w-8 h-8" style={{ color: '#7f5af0' }} />
+            <h1 className="text-2xl font-bold" style={{ color: '#ffffff' }}>ValoBrain</h1>
           </Link>
 
           {isHomePage && (
             <nav className="flex items-center gap-6 relative">
               <button
                 onClick={() => scrollToSection('hero')}
-                className={`transition-colors text-sm font-medium ${
-                  activeSection === 'hero' ? 'text-blue-400' : 'text-blue-200 hover:text-white'
-                }`}
+                className="transition-colors text-sm font-medium text-white"
+                style={{ color: activeSection === 'hero' ? '#7f5af0' : undefined }}
+                onMouseEnter={(e) => { if (activeSection !== 'hero') e.currentTarget.style.color = '#7f5af0'; }}
+                onMouseLeave={(e) => { if (activeSection !== 'hero') e.currentTarget.style.color = '#ffffff'; }}
               >
                 Home
               </button>
               <button
                 onClick={() => scrollToSection('features')}
-                className={`transition-colors text-sm font-medium ${
-                  activeSection === 'features' ? 'text-blue-400' : 'text-blue-200 hover:text-white'
-                }`}
+                className="transition-colors text-sm font-medium text-white"
+                style={{ color: activeSection === 'features' ? '#7f5af0' : undefined }}
+                onMouseEnter={(e) => { if (activeSection !== 'features') e.currentTarget.style.color = '#7f5af0'; }}
+                onMouseLeave={(e) => { if (activeSection !== 'features') e.currentTarget.style.color = '#ffffff'; }}
               >
                 Features
               </button>
               <button
                 onClick={() => scrollToSection('how-it-works')}
-                className={`transition-colors text-sm font-medium ${
-                  activeSection === 'how-it-works' ? 'text-blue-400' : 'text-blue-200 hover:text-white'
-                }`}
+                className="transition-colors text-sm font-medium text-white"
+                style={{ color: activeSection === 'how-it-works' ? '#7f5af0' : undefined }}
+                onMouseEnter={(e) => { if (activeSection !== 'how-it-works') e.currentTarget.style.color = '#7f5af0'; }}
+                onMouseLeave={(e) => { if (activeSection !== 'how-it-works') e.currentTarget.style.color = '#ffffff'; }}
               >
                 How It Works
               </button>
               <button
                 onClick={() => scrollToSection('get-started')}
-                className={`transition-colors text-sm font-medium ${
-                  activeSection === 'get-started' ? 'text-blue-400' : 'text-blue-200 hover:text-white'
-                }`}
+                className="transition-colors text-sm font-medium text-white"
+                style={{ color: activeSection === 'get-started' ? '#7f5af0' : undefined }}
+                onMouseEnter={(e) => { if (activeSection !== 'get-started') e.currentTarget.style.color = '#7f5af0'; }}
+                onMouseLeave={(e) => { if (activeSection !== 'get-started') e.currentTarget.style.color = '#ffffff'; }}
               >
                 Get Started
               </button>
@@ -95,8 +99,11 @@ const Header = () => {
               {/* Scroll Progress Indicator */}
               <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-white/10">
                 <div 
-                  className="h-full bg-blue-400 transition-all duration-300 ease-out"
-                  style={{ width: `${scrollProgress}%` }}
+                  className="h-full transition-all duration-300 ease-out"
+                  style={{ 
+                    width: `${scrollProgress}%`, 
+                    background: 'linear-gradient(to right, #7f5af0, #BEABF7)'
+                  }}
                 />
               </div>
             </nav>

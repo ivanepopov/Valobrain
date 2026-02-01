@@ -132,7 +132,7 @@ const WinConditionDistribution = memo(({ team, allSeriesData }: Props) => {
                 <div className="flex justify-between items-center">
                     <span className="text-base text-white font-semibold">{label}</span>
                     <div className="flex gap-4 text-sm font-bold">
-                        {showWins && <span className="text-blue-300">W: {winVal}</span>}
+                        {showWins && <span className="text-emerald-300">W: {winVal}</span>}
                         {showLosses && <span className="text-rose-300">L: {lossVal}</span>}
                     </div>
                 </div>

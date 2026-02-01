@@ -117,15 +117,15 @@ const PlayerStatisticsTable = memo(({ roster, allSeriesData }: Props) => {
                         <table className="w-full text-base">
                         <thead>
                             <tr className="border-b border-white/10">
-                                <th className="text-left py-3 px-4 text-blue-200 font-semibold">Player</th>
-                                <th className="text-left py-3 px-4 text-blue-200 font-semibold">Agents</th>
-                                <th className="text-center py-3 px-4 text-blue-200 font-semibold">K</th>
-                                <th className="text-center py-3 px-4 text-blue-200 font-semibold">D</th>
-                                <th className="text-center py-3 px-4 text-blue-200 font-semibold">A</th>
-                                <th className="text-center py-3 px-4 text-blue-200 font-semibold">+/-</th>
-                                <th className="text-center py-3 px-4 text-blue-200 font-semibold">KD</th>
-                                <th className="text-center py-3 px-4 text-blue-200 font-semibold">ADR</th>
-                                <th className="text-center py-3 px-4 text-blue-200 font-semibold">FK</th>
+                                <th className="text-left py-3 px-4 font-semibold" style={{ color: '#fffffe' }}>Player</th>
+                                <th className="text-left py-3 px-4 font-semibold" style={{ color: '#fffffe' }}>Agents</th>
+                                <th className="text-center py-3 px-4 font-semibold" style={{ color: '#fffffe' }}>K</th>
+                                <th className="text-center py-3 px-4 font-semibold" style={{ color: '#fffffe' }}>D</th>
+                                <th className="text-center py-3 px-4 font-semibold" style={{ color: '#fffffe' }}>A</th>
+                                <th className="text-center py-3 px-4 font-semibold" style={{ color: '#fffffe' }}>+/-</th>
+                                <th className="text-center py-3 px-4 font-semibold" style={{ color: '#fffffe' }}>KD</th>
+                                <th className="text-center py-3 px-4 font-semibold" style={{ color: '#fffffe' }}>ADR</th>
+                                <th className="text-center py-3 px-4 font-semibold" style={{ color: '#fffffe' }}>FK</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -148,15 +148,15 @@ const PlayerStatisticsTable = memo(({ roster, allSeriesData }: Props) => {
                                             ))}
                                         </div>
                                     </td>
-                                    <td className="py-3 px-4 text-center text-blue-100">{player.kills}</td>
-                                    <td className="py-3 px-4 text-center text-blue-100">{player.deaths}</td>
-                                    <td className="py-3 px-4 text-center text-blue-100">{player.assists}</td>
+                                    <td className="py-3 px-4 text-center" style={{ color: '#fffffe' }}>{player.kills}</td>
+                                    <td className="py-3 px-4 text-center" style={{ color: '#fffffe' }}>{player.deaths}</td>
+                                    <td className="py-3 px-4 text-center" style={{ color: '#fffffe' }}>{player.assists}</td>
                                     <td className={`py-3 px-4 text-center font-mono font-bold ${Number(player.kdDiff) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                         {player.kdDiff}
                                     </td>
-                                    <td className="py-3 px-4 text-center text-blue-100">{player.kd}</td>
-                                    <td className="py-3 px-4 text-center text-blue-100">{player.adr}</td>
-                                    <td className="py-3 px-4 text-center text-blue-100">{player.fk}</td>
+                                    <td className="py-3 px-4 text-center" style={{ color: '#fffffe' }}>{player.kd}</td>
+                                    <td className="py-3 px-4 text-center" style={{ color: '#fffffe' }}>{player.adr}</td>
+                                    <td className="py-3 px-4 text-center" style={{ color: '#fffffe' }}>{player.fk}</td>
                                 </tr>
                             ))}
                         </tbody>

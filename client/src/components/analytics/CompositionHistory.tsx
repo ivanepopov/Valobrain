@@ -112,7 +112,7 @@ const CompositionHistory = memo(({ team, allSeriesData, selectedMap }: Props) =>
                 <GlassBox className="mb-6 border-white/10">
                     <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
                         <h3 className="text-white text-xl font-bold flex items-center gap-2">
-                            <Users className="w-5 h-5 text-blue-400" />
+                            <Users className="w-5 h-5" style={{ color: '#7f5af0' }} />
                             {selectedMap} Comps
                         </h3>
                         <div className="flex gap-4 bg-linear-to-r from-slate-950/60 to-slate-900/60 p-2.5 rounded-lg border border-white/10 backdrop-blur-sm">

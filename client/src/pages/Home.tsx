@@ -23,6 +23,22 @@ const Home = () => {
     const [teamsDropdown, setTeamsDropdown] = useState<Team[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLFormElement>(null);
+    const [displayedText, setDisplayedText] = useState('');
+    const fullText = 'Level up your Valorant IQ.';
+
+    useEffect(() => {
+        let index = 0;
+        const typingInterval = setInterval(() => {
+            if (index < fullText.length) {
+                setDisplayedText(fullText.slice(0, index + 1));
+                index++;
+            } else {
+                clearInterval(typingInterval);
+            }
+        }, 100); // Adjust speed here (lower = faster)
+
+        return () => clearInterval(typingInterval);
+    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -94,9 +110,12 @@ const Home = () => {
                   className="text-center mb-16"
                 >
                   <div className="flex items-center justify-center gap-3 mb-6">
-                    <h1 className="text-4xl md:text-6xl font-bold text-white" >Level up your Valorant IQ</h1>
+                    <h1 className="text-4xl md:text-6xl font-bold text-white" style={{ color: '#ffffff' }} >
+                      {displayedText}
+                      <span className="cursor-blink">|</span>
+                    </h1>
                   </div>
-                  <p className="text-lg md:text-xl text-blue-200 mb-8 max-w-3xl mx-auto">
+                  <p className="text-lg md:text-xl mb-8 max-w-3xl mx-auto" style={{ color: '#ffffff' }}>
                     Discover how teams play, where they excel, and how to counter their strategies with AI-powered match analytics and tactical reports, just with a team name.
                   </p>
         
@@ -104,9 +123,9 @@ const Home = () => {
                   <form onSubmit={handleSubmit} className="max-w-2xl mx-auto relative" ref={dropdownRef}>
                     <label htmlFor="team-search" className="sr-only">Search for a Valorant team</label>
                     <div
-                        className="backdrop-blur-md bg-white/5 border-2 border-white/10 rounded-2xl p-3 hover:border-blue-400/50 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-400/30 transition-all duration-300">
+                        className="backdrop-blur-md bg-white/5 border-2 border-white/10 rounded-2xl p-3 hover:border-[#7f5af0] focus-within:border-[#7f5af0] focus-within:ring-2 focus-within:ring-[#7f5af0]/30 transition-all duration-300">
                       <div className="flex items-center gap-3">
-                        <Search className="w-6 h-6 text-blue-400 ml-3" aria-hidden="true"/>
+                        <Search className="w-6 h-6 ml-3" style={{ color: '#7f5af0' }} aria-hidden="true"/>
                         <input
                             id="team-search"
                             type="text"
@@ -130,7 +149,8 @@ const Home = () => {
                         />
                         <button
                           type="submit"
-                          className="px-6 md:px-8 py-3 bg-blue-900 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105"
+                          className="px-6 md:px-8 py-3 font-semibold rounded-xl transition-all duration-300 hover:scale-105"
+                          style={{ backgroundColor: '#7f5af0', color: '#ffffff' }}
                           aria-label="Search team"
                         >
                           Search
@@ -138,7 +158,7 @@ const Home = () => {
                       </div>
                     </div>
         
-                    <p className="text-blue-200/70 text-sm mt-4">
+                    <p className="text-sm mt-4" style={{ color: '#ffffff' }}>
                       Try searching: Sentinels, Team Liquid, FNATIC, or any team name
                     </p>
         

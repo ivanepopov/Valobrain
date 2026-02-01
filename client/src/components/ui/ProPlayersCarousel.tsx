@@ -4,6 +4,8 @@ import gucc107Image from '../../assets/people/gucc107.png';
 import huynhImage from '../../assets/people/HUYNH.png';
 import fireballopsImage from '../../assets/people/fireballops.png';
 import runiImage from '../../assets/people/runi.png';
+import kessImage from '../../assets/people/kess.png';
+import exciteImage from '../../assets/people/excite.png';
 
 const proPlayers = [
   { name: 'mas', team: 'Former FaZe', image: masImage },
@@ -11,9 +13,8 @@ const proPlayers = [
   { name: 'HUYNH', team: 'Former GenG', image: huynhImage },
   { name: 'FireBallOps', team: 'NBG', image: fireballopsImage },
   { name: 'runi', team: 'Former Cloud9', image: runiImage },
-  { name: 'p6', team: 'FNATIC', image: 'https://owcdn.net/img/61c317d9c70a4.png' },
-  { name: 'p7', team: 'Team Liquid', image: 'https://owcdn.net/img/61c31870ef077.png' },
-  { name: 'p8', team: 'FNATIC', image: 'https://owcdn.net/img/63fd958f30c12.png' },
+  { name: 'Kess', team: 'LYON', image: kessImage },
+  { name: 'Excite', team: 'WVU', image: exciteImage },
 ];
 
 const ProPlayersCarousel = () => {
@@ -23,7 +24,7 @@ const ProPlayersCarousel = () => {
   return (
     <section className="w-full py-2 overflow-hidden" aria-label="Professional players using ValoBrain">
       {/* Header Text */}
-      <p className="text-center text-slate-300 text-base mb-8">
+      <p className="text-center text-xl mb-8" style={{ color: '#ffffff' }}>
         Trusted by professional Valorant players and coaches
       </p>
       
@@ -64,8 +65,8 @@ const ProPlayersCarousel = () => {
               
               {/* Player Name */}
               <div className="text-center">
-                <p className="text-sm font-semibold text-white">{player.name}</p>
-                <p className="text-xs text-slate-400">{player.team}</p>
+                <p className="text-sm font-semibold text-gray-200">{player.name}</p>
+                <p className="text-xs text-gray-200">{player.team}</p>
               </div>
             </div>
           ))}

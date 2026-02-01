@@ -128,14 +128,14 @@ const Dashboard = () => {
                 <NeuralNetworkBackground />
                 <div className="relative z-10 flex flex-col items-center justify-center min-h-[60vh] space-y-6">
                     <div className="relative">
-                        <div className="h-16 w-16 animate-spin rounded-full border-4 border-blue-400/20 border-t-blue-400"></div>
+                        <div className="h-16 w-16 animate-spin rounded-full border-4" style={{ borderColor: 'rgba(127, 90, 240, 0.2)', borderTopColor: '#7f5af0' }}></div>
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="h-8 w-8 animate-pulse rounded-full bg-blue-400/20"></div>
+                            <div className="h-8 w-8 animate-pulse rounded-full" style={{ backgroundColor: 'rgba(127, 90, 240, 0.2)' }}></div>
                         </div>
                     </div>
                     <div className="text-center">
                         <h3 className="text-xl font-bold text-white">Loading Team Data</h3>
-                        <p className="text-base text-blue-200/60 mt-2">
+                        <p className="text-base mt-2" style={{ color: '#ffffff' }}>
                             Retrieving team information...
                         </p>
                     </div>
@@ -152,7 +152,10 @@ const Dashboard = () => {
                 <div className="relative z-10 max-w-7xl mx-auto">
                     <button
                         onClick={() => navigate("/")}
-                        className="flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-4 transition-colors"
+                        className="flex items-center gap-2 mb-4 transition-colors"
+                        style={{ color: '#7f5af0' }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = '#9d7ff5'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = '#7f5af0'}
                     >
                         <ArrowLeft className="w-5 h-5" />
                         Back to Search
@@ -160,10 +163,13 @@ const Dashboard = () => {
                     <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
                         <div className="text-red-400 text-6xl">⚠️</div>
                         <h2 className="text-3xl font-bold text-white">{error || "Team Not Found"}</h2>
-                        <p className="text-base text-blue-200">Please try searching for a different team.</p>
+                        <p className="text-base" style={{ color: '#ffffff' }}>Please try searching for a different team.</p>
                         <button
                             onClick={() => navigate("/")}
-                            className="mt-4 px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-semibold transition-colors"
+                            className="mt-4 px-6 py-3 rounded-lg font-semibold transition-colors"
+                            style={{ backgroundColor: '#7f5af0', color: '#fffffe' }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9d7ff5'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7f5af0'}
                         >
                             Return to Search
                         </button>
@@ -203,7 +209,10 @@ const Dashboard = () => {
                         <div className="flex items-center gap-4">
                             <button 
                                 onClick={() => navigate("/")}
-                                className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-blue-400 hover:text-blue-300 transition-all duration-300"
+                                className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300"
+                                style={{ color: '#7f5af0' }}
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#9d7ff5'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = '#7f5af0'}
                             >
                                 <ArrowLeft className="w-4 h-4" />
                             </button>
@@ -214,7 +223,7 @@ const Dashboard = () => {
                                 )}
                                 <div>
                                     <h1 className="text-3xl font-bold text-white">{team.name}</h1>
-                                    <p className="text-base text-blue-200">Team Dashboard</p>
+                                    <p className="text-base" style={{ color: '#ffffff' }}>Team Dashboard</p>
                                 </div>
                             </div>
                         </div>
@@ -227,13 +236,17 @@ const Dashboard = () => {
                                         <button
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id as "history" | "analytics" | "ai-insight")}
-                                            className={`
-                                                flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300
-                                                ${activeTab === tab.id 
-                                                    ? 'bg-blue-900 text-white' 
-                                                    : 'text-blue-200 hover:bg-white/5'
-                                                }
-                                            `}
+                                            className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300"
+                                            style={{
+                                                backgroundColor: activeTab === tab.id ? '#7f5af0' : 'transparent',
+                                                color: activeTab === tab.id ? '#fffffe' : '#ffffff'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (activeTab !== tab.id) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (activeTab !== tab.id) e.currentTarget.style.backgroundColor = 'transparent';
+                                            }}
                                         >
                                             <Icon className="w-5 h-5" />
                                             {tab.label}
@@ -248,14 +261,23 @@ const Dashboard = () => {
                 {isFetchingSeries ? (
                     <div className="flex flex-col items-center justify-center py-32 space-y-6">
                         <div className="relative">
-                            <div className="h-16 w-16 animate-spin rounded-full border-4 border-blue-400/20 border-t-blue-400"></div>
+                            <div 
+                                className="h-16 w-16 animate-spin rounded-full border-4"
+                                style={{
+                                    borderColor: 'rgba(127, 90, 240, 0.2)',
+                                    borderTopColor: '#7f5af0'
+                                }}
+                            ></div>
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="h-8 w-8 animate-pulse rounded-full bg-blue-400/20"></div>
+                                <div 
+                                    className="h-8 w-8 animate-pulse rounded-full"
+                                    style={{ backgroundColor: 'rgba(127, 90, 240, 0.2)' }}
+                                ></div>
                             </div>
                         </div>
                         <div className="text-center">
                             <h3 className="text-xl font-bold text-white">Aggregating Intelligence</h3>
-                            <p className="text-base text-blue-200/60 mt-2">
+                            <p className="text-base mt-2" style={{ color: '#ffffff' }}>
                                 Processing {stats.aggregationSeriesIds?.length || 0} historical series...
                             </p>
                         </div>

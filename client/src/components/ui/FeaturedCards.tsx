@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import matchHistoryImg from '../../assets/features_images/match_history.png';
 import analytics1Img from '../../assets/features_images/analytics_1.png';
 import analytics2Img from '../../assets/features_images/analytics_2.png';
-import tacticalReportImg from '../../assets/features_images/tactical_report.png';
 import ai1Img from '../../assets/features_images/ai_1.png';
 import ai2Img from '../../assets/features_images/ai_2.png';
 import ai3Img from '../../assets/features_images/ai_3.png';
@@ -15,7 +14,6 @@ const FeaturedCards = () => {
         matchHistoryImg,    // 0 - Match History
         analytics1Img,      // 1 - Analytics
         analytics2Img,      // 2 - Analytics
-        tacticalReportImg,  // 3 - Tactical Report
         ai1Img,            // 4 - AI Insights
         ai2Img,            // 5 - AI Insights
         ai3Img,            // 6 - AI Insights
@@ -79,7 +77,8 @@ const FeaturedCards = () => {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.2 }}
-                    className="text-4xl font-bold text-white mb-4"
+                    className="text-4xl font-bold mb-4"
+                    style={{ color: '#ffffff' }}
                 >
                     Features
                 </motion.h2>
@@ -88,7 +87,8 @@ const FeaturedCards = () => {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.3 }}
-                    className="text-blue-200/70 text-base"
+                    className="text-xl"
+                    style={{ color: '#ffffff' }}
                 >
                     Explore the features that ValoBrain offers
                 </motion.p>
@@ -128,19 +128,26 @@ const FeaturedCards = () => {
                                         setIsPlaying(false); // Pause when user manually selects
                                     }
                                 }}
-                                className={`w-full backdrop-blur-md bg-white/5 border rounded-lg p-4 hover:border-blue-400/50 hover:bg-white/10 transition-all duration-300 h-40 flex flex-col justify-center ${
-                                    activeFeature === index ? 'border-blue-400 bg-white/10 ring-2 ring-blue-400/30' : 'border-white/10'
-                                }`}
+                                className="w-full backdrop-blur-md bg-white/5 border rounded-lg p-4 hover:bg-white/10 transition-all duration-300 h-40 flex flex-col justify-center"
+                                style={{
+                                    borderColor: activeFeature === index ? '#7f5af0' : 'rgba(255, 255, 255, 0.1)',
+                                    boxShadow: activeFeature === index ? '0 0 0 2px rgba(127, 90, 240, 0.3)' : 'none'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (activeFeature !== index) e.currentTarget.style.borderColor = '#7f5af0';
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (activeFeature !== index) e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                                }}
                             >
-                                <div className={`flex justify-center mb-2 transition-colors ${
-                                    activeFeature === index ? 'text-blue-300' : 'text-blue-400'
-                                }`}>
+                                <div className="flex justify-center mb-2 transition-colors"
+                                    style={{ color: '#7f5af0' }}>
                                     {feature.icon}
                                 </div>
-                                <h3 className="text-base font-semibold text-white text-center mb-2">
+                                <h3 className="text-base font-semibold text-center mb-2" style={{ color: '#ffffff' }}>
                                     {feature.title}
                                 </h3>
-                                <p className="text-s text-blue-200/70 text-center leading-tight">
+                                <p className="text-s text-center leading-tight" style={{ color: '#ffffff' }}>
                                     {feature.description}
                                 </p>
                             </button>
@@ -200,11 +207,20 @@ const FeaturedCards = () => {
                                     setCurrentImageIndex(index);
                                     setIsPlaying(false);
                                 }}
-                                className={`transition-all duration-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                                    currentImageIndex === index
-                                        ? "bg-blue-400 w-12 h-2"
-                                        : "bg-white/30 hover:bg-white/50 w-2 h-2"
-                                }`}
+                                className="transition-all duration-300 rounded-full focus:outline-none"
+                                style={{
+                                    backgroundColor: currentImageIndex === index ? '#7f5af0' : 'rgba(255, 255, 255, 0.3)',
+                                    width: currentImageIndex === index ? '48px' : '8px',
+                                    height: '8px'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (currentImageIndex !== index) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (currentImageIndex !== index) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                                }}
+                                onFocus={(e) => e.currentTarget.style.boxShadow = '0 0 0 2px #7f5af0'}
+                                onBlur={(e) => e.currentTarget.style.boxShadow = 'none'}
                                 aria-label={`Go to screenshot ${index + 1} of ${allImages.length}`}
                                 aria-current={currentImageIndex === index ? "true" : "false"}
                             />
@@ -214,7 +230,12 @@ const FeaturedCards = () => {
                     {/* Play/Pause Button */}
                     <button
                         onClick={() => setIsPlaying(!isPlaying)}
-                        className="p-3 min-h-[44px] min-w-[44px] bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-950"
+                        className="p-3 min-h-[44px] min-w-[44px] backdrop-blur-md text-white rounded-full transition-all duration-300 focus:outline-none"
+                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
+                        onFocus={(e) => e.currentTarget.style.boxShadow = '0 0 0 2px #7f5af0, 0 0 0 4px rgba(15, 23, 42, 1)'}
+                        onBlur={(e) => e.currentTarget.style.boxShadow = 'none'}
                         aria-label={isPlaying ? "Pause carousel auto-play" : "Play carousel auto-play"}
                         aria-pressed={isPlaying}
                     >
