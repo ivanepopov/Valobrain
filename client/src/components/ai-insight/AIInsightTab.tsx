@@ -229,7 +229,8 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
             executiveSummary: '',
             attackProtocols: { defaultPhase: '', executePhase: '', tendencies: [] },
             defenseSetups: { standardSetups: '', aggressivePlays: '', tendencies: [] },
-            pistolEconomy: '',
+            pistolRounds: '',
+            economyIntel: { forceBuyTendency: '', ecoRoundWinRate: '', operatorInvestment: '', bonusRoundStyle: '', economyExploit: ''},
             playerIntel: [],
             counterStrats: [],
             coachNote: '',
@@ -294,7 +295,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
 
         // Extract Pistol & Economy
         const pistolMatch = markdown.match(/## 🔫 Pistol & Economy Analysis\s*([\s\S]*?)(?=## 🎯|\n---\n|\n---$|$)/);
-        if (pistolMatch) sections.pistolEconomy = stripMarkdown(pistolMatch[1].trim());
+        if (pistolMatch) sections.pistolRounds = stripMarkdown(pistolMatch[1].trim());
 
         // Extract Player Intel (table)
         // Use \n---\n to match horizontal rules only, not table separators like | :--- |
@@ -631,7 +632,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                                 <h3 className="text-lg font-bold text-white mb-1">
                                     Selected Series: vs {selectedSeries.opponent}
                                 </h3>
-                                <p className="text-blue-300 text-sm">
+                                <p className="text-sm" style={{ color: '#BEABF7' }}>
                                     {selectedSeries.date} • {selectedSeries.score}
                                 </p>
                             </div>
@@ -655,10 +656,13 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                                         className={`
                       flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
                       ${isGenerating
-                                            ? 'bg-blue-900/50 text-white/50 cursor-not-allowed'
-                                            : 'bg-blue-900 text-white hover:scale-105'
+                                            ? 'text-white/50 cursor-not-allowed'
+                                            : 'text-white hover:scale-105'
                                         }
                     `}
+                                        style={{
+                                            backgroundColor: '#7f5af0',
+                                        }}
                                     >
                                         {isGenerating ? (
                                             <>
@@ -678,11 +682,11 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
 
                         {/* Map Selection */}
                         <div className="flex items-center gap-3 flex-wrap">
-                            <span className="text-blue-200 text-sm">Generate report for:</span>
+                            <span className="text-purple-200 text-sm">Generate report for:</span>
                             {isLoadingMaps ? (
                                 <div className="flex items-center gap-2">
-                                    <Loader2 className="w-4 h-4 text-blue-900 animate-spin" />
-                                    <span className="text-blue-300 text-sm">Loading maps...</span>
+                                    <Loader2 className="w-4 h-4 text-purple-900 animate-spin" />
+                                    <span className="text-purple-300 text-sm">Loading maps...</span>
                                 </div>
                             ) : (
                                 <div className="flex gap-2 flex-wrap">
@@ -693,12 +697,13 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                                             disabled={isGenerating}
                                             className={`
                         px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300
-                        ${selectedReportMap === map
-                                                ? 'bg-blue-900 text-white'
-                                                : 'bg-white/5 text-blue-200 hover:bg-white/10'
-                                            }
                         ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}
                       `}
+                                            style={{
+                                                backgroundColor: selectedReportMap === map ? '#7f5af0' : 'rgba(255, 255, 255, 0.05)',
+                                                color: selectedReportMap === map ? '#fffffe' : '#94a1b2',
+                                                boxShadow: selectedReportMap === map ? '0 10px 15px -3px rgba(127, 90, 240, 0.2)' : 'none'
+                                            }}
                                         >
                                             Map {i + 1}: {map}
                                         </button>
@@ -735,8 +740,8 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                           ${isComplete
                                                     ? 'bg-green-500 text-white'
                                                     : isActive
-                                                        ? 'bg-blue-900 text-white'
-                                                        : 'bg-white/10 text-blue-300'
+                                                        ? 'bg-purple-900 text-white'
+                                                        : 'bg-white/10 text-purple-300'
                                                 }
                         `}>
                                                     {isComplete ? (
@@ -751,7 +756,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                                                 </div>
                                                 <span className={`
                           text-xs font-medium transition-colors duration-300
-                          ${isActive ? 'text-blue-300' : isComplete ? 'text-green-400' : 'text-blue-400/50'}
+                          ${isActive ? 'text-purple-300' : isComplete ? 'text-green-400' : 'text-purple-400/50'}
                         `}>
                           {stage.label}
                         </span>
@@ -763,7 +768,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                                 {/* Progress Bar Track */}
                                 <div className="relative h-2 bg-white/10 rounded-full overflow-hidden">
                                     <motion.div
-                                        className="absolute left-0 top-0 h-full bg-blue-900 rounded-full"
+                                        className="absolute left-0 top-0 h-full bg-purple-900 rounded-full"
                                         initial={{ width: '0%' }}
                                         animate={{
                                             width: generationStage === 'digest' ? '33%'
@@ -777,7 +782,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                                 </div>
 
                                 {/* Current Status */}
-                                <p className="text-center text-blue-300 text-sm mt-3">
+                                <p className="text-center text-purple-300 text-sm mt-3">
                                     {generationStatus || 'Initializing...'}
                                 </p>
                             </motion.div>
