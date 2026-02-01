@@ -45,7 +45,7 @@ const ReportHistory = ({ reportHistory, onLoadReport, onDeleteReport, isCollapse
             className="h-full flex flex-col"
         >
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                <h2 className="text-xl font-bold text-white flex items-center gap-2">
                     <History className="w-6 h-6 text-purple-400" />
                     Report History
                 </h2>
