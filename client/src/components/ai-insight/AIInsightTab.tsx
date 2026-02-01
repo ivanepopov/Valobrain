@@ -14,6 +14,7 @@ import AIModelFilter from "./AIModelFilter.tsx";
 import AIModelModal from "./AIModelModal.tsx";
 import ReportData from "./ReportData.tsx";
 import FilteredSeries from "./FilteredSeries.tsx";
+import ReportHistory, { type SavedReport } from "./ReportHistory.tsx";
 import GlassBox from "../ui/GlassBox.tsx";
 import {FileText, Loader2, X} from "lucide-react";
 
@@ -29,6 +30,8 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
     // Local UI state (not persisted across tab switches)
     const [selectedMap, setSelectedMap] = useState<string>('All');
     const [isSeriesCollapsed, setIsSeriesCollapsed] = useState(false);
+    const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
+    const [reportHistory, setReportHistory] = useState<SavedReport[]>([]);
     const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Destructure persisted state from props
@@ -132,6 +135,65 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
             }
         }
     }, []);
+
+    // Load report history on mount
+    useEffect(() => {
+        const savedHistory = localStorage.getItem('valobrain_report_history');
+        if (savedHistory) {
+            try {
+                const parsed = JSON.parse(savedHistory);
+                setReportHistory(parsed);
+            } catch (e) {
+                console.error('Failed to parse report history from localStorage', e);
+            }
+        }
+    }, []);
+
+    // Save report to history
+    const saveReportToHistory = (report: ReportSections, meta: { teamName: string; opponent: string; map: string; date: string }) => {
+        const newEntry: SavedReport = {
+            id: Date.now().toString(),
+            teamName: meta.teamName,
+            opponent: meta.opponent,
+            map: meta.map,
+            date: meta.date,
+            createdAt: new Date().toISOString(),
+            reportData: report,
+        };
+        setReportHistory(prev => {
+            const updated = [newEntry, ...prev].slice(0, 10); // Keep max 10
+            localStorage.setItem('valobrain_report_history', JSON.stringify(updated));
+            return updated;
+        });
+    };
+
+    // Load a saved report
+    const handleLoadReport = (savedReport: SavedReport) => {
+        setReportData(savedReport.reportData);
+        // Create a mock series to display the report context
+        setReportState(prev => ({
+            ...prev,
+            selectedSeries: {
+                id: savedReport.id,
+                opponent: savedReport.opponent,
+                result: 'win',
+                score: '',
+                date: savedReport.date,
+                dateValue: 0,
+                maps: [savedReport.map],
+            },
+            selectedReportMap: savedReport.map,
+        }));
+    };
+
+    // Delete a report from history
+    const handleDeleteReport = (id: string) => {
+        setReportHistory(prev => {
+            const updated = prev.filter(r => r.id !== id);
+            localStorage.setItem('valobrain_report_history', JSON.stringify(updated));
+            return updated;
+        });
+    };
 
     // Track which series have available match data
     const [availableSeries, setAvailableSeries] = useState<Record<string, boolean>>({});
@@ -491,6 +553,17 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                     const markdown = job.result?.reportMarkdown || '';
                     const parsed = parseMarkdownReport(markdown);
                     setReportData(parsed);
+
+                    // Save to history
+                    if (selectedSeries) {
+                        saveReportToHistory(parsed, {
+                            teamName,
+                            opponent: selectedSeries.opponent,
+                            map: selectedReportMap,
+                            date: selectedSeries.date,
+                        });
+                    }
+
                     setIsGenerating(false);
                     setGenerationStatus('');
                     setGenerationStage('idle');
@@ -818,18 +891,30 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                 )}
             </AnimatePresence>
 
-            {/* Recent/Filtered Series Section */}
-            <FilteredSeries
-                selectedMap={selectedMap}
-                teamName={teamName}
-                transformedSeriesCount={transformedSeries.length}
-                isSeriesCollapsed={isSeriesCollapsed}
-                setIsSeriesCollapsed={setIsSeriesCollapsed}
-                isCheckingAvailability={isCheckingAvailability}
-                filteredSeries={filteredSeries}
-                selectedSeries={selectedSeries}
-                setSelectedSeries={setSelectedSeries}
-            />
+            {/* Bottom Section: Series Selection + Report History */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left: Available/Filtered Series */}
+                <FilteredSeries
+                    selectedMap={selectedMap}
+                    teamName={teamName}
+                    transformedSeriesCount={transformedSeries.length}
+                    isSeriesCollapsed={isSeriesCollapsed}
+                    setIsSeriesCollapsed={setIsSeriesCollapsed}
+                    isCheckingAvailability={isCheckingAvailability}
+                    filteredSeries={filteredSeries}
+                    selectedSeries={selectedSeries}
+                    setSelectedSeries={setSelectedSeries}
+                />
+
+                {/* Right: Report History */}
+                <ReportHistory
+                    reportHistory={reportHistory.filter(r => r.teamName === teamName)}
+                    onLoadReport={handleLoadReport}
+                    onDeleteReport={handleDeleteReport}
+                    isCollapsed={isHistoryCollapsed}
+                    setIsCollapsed={setIsHistoryCollapsed}
+                />
+            </div>
         </div>
     );
 }
