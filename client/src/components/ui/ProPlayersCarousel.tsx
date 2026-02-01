@@ -5,6 +5,7 @@ import huynhImage from '../../assets/people/HUYNH.png';
 import fireballopsImage from '../../assets/people/fireballops.png';
 import runiImage from '../../assets/people/runi.png';
 import kessImage from '../../assets/people/kess.png';
+import exciteImage from '../../assets/people/excite.png';
 
 const proPlayers = [
   { name: 'mas', team: 'Former FaZe', image: masImage },
@@ -13,8 +14,7 @@ const proPlayers = [
   { name: 'FireBallOps', team: 'NBG', image: fireballopsImage },
   { name: 'runi', team: 'Former Cloud9', image: runiImage },
   { name: 'Kess', team: 'LYON', image: kessImage },
-  { name: 'p7', team: 'Team Liquid', image: 'https://owcdn.net/img/61c31870ef077.png' },
-  { name: 'p8', team: 'FNATIC', image: 'https://owcdn.net/img/63fd958f30c12.png' },
+  { name: 'Excite', team: 'WVU', image: exciteImage },
 ];
 
 const ProPlayersCarousel = () => {
