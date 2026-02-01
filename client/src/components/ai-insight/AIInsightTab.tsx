@@ -300,7 +300,7 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
     }
 
     // Extract Counter-Strats
-    const counterMatch = markdown.match(/## 🧠 Counter-Strat Playbook[\s\S]*?\s*([\s\S]*?)(?=## 📝|\n---\n|\n---$|$)/);
+    const counterMatch = markdown.match(/## 🧠 Counter-Strat Playbook(?:.*)\s*([\s\S]*?)(?=## 📝|\n---\n|\n---$|$)/);
     if (counterMatch) {
       // Match each TIP block
       const tipBlocks = counterMatch[1].split(/>\s*\[!TIP\]/).filter(Boolean);
