@@ -39,7 +39,7 @@ const FilteredSeries = ({
             transition={{ duration: 0.5, delay: 0.1 }}
         >
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-white">
+                <h2 className="text-xl font-bold text-white">
                     {selectedMap === 'All' ? 'Available Series' : 'Filtered Series'}
                 </h2>
 
