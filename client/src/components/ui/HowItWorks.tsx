@@ -19,7 +19,7 @@ const HowItWorks = () => {
             number: "03",
             icon: <Sparkles className="w-10 h-10" />,
             title: "Get AI Insights",
-            description: "Receive AI-powered tactical reports and strategic recommendations",
+            description: "Receive AI-powered insights and strategic recommendations",
         },
     ];
 

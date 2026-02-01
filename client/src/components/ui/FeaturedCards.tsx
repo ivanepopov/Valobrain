@@ -20,7 +20,7 @@ const FeaturedCards = () => {
     ];
 
     // Map image index to feature index
-    const imageToFeatureMap = [0, 1, 1, 2, 3, 3, 3];
+    const imageToFeatureMap = [0, 1, 1, 2, 2, 2];
 
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isPlaying, setIsPlaying] = useState(true);
@@ -43,22 +43,17 @@ const FeaturedCards = () => {
         {
             icon: <BarChart3 className="w-8 h-8" />,
             title: 'Match History',
-            description: 'Track and analyze team matches',
+            description: 'View recent competitive matches and match statistics',
         },
         {
             icon: <Search className="w-8 h-8" />,
             title: 'Analytics',
-            description: 'Deep dive into performance metrics and overall team stats',
-        },
-        {
-            icon: <FileText className="w-8 h-8" />,
-            title: 'Tactical Report',
-            description: 'Gain access to comprehensive reports on team strategies',
+            description: 'Deep dive into overall team stats, compositions, map performance, and win conditions',
         },
         {
             icon: <Sparkles className="w-8 h-8" />,
             title: 'AI Insights',
-            description: 'Generate AI driven insights to enhance in-game performance',
+            description: 'Generate AI driven insights to uncover attack protocols, defensive setups, pistol strategy, economy management, and counter-strategies',
         },
     ];
 
@@ -102,7 +97,7 @@ const FeaturedCards = () => {
                 transition={{ duration: 0.4 }}
                 className="mb-12"
             >
-                <div className="grid md:grid-cols-4 gap-4">
+                <div className="grid md:grid-cols-3 gap-4">
                     {features.map((feature, index) => (
                         <motion.div
                             key={feature.title}
