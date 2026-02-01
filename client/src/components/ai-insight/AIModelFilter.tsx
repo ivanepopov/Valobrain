@@ -50,7 +50,7 @@ const AIModelFilter = ({
         <div className="flex flex-col gap-4">
           {/* AI Model Selection */}
           <div className="flex items-center gap-6">
-            <label className="text-blue-200 text-xs font-medium tracking-wider whitespace-nowrap w-28">
+            <label className="text-xs font-medium tracking-wider whitespace-nowrap w-28" style={{ color: '#fffffe' }}>
               Select Model
             </label>
 
@@ -59,14 +59,18 @@ const AIModelFilter = ({
                 <button
                   key={model.id}
                   onClick={() => setSelectedModel(model.id, model.agent)}
-                  className={`
-                        px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-300
-                        ${
-                          selectedModel === model.id
-                            ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20'
-                            : 'bg-white/5 text-blue-200 hover:bg-white/10'
-                        }
-                      `}
+                  className="px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-300"
+                  style={{
+                      backgroundColor: selectedModel === model.id ? '#7f5af0' : 'rgba(255, 255, 255, 0.05)',
+                      color: selectedModel === model.id ? '#fffffe' : '#94a1b2',
+                      boxShadow: selectedModel === model.id ? '0 10px 15px -3px rgba(127, 90, 240, 0.2)' : 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                      if (selectedModel !== model.id) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                      if (selectedModel !== model.id) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                  }}
                 >
                   {model.name}
                 </button>
@@ -77,14 +81,18 @@ const AIModelFilter = ({
                 <div key={model.id} className="relative group">
                   <button
                     onClick={() => setSelectedModel(model.id, model.agent)}
-                    className={`
-                          px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-300
-                          ${
-                            selectedModel === model.id
-                              ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20'
-                              : 'bg-white/5 text-blue-200 hover:bg-white/10'
-                          }
-                        `}
+                    className="px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-300"
+                    style={{
+                        backgroundColor: selectedModel === model.id ? '#7f5af0' : 'rgba(255, 255, 255, 0.05)',
+                        color: selectedModel === model.id ? '#fffffe' : '#94a1b2',
+                        boxShadow: selectedModel === model.id ? '0 10px 15px -3px rgba(127, 90, 240, 0.2)' : 'none'
+                    }}
+                    onMouseEnter={(e) => {
+                        if (selectedModel !== model.id) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                        if (selectedModel !== model.id) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                    }}
                   >
                     {model.name}
                   </button>
@@ -115,7 +123,14 @@ const AIModelFilter = ({
               <button
                 type="button"
                 onClick={() => setShowCustomModal(true)}
-                className="px-3 py-1.5 rounded-md text-xs font-semibold bg-white/5 text-blue-400 border border-blue-400/20 hover:bg-blue-400/10 transition-all duration-300 flex items-center gap-1"
+                className="px-3 py-1.5 rounded-md text-xs font-semibold bg-white/5 transition-all duration-300 flex items-center gap-1"
+                style={{
+                    outline: '#7f5af0',
+                    color: '#94a1b2',
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                }}
               >
                 <Plus className="w-3 h-3" />
                 Custom..
@@ -125,7 +140,7 @@ const AIModelFilter = ({
 
           {/* API Key Input */}
           <div className="flex items-center gap-6">
-            <label className="text-blue-200 text-xs font-medium tracking-wider whitespace-nowrap w-28 uppercase">
+            <label className="text-xs font-medium tracking-wider whitespace-nowrap w-28 uppercase" style={{ color: '#fffffe' }}>
               API Key
             </label>
 
@@ -138,19 +153,25 @@ const AIModelFilter = ({
                   placeholder={isOllama ? 'No API key required for Ollama' : `Enter ${capitalize(selectedAgent)} key...`}
                   disabled={isOllama}
                   className={`
-                    w-full px-4 py-1.5 pr-10 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-blue-400/50
+                    w-full px-4 py-1.5 pr-10 rounded-lg bg-white/5 border border-white/10 text-sm
                     focus:outline-none focus:border-blue-400/50 transition-colors
                     ${isOllama ? 'opacity-50 cursor-not-allowed' : ''}
                   `}
+                  style={{
+                      color: '#94a1b2',
+                  }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowApiKey((v) => !v)}
                   disabled={isOllama}
                   className={`
-                    absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400 hover:text-blue-300 transition-colors
-                    ${isOllama ? 'opacity-50 cursor-not-allowed hover:text-blue-400' : ''}
+                    absolute right-3 top-1/2 transform -translate-y-1/2
+                    ${isOllama ? 'opacity-50 cursor-not-allowed' : ''}
                   `}
+                  style={{
+                      color: '#7f5af0',
+                  }}
                   aria-label={showApiKey ? 'Hide API key' : 'Show API key'}
                 >
                   {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

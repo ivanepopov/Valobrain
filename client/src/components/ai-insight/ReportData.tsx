@@ -132,7 +132,7 @@ const ReportData = ({ reportData, selectedSeries }: Props) => {
                             <h2 className="text-2xl font-bold text-white">Pistol & Economy</h2>
                         </div>
                         <p className="text-blue-100 whitespace-pre-wrap">
-                            {reportData.pistolEconomy || 'No economy analysis available.'}
+                            {reportData.pistolRounds || 'No economy analysis available.'}
                         </p>
                     </GlassBox>
                 </motion.div>
