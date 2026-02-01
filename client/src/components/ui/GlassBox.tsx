@@ -13,6 +13,7 @@ export function GlassBox({ children, className = '' }: GlassBoxProps) {
         border border-white/10 
         rounded-xl p-6
         transition-all duration-300
+        hover:border-[#7f5af0]
         ${className}
       `}
     >

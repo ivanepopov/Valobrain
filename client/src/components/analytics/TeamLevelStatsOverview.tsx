@@ -94,7 +94,7 @@ const TeamLevelStatsOverview = memo(({ team, allSeriesData }: Props) => {
                     <GlassBox>
                         <div className="flex items-center gap-3 mb-2">
                             <Trophy className="w-5 h-5 text-green-400" />
-                            <p className="text-blue-200 text-sm">Overall Match Win Rate</p>
+                            <p className="text-sm" style={{ color: '#fffffe' }}>Overall Match Win Rate</p>
                         </div>
                         <p className="text-3xl font-bold text-white">{matchWinRate.toFixed(1)}%</p>
                         <div className="mt-2 w-full bg-white/10 rounded-full h-2">
@@ -105,7 +105,7 @@ const TeamLevelStatsOverview = memo(({ team, allSeriesData }: Props) => {
                     <GlassBox>
                         <div className="flex items-center gap-3 mb-2">
                             <Target className="w-5 h-5 text-red-400" />
-                            <p className="text-blue-200 text-sm">Attack Round Win Rate</p>
+                            <p className="text-sm" style={{ color: '#fffffe' }}>Attack Round Win Rate</p>
                         </div>
                         <p className="text-3xl font-bold text-white">{attackWinRate.toFixed(1)}%</p>
                         <div className="mt-2 w-full bg-white/10 rounded-full h-2">
@@ -116,7 +116,7 @@ const TeamLevelStatsOverview = memo(({ team, allSeriesData }: Props) => {
                     <GlassBox>
                         <div className="flex items-center gap-3 mb-2">
                             <Shield className="w-5 h-5 text-blue-400" />
-                            <p className="text-blue-200 text-sm">Defense Round Win Rate</p>
+                            <p className="text-sm" style={{ color: '#fffffe' }}>Defense Round Win Rate</p>
                         </div>
                         <p className="text-3xl font-bold text-white">{defenseWinRate.toFixed(1)}%</p>
                         <div className="mt-2 w-full bg-white/10 rounded-full h-2">

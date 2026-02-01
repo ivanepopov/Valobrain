@@ -14,22 +14,23 @@ const CTASection = () => {
             transition={{ duration: 0.6 }}
             className="mb-24"
         >
-            <div className="relative backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-12 overflow-hidden hover:border-blue-400/50 transition-all duration-300">
+            <div className="relative backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-12 overflow-hidden hover:border-[#7f5af0] transition-all duration-300">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400/5 rounded-full blur-3xl" />
                 <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-400/5 rounded-full blur-3xl" />
 
                 <div className="relative z-10 text-center max-w-3xl mx-auto">
-                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#ffffff' }}>
                         Analyze Opponents. Play Smarter. Win More.
                     </h2>
 
-                    <p className="text-base text-blue-200/70 mb-8">
+                    <p className="text-xl mb-8" style={{ color: '#ffffff' }}>
                         Start finding counters to teams with AI-powered insights and comprehensive statistics.
                     </p>
 
                     <button
                         onClick={handleScrollToTop}
-                        className="group inline-flex items-center gap-3 px-8 py-4 bg-blue-900 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105"
+                        className="group inline-flex items-center gap-3 px-8 py-4 font-semibold rounded-xl transition-all duration-300 hover:scale-105"
+                        style={{ backgroundColor: '#7f5af0', color: '#ffffff' }}
                     >
                         Analyze Now
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

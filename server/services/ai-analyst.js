@@ -72,8 +72,8 @@ class AiAnalystService {
             .map(([name, agent]) => `  - ${name}: ${agent}`)
             .join('\n');
 
-        // Construct the final prompt with explicit roster enforcement
-        return `
+            // Construct the final prompt with explicit roster enforcement
+            return `
 ${systemPrompt}
 
 ---
@@ -135,9 +135,9 @@ ${JSON.stringify(matchDigest, null, 2)}
                 messages: [{ role: "user", content: prompt }],
                 response_format: { type: "json_object" }
             }, {
-                headers: { 
-                    'Authorization': `Bearer ${apiKey}`, 
-                    'Content-Type': 'application/json' 
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
                 },
                 signal
             });
@@ -162,9 +162,9 @@ ${JSON.stringify(matchDigest, null, 2)}
                 messages: [{ role: "user", content: prompt }],
                 response_format: { type: "json_object" }
             }, {
-                headers: { 
-                    'Authorization': `Bearer ${apiKey}`, 
-                    'Content-Type': 'application/json' 
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
                 },
                 signal
             });

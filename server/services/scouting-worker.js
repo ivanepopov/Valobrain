@@ -234,8 +234,18 @@ async function parseMatchFile(filePath, targetMap = null) {
 
                     // Round End / Team Won
                     if (event.type === 'team-won-round' && currentRoundObj) {
+                        // Try multiple paths to get the winning team name (GRID format varies)
+                        let winnerName = event.team?.name 
+                            || event.actor?.state?.name 
+                            || event.target?.state?.name;
+                        
+                        // Fallback: Resolve team ID to name using our teamIdMap
+                        if (!winnerName && event.team?.id && teamIdMap[event.team.id]) {
+                            winnerName = teamIdMap[event.team.id];
+                        }
+                        
                         currentRoundObj.winInfo = {
-                            winner: event.team?.name,
+                            winner: winnerName,
                             reason: event.reason || 'elimination',
                             type: event.reason
                         };
@@ -249,16 +259,8 @@ async function parseMatchFile(filePath, targetMap = null) {
                             const killerTeamID = event.actor?.state?.teamId;
                             const victimTeamID = event.target?.state?.teamId;
                             
-                            
                             const resolvedKillerTeam = teamIdMap[killerTeamID] || killerTeamID || 'Unknown';
                             const resolvedVictimTeam = teamIdMap[victimTeamID] || victimTeamID || 'Unknown';
-
-                            // DEBUG: Check for full team state
-                            console.log(`[Parser] Kill State Keys: ${Object.keys(event.actor?.state || {})}`); 
-                            if (event.actor?.state?.teams) {
-                                console.log(`[Parser] FULL TEAM DATA AVAILABLE IN KILL!`);
-                            }
-
 
                             const kPos = event.actor?.state?.game?.position;
                             const vPos = event.target?.state?.game?.position;

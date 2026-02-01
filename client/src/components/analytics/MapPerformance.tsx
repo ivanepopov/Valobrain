@@ -155,7 +155,7 @@ const MapPerformance = memo(({ team, allSeriesData, selectedMap = "All" }: Props
                         {/* Y-Axis Labels */}
                         <div className="absolute left-0 top-0 h-80 flex flex-col justify-between w-12 text-right pr-2">
                             {[100, 75, 50, 25, 0].map((v) => (
-                                <span key={v} className="text-[10px] font-bold text-blue-200/50 leading-none flex items-center justify-end h-0 uppercase">{v}%</span>
+                                <span key={v} className="text-[10px] font-bold text-white/50 leading-none flex items-center justify-end h-0 uppercase">{v}%</span>
                             ))}
                         </div>
 
@@ -214,7 +214,7 @@ const MapPerformance = memo(({ team, allSeriesData, selectedMap = "All" }: Props
                     </div>
                 ) : (
                     <div className="py-20 text-center border-2 border-dashed border-white/10 rounded-2xl bg-slate-900/30">
-                        <p className="text-blue-200/40 italic text-sm">No match data found for this filter</p>
+                        <p className="text-white/40 italic text-sm">No match data found for this filter</p>
                     </div>
                 )}
             </div>

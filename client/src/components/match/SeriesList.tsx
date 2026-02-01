@@ -26,9 +26,9 @@ const SeriesList = ({ allSeriesData, selectedSeriesId, setSelectedSeriesId, team
         <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar">
             {allSeriesData.length === 0 ? (
                 <GlassBox className="p-12 text-center border-dashed border-white/10 flex flex-col items-center justify-center">
-                    <Search className="w-16 h-16 text-blue-400/30 mb-4" />
+                    <Search className="w-16 h-16 mb-4" style={{ color: 'rgba(127, 90, 240, 0.3)' }} />
                     <h3 className="text-xl font-semibold text-white mb-2">No matches found</h3>
-                    <p className="text-blue-200/60">Try adjusting your filters to find what you're looking for</p>
+                    <p style={{ color: 'rgba(255, 255, 254, 0.7)' }}>Try adjusting your filters to find what you're looking for</p>
                 </GlassBox>
             ) : (
                 allSeriesData.map((data) => {

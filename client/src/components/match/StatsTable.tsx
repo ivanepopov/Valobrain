@@ -35,15 +35,15 @@ const StatsTable = ({ teamName, isWinner, players, isMultipleAgents = false }: P
             <table className="w-full text-base">
                 <thead>
                     <tr className="border-b border-white/10">
-                        <th className="text-left py-3 px-4 text-blue-200 font-semibold w-[20%]">Player</th>
-                        <th className="text-left py-3 px-4 text-blue-200 font-semibold w-[15%]">Agents</th>
-                        <th className="text-center py-3 px-4 text-blue-200 font-semibold w-[8%]">K</th>
-                        <th className="text-center py-3 px-4 text-blue-200 font-semibold w-[8%]">D</th>
-                        <th className="text-center py-3 px-4 text-blue-200 font-semibold w-[8%]">A</th>
-                        <th className="text-center py-3 px-4 text-blue-200 font-semibold w-[10%]">+/-</th>
-                        <th className="text-center py-3 px-4 text-blue-200 font-semibold w-[10%]">KD</th>
-                        <th className="text-center py-3 px-4 text-blue-200 font-semibold w-[10%]">ADR</th>
-                        <th className="text-center py-3 px-4 text-blue-200 font-semibold w-[11%]">FK</th>
+                        <th className="text-left py-3 px-4 font-semibold w-[20%]" style={{ color: '#fffffe' }}>Player</th>
+                        <th className="text-left py-3 px-4 font-semibold w-[15%]" style={{ color: '#fffffe' }}>Agents</th>
+                        <th className="text-center py-3 px-4 font-semibold w-[8%]" style={{ color: '#fffffe' }}>K</th>
+                        <th className="text-center py-3 px-4 font-semibold w-[8%]" style={{ color: '#fffffe' }}>D</th>
+                        <th className="text-center py-3 px-4 font-semibold w-[8%]" style={{ color: '#fffffe' }}>A</th>
+                        <th className="text-center py-3 px-4 font-semibold w-[10%]" style={{ color: '#fffffe' }}>+/-</th>
+                        <th className="text-center py-3 px-4 font-semibold w-[10%]" style={{ color: '#fffffe' }}>KD</th>
+                        <th className="text-center py-3 px-4 font-semibold w-[10%]" style={{ color: '#fffffe' }}>ADR</th>
+                        <th className="text-center py-3 px-4 font-semibold w-[11%]" style={{ color: '#fffffe' }}>FK</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -74,22 +74,22 @@ const StatsTable = ({ teamName, isWinner, players, isMultipleAgents = false }: P
                                                     style={{ zIndex: agents.length - i }}
                                                 />
                                             ) : (
-                                                <span key={i} className="text-blue-100 text-sm">
+                                                <span key={i} className="text-sm" style={{ color: '#fffffe' }}>
                                                     {agentName}
                                                 </span>
                                             )
                                         ))}
                                     </div>
                                 </td>
-                                <td className="py-3 px-4 text-center text-blue-100">{player.kills}</td>
-                                <td className="py-3 px-4 text-center text-blue-100">{player.deaths}</td>
-                                <td className="py-3 px-4 text-center text-blue-100">{player.killAssistsGiven}</td>
+                                <td className="py-3 px-4 text-center" style={{ color: '#fffffe' }}>{player.kills}</td>
+                                <td className="py-3 px-4 text-center" style={{ color: '#fffffe' }}>{player.deaths}</td>
+                                <td className="py-3 px-4 text-center" style={{ color: '#fffffe' }}>{player.killAssistsGiven}</td>
                                 <td className={`py-3 px-4 text-center font-mono font-bold ${kdDiff >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                     {kdDiff > 0 ? `+${kdDiff}` : kdDiff}
                                 </td>
-                                <td className="py-3 px-4 text-center text-blue-100">{kd}</td>
-                                <td className="py-3 px-4 text-center text-blue-100">{player.adr || "0"}</td>
-                                <td className="py-3 px-4 text-center text-blue-100">{player.fk || 0}</td>
+                                <td className="py-3 px-4 text-center" style={{ color: '#fffffe' }}>{kd}</td>
+                                <td className="py-3 px-4 text-center" style={{ color: '#fffffe' }}>{player.adr || "0"}</td>
+                                <td className="py-3 px-4 text-center" style={{ color: '#fffffe' }}>{player.fk || 0}</td>
                             </tr>
                         );
                     })}

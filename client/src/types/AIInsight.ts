@@ -20,7 +20,14 @@ export interface ReportSections {
     aggressivePlays: string;
     tendencies: string[];
   };
-  pistolEconomy: string;
+  pistolRounds: string;
+  economyIntel: {
+    forceBuyTendency: string;
+    ecoRoundWinRate: string;
+    operatorInvestment: string;
+    bonusRoundStyle: string;
+    economyExploit: string;
+  };
   playerIntel: Array<{
     player: string;
     agent: string;
