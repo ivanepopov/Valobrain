@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { AlertCircle, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import {AlertCircle, ChevronDown, ChevronUp, List, Loader2} from 'lucide-react';
 import { GlassBox } from '../ui/GlassBox';
 import { capitalize } from '../../utils/formatters';
 import type { TransformedSeries } from '../../types/AIInsight';
@@ -39,7 +39,8 @@ const FilteredSeries = ({
             transition={{ duration: 0.5, delay: 0.1 }}
         >
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-white">
+                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                    <List className="w-6 h-6 text-purple-400" />
                     {selectedMap === 'All' ? 'Available Series' : 'Filtered Series'}
                 </h2>
 
