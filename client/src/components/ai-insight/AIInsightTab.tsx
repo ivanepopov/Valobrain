@@ -709,6 +709,31 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                 />
             }
 
+            {/* Bottom Section: Series Selection + Report History */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left: Available/Filtered Series */}
+                <FilteredSeries
+                    selectedMap={selectedMap}
+                    teamName={teamName}
+                    transformedSeriesCount={transformedSeries.length}
+                    isSeriesCollapsed={isSeriesCollapsed}
+                    setIsSeriesCollapsed={setIsSeriesCollapsed}
+                    isCheckingAvailability={isCheckingAvailability}
+                    filteredSeries={filteredSeries}
+                    selectedSeries={selectedSeries}
+                    setSelectedSeries={setSelectedSeries}
+                />
+
+                {/* Right: Report History */}
+                <ReportHistory
+                    reportHistory={reportHistory.filter(r => r.teamName === teamName)}
+                    onLoadReport={handleLoadReport}
+                    onDeleteReport={handleDeleteReport}
+                    isCollapsed={isHistoryCollapsed}
+                    setIsCollapsed={setIsHistoryCollapsed}
+                />
+            </div>
+
             {/* Generate Report Button */}
             {selectedSeries && (
                 <motion.div
@@ -890,31 +915,6 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                     />
                 )}
             </AnimatePresence>
-
-            {/* Bottom Section: Series Selection + Report History */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Left: Available/Filtered Series */}
-                <FilteredSeries
-                    selectedMap={selectedMap}
-                    teamName={teamName}
-                    transformedSeriesCount={transformedSeries.length}
-                    isSeriesCollapsed={isSeriesCollapsed}
-                    setIsSeriesCollapsed={setIsSeriesCollapsed}
-                    isCheckingAvailability={isCheckingAvailability}
-                    filteredSeries={filteredSeries}
-                    selectedSeries={selectedSeries}
-                    setSelectedSeries={setSelectedSeries}
-                />
-
-                {/* Right: Report History */}
-                <ReportHistory
-                    reportHistory={reportHistory.filter(r => r.teamName === teamName)}
-                    onLoadReport={handleLoadReport}
-                    onDeleteReport={handleDeleteReport}
-                    isCollapsed={isHistoryCollapsed}
-                    setIsCollapsed={setIsHistoryCollapsed}
-                />
-            </div>
         </div>
     );
 }
