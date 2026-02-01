@@ -29,11 +29,14 @@ const JOB_STATUS = {
  * @param {string} seriesId - Match Series ID
  * @param {string} teamName - Target Team
  * @param {string} targetMap - Specific map to analyze (null = all maps/Game 1)
- * @param {string} apiKey - User-provided Gemini API key (optional)
+ * @param {string} apiKey - User-provided API key (optional)
  * @param {string} pipelineVersion - Version tag for cache busting
+ * @param {string} agent - AI Agent to use (gemini, openai, claude)
+ * @param {string} model - Specific AI model to use
+ * @param {string} endpoint - Custom API endpoint (optional)
  * @returns {string} jobId
  */
-function addJob(seriesId, teamName, targetMap = null, apiKey = null, pipelineVersion = 'v2-two-pass') {
+function addJob(seriesId, teamName, targetMap = null, apiKey = null, pipelineVersion = 'v2-two-pass', agent = 'gemini', model = null, endpoint = null) {
   // Check for existing pending/processing job for same parameters
   for (const [id, job] of jobs.entries()) {
     if (
@@ -41,6 +44,9 @@ function addJob(seriesId, teamName, targetMap = null, apiKey = null, pipelineVer
       job.teamName === teamName &&
       job.targetMap === targetMap &&
       job.version === pipelineVersion &&
+      job.agent === agent &&
+      job.model === model &&
+      job.endpoint === endpoint &&
       (job.status === JOB_STATUS.PENDING || job.status === JOB_STATUS.PROCESSING)
     ) {
       return id;
@@ -54,7 +60,10 @@ function addJob(seriesId, teamName, targetMap = null, apiKey = null, pipelineVer
     seriesId,
     teamName,
     targetMap, // null = all maps (Game 1), or specific map name
-    apiKey, // User-provided Gemini API key (optional, falls back to env)
+    apiKey, // User-provided API key (optional, falls back to env)
+    agent, // AI Agent to use
+    model, // Specific AI model to use
+    endpoint, // Custom API endpoint
     version: pipelineVersion,
     status: JOB_STATUS.PENDING,
     progress: 0,
@@ -65,10 +74,47 @@ function addJob(seriesId, teamName, targetMap = null, apiKey = null, pipelineVer
       writer: 'pending'
     },
     result: null,
-    error: null
+    error: null,
+    controller: new AbortController()
   });
 
   return jobId;
+}
+
+/**
+ * Abort a job
+ */
+function abortJob(jobId) {
+  const job = jobs.get(jobId);
+  if (!job) return false;
+
+  if (job.status === JOB_STATUS.PENDING || job.status === JOB_STATUS.PROCESSING) {
+    if (job.controller) {
+      job.controller.abort();
+    }
+    job.status = JOB_STATUS.FAILED;
+    job.error = 'Report generation timed out or was aborted.';
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Cancel a job
+ */
+function cancelJob(jobId) {
+  const job = jobs.get(jobId);
+  if (!job) return false;
+
+  if (job.status === JOB_STATUS.PENDING || job.status === JOB_STATUS.PROCESSING) {
+    job.status = JOB_STATUS.FAILED;
+    job.error = 'Job cancelled by user';
+    if (job.controller) {
+      job.controller.abort();
+    }
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -105,6 +151,8 @@ function getNextJob() {
 
 module.exports = {
   addJob,
+  abortJob,
+  cancelJob,
   getJob,
   updateJob,
   getNextJob,
