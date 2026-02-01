@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { X } from 'lucide-react';
-import { GlassBox } from './GlassBox';
-import type { AIAgent, CustomAIModel } from '../../types/AIInsight';
+import { GlassBox } from '../ui/GlassBox.tsx';
+import type { AIAgent, CustomAIModel } from '../../types/AIInsight.ts';
 
 type CustomModelFormState = Omit<CustomAIModel, 'id'>;
 

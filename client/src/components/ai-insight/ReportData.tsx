@@ -1,6 +1,6 @@
 import {motion} from "motion/react";
 import {Brain, Crosshair, DollarSign, MessageSquare, Shield, Target, Users} from "lucide-react";
-import GlassBox from "./GlassBox.tsx";
+import GlassBox from "../ui/GlassBox.tsx";
 import type {ReportSections, TransformedSeries} from "../../types/AIInsight.ts";
 
 type Props = {

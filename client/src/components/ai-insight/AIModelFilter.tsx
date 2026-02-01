@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Eye, EyeOff, Plus, X } from 'lucide-react';
-import { capitalize } from '../../utils/formatters';
-import { GlassBox } from './GlassBox';
-import type { AIInsightReportState, AIAgent, CustomAIModel } from '../../types/AIInsight';
+import { capitalize } from '../../utils/formatters.ts';
+import { GlassBox } from '../ui/GlassBox.tsx';
+import type { AIInsightReportState, AIAgent, CustomAIModel } from '../../types/AIInsight.ts';
 
 const INITIAL_MODELS: Array<{ id: string; name: string; agent: AIAgent }> = [
   { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro', agent: 'gemini' },
