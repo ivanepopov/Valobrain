@@ -52,7 +52,7 @@ const FeaturedImagesCarousel = ({
                                 loading="lazy"
                                 onError={(e) => {
                                     e.currentTarget.onerror = null;
-                                    e.currentTarget.src = "/vite.svg";
+                                    e.currentTarget.src = "/brain.svg";
                                 }}
                             />
                         </div>

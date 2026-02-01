@@ -1,5 +1,5 @@
 import {motion, AnimatePresence} from "motion/react";
-import {BarChart3, FileText, Search, Sparkles} from "lucide-react";
+import {BarChart3, Search, Sparkles} from "lucide-react";
 import { useState, useEffect } from "react";
 import matchHistoryImg from '../../assets/features_images/match_history.png';
 import analytics1Img from '../../assets/features_images/analytics_1.png';
@@ -183,7 +183,7 @@ const FeaturedCards = () => {
                                     loading="lazy"
                                     onError={(e) => {
                                         e.currentTarget.onerror = null;
-                                        e.currentTarget.src = '/vite.svg';
+                                        e.currentTarget.src = '/brain.svg';
                                     }}
                                 />
                             </motion.div>
