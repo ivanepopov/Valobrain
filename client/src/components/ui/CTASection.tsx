@@ -24,7 +24,7 @@ const CTASection = () => {
                     </h2>
 
                     <p className="text-xl mb-8" style={{ color: '#ffffff' }}>
-                        Start finding counters to teams with AI-powered insights and comprehensive statistics.
+                        Start finding counters to teams with AI-powered insights and comprehensive statistics
                     </p>
 
                     <button
