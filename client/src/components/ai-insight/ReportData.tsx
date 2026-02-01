@@ -119,7 +119,7 @@ const ReportData = ({ reportData, selectedSeries }: Props) => {
                     </GlassBox>
                 </motion.div>
 
-                {/* 4. Pistol & Economy - 1 Column */}
+                {/* 4. Pistol Round Analysis - 1 Column */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -128,21 +128,75 @@ const ReportData = ({ reportData, selectedSeries }: Props) => {
                 >
                     <GlassBox className="h-full">
                         <div className="flex items-center gap-3 mb-4">
-                            <DollarSign className="w-6 h-6 text-green-400" />
-                            <h2 className="text-2xl font-bold text-white">Pistol & Economy</h2>
+                            <Crosshair className="w-6 h-6 text-yellow-400" />
+                            <h2 className="text-2xl font-bold text-white">Pistol Rounds</h2>
                         </div>
                         <p className="text-blue-100 whitespace-pre-wrap">
-                            {reportData.pistolRounds || 'No economy analysis available.'}
+                            {reportData.pistolRounds || 'No pistol round analysis available.'}
                         </p>
                     </GlassBox>
                 </motion.div>
 
-                {/* 5. Player Intel - 2 Columns */}
+                {/* 5. Economy Intel - 2 Columns */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.45 }}
+                    className="lg:col-span-2"
+                >
+                    <GlassBox className="h-full">
+                        <div className="flex items-center gap-3 mb-4">
+                            <DollarSign className="w-6 h-6 text-green-400" />
+                            <h2 className="text-2xl font-bold text-white">Economy Intel</h2>
+                        </div>
+                        {(reportData.economyIntel.forceBuyTendency || reportData.economyIntel.economyExploit) ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-3">
+                                    {reportData.economyIntel.forceBuyTendency && (
+                                        <div className="flex items-start gap-2">
+                                            <span className="text-blue-300 text-sm font-semibold min-w-[120px]">Force Buy:</span>
+                                            <span className="text-blue-100 text-sm">{reportData.economyIntel.forceBuyTendency}</span>
+                                        </div>
+                                    )}
+                                    {reportData.economyIntel.ecoRoundWinRate && (
+                                        <div className="flex items-start gap-2">
+                                            <span className="text-blue-300 text-sm font-semibold min-w-[120px]">Eco Win Rate:</span>
+                                            <span className="text-blue-100 text-sm">{reportData.economyIntel.ecoRoundWinRate}</span>
+                                        </div>
+                                    )}
+                                    {reportData.economyIntel.operatorInvestment && (
+                                        <div className="flex items-start gap-2">
+                                            <span className="text-blue-300 text-sm font-semibold min-w-[120px]">Op Investment:</span>
+                                            <span className="text-blue-100 text-sm">{reportData.economyIntel.operatorInvestment}</span>
+                                        </div>
+                                    )}
+                                    {reportData.economyIntel.bonusRoundStyle && (
+                                        <div className="flex items-start gap-2">
+                                            <span className="text-blue-300 text-sm font-semibold min-w-[120px]">Bonus Style:</span>
+                                            <span className="text-blue-100 text-sm">{reportData.economyIntel.bonusRoundStyle}</span>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                {reportData.economyIntel.economyExploit && (
+                                    <div className="p-4 rounded-lg bg-green-400/10 border border-green-400/20 flex flex-col justify-center">
+                                        <span className="text-green-400 text-sm font-semibold block mb-2">💡 Exploit Strategy:</span>
+                                        <p className="text-blue-100 text-sm italic">"{reportData.economyIntel.economyExploit}"</p>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <p className="text-blue-200">No economy intel available.</p>
+                        )}
+                    </GlassBox>
+                </motion.div>
+
+                {/* 6. Player Intel - Full Width */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.5 }}
-                    className="lg:col-span-2"
+                    className="lg:col-span-3"
                 >
                     <GlassBox className="h-full">
                         <div className="flex items-center gap-3 mb-4">
@@ -190,7 +244,7 @@ const ReportData = ({ reportData, selectedSeries }: Props) => {
                     </GlassBox>
                 </motion.div>
 
-                {/* 6. Counter-Strat Playbook - Full Width */}
+                {/* 7. Counter-Strat Playbook - Full Width */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -225,7 +279,7 @@ const ReportData = ({ reportData, selectedSeries }: Props) => {
                     </GlassBox>
                 </motion.div>
 
-                {/* 7. Coach's Final Note - Full Width */}
+                {/* 8. Coach's Final Note - Full Width */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

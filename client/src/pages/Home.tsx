@@ -116,7 +116,7 @@ const Home = () => {
                     </h1>
                   </div>
                   <p className="text-lg md:text-xl mb-8 max-w-3xl mx-auto" style={{ color: '#ffffff' }}>
-                    Discover how teams play, where they excel, and how to counter their strategies with AI-powered match analytics and tactical reports, just with a team name.
+                    Discover how teams play, where they excel, and how to counter their strategies with AI-powered match analytics, just with a team name.
                   </p>
         
                   {/* Search Bar */}
