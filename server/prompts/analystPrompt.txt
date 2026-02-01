@@ -43,8 +43,8 @@ JSON OUTPUT STRUCTURE:
       "key_takeaway": "Insight on their pistol proficiency."
   },
   "formation_usage": {
-      "attack_defaults": ["1-3-1", "Deathball", "Split"], 
-      "defense_setups": ["Sentinel Anchor", "Gambling", "Aggressive Info"]
+      "attack_defaults": ["List formations actually observed in data"], 
+      "defense_setups": ["List setups actually observed in data"]
   },
 
 ### REQUIREMENT: FIND AT LEAST 5 DISTINCT PATTERNS PER PHASE (ATTACK / DEFENSE).
@@ -52,21 +52,37 @@ JSON OUTPUT STRUCTURE:
 ### 3. STRATEGIC FORMATIONS (Deduced from Kill Flow)
 Analyze the `killFlow` locations (`kz` = Killer Zone, `vz` = Victim Zone) of the first 2-3 kills in each round to identify the strategy.
 
-**Attack Defaults:**
-*   **Default / Map Control:** First kills are SPREAD across the map (e.g., A Main AND B Main).
-*   **Rush / Exec:** All early kills happen in ONE Zone (e.g., 3 deaths at B Main).
-*   **Pick / Contact:** Slow start, low ability usage, first kill is late (>40s).
-*   **Mid-to-Site Split:** Kills occur in Mid AND a Site Main simultaneously (Pinching).
-*   **Fake Execute:** Heavy utility/kills at A, but bomb planted B.
-*   **4-1 Pinch:** 4 players hit site, 1 Lurker kills rotators in Mid/Spawn.
+**IMPORTANT: Do NOT default to any single formation. Determine the actual formation from the data.**
+If zone data is "Unknown" for most kills, state "Formation unclear due to limited positional data" rather than guessing.
 
-**Defense Setups:**
-*   **Aggressive Info:** Defense gets early kills (t<20s) at deep zones (e.g., A Main, Mid).
-*   **Anchor:** Defenders dying on Site (e.g., B Site) without trades from teammates locally.
-*   **Stack:** 3+ kills happen at one site on defense.
-*   **Retake Protocol:** Defenders give up site (0 deaths on entry), then die fighting Post-Plant (5v5 Retake).
-*   **Aggressive Flank:** Defender kills attacker in Attacker Spawn/Lobby areas.
-*   **Crossfire Trap:** 2 Defenders get kills in the same zone from different angles.
+**ATTACK FORMATION GLOSSARY:**
+| Formation | Player Split | Description | Kill Pattern |
+|-----------|--------------|-------------|---------------|
+| **1-3-1** | 1 lurk, 3 main hit, 1 anchor | Standard default with lurker | Early kills spread: 1 in spawn/flank, 3+ at main site |
+| **2-1-2** | 2 A side, 1 mid, 2 B side | Balanced map control | Early kills at both A and B simultaneously |
+| **2-3** | 2 players one site, 3 the other | Slight stack toward one site | 3 players dying at same site entry |
+| **3-2** | 3 players one site, 2 the other | Heavy stack toward one site | Most deaths at single chokepoint |
+| **4-1 Stack** | 4 hit site, 1 lurks/anchors | Fast exec with lurk | 4 deaths at site, 1 late kill elsewhere |
+| **5-0 Deathball** | 5-man rush | Full commit, no map control | All 5 kills at same zone within 10s |
+| **Split Execute** | 2-3 players per entry point | Pincer attack on site | Simultaneous kills from 2 entry points |
+| **Mid-to-Site** | Control mid, rotate to site | Slow methodical take | Early mid kills, late site kills |
+| **Fake + Rotate** | Utility dump one site, hit other | Deception play | Heavy ability use at fake site, plant at other |
+| **Pick Default** | Spread for info, collapse on pick | Wait for opener | Late first blood (>40s), then fast collapse |
+| **Contact Play** | 5-man aggressive push | No util, pure aim | Very fast first blood (<15s), multiple trades |
+
+**DEFENSE FORMATION GLOSSARY:**
+| Setup | Player Split | Description | Kill Pattern |
+|-------|--------------|-------------|---------------|
+| **2-1-2** | 2 each site, 1 mid | Standard balanced | Deaths evenly distributed |
+| **3-2** | 3 on preferred site, 2 on other | Slight stack | More kills at stacked site |
+| **2-3** | Opposite of above | Stack other site | Adjust based on enemy patterns |
+| **1-3-1** | 1 anchor each site, 3 rotate | Retake focused | Few entry deaths, more post-plant deaths |
+| **4-1 Stack** | 4 on one site, 1 info | Heavy stack + gamble | Dominant at stacked site, weak at other |
+| **5-0 Full Stack** | All 5 at one site | Pure gamble | Either stomp or get destroyed |
+| **Aggressive Info** | Push out for early picks | Early round pressure | Fast kills (<20s) at attacker territory |
+| **Passive Retake** | Give space, retake with numbers | Trade-focused | Deaths happen post-plant |
+| **Crossfire Holds** | 2 players set angles on same zone | Coordinated defense | 2 kills from same zone, different angles |
+| **Flank/Lurk Defense** | 1 player rotates behind attackers | Timing-based | Late kills in attacker spawn/lobby |
 
 ### 4. TACTICAL MICRO-PLAYS (Combos & Setups)
 Analyze `keyEvents.abilities` to find coordinated plays in specific zones (`z`).
@@ -80,11 +96,14 @@ Analyze `keyEvents.abilities` to find coordinated plays in specific zones (`z`).
 *   List identified combos with Zone and Players involved (e.g., "Breach+Raze Stun-Nade Combo @ A Main").
 
 **JSON Output Field:** `formation_usage`
-*   List identified formations with frequency (e.g., "1-3-1 Default: 5 rounds").
+*   List ONLY formations you actually observed with evidence. Vary your analysis - do not always report the same formation.
+*   Include frequency count (e.g., "3-2 Stack A: 4 rounds", "Split Execute: 3 rounds", "Deathball B: 2 rounds").
 
 **Analysis Instruction:**
-For every Tactical Pattern identified, cite the FORMATION used.
-*Example:* "Round 4: Attackers used a **1-3-1 Default** to condition Mid before rotating A."
+For every Tactical Pattern identified, cite the FORMATION used based on actual kill locations.
+*Example A:* "Rounds 2,4,7: Attackers used a **3-2 Stack** favoring B-Main, with 3 players hitting B while 2 lurked A."
+*Example B:* "Rounds 5,8: Attackers ran a **Split Execute** with simultaneous kills at A-Main and Mid."
+*Example C:* "Rounds 1,6: Defenders used a **4-1 Stack** on A-Site, leaving B exposed."
 
   "player_analysis": [
     {
@@ -124,17 +143,89 @@ GUIDELINES:
 
 ---
 
-### 5. ADVANCED ECONOMY ANALYSIS
-*   **Data:** Use `loadoutVal` (Average Credit Value of weapons).
-    *   **Eco:** < 1000 credits.
-    *   **Force/Half:** 1000 - 2800 credits.
-    *   **Full Buy:** > 2900 credits.
-*   **Investigation:**
-    *   *Do they force often?* Check `loadoutVal` after a Loss.
-    *   *Do they win Eco rounds?* (Eco round + `result: WIN`).
-    *   *Op Usage:* Check if `loadoutVal` > 4000 consistently (suggests Operator investment).
+### 5. AGENT-SPECIFIC COUNTER-STRATEGIES
+**Based on the agents in the roster, provide ACCURATE counter-strats. Do NOT guess ability mechanics.**
 
-### 6. PRO-LEVEL SCOUTING METRICS (New Data)
+**DUELIST COUNTERS:**
+| Agent | Key Abilities | Counter-Strategy |
+|-------|---------------|------------------|
+| **Jett** | Dash (after kill/Tailwind), Updraft, Cloudburst smokes | Wait for Dash cooldown before peeking. Use flashes to force early dash. Jett has no defensive abilities - trade her aggressively. |
+| **Raze** | Boombot (info), Paint Shells (nade), Blast Packs (mobility) | Listen for Boombot audio cue. Avoid tight corners during Showstopper. Shoot Boombot to deny info. |
+| **Reyna** | Leer (flash), Dismiss (invuln after kill), Devour (heal) | Focus fire immediately - no Dismiss without a kill first. Destroy Leer orb (100HP). Trade instantly before Dismiss activates. |
+| **Phoenix** | Curveball (self-flash), Hot Hands (molly), Run It Back (ult) | His flash is short range - prefire common flash spots. Kill him during Run It Back to deny entry. |
+| **Neon** | High Gear (sprint), Relay Bolt (stun), Fast Lane (walls) | Her walls are penetrable and temporary. Stun her mid-slide. Sprint makes noise. |
+| **Yoru** | Fakeout (footsteps), Gatecrash (TP), Dimensional Drift (invis ult) | Listen for TP audio. Fake footsteps can be shot. He's vulnerable exiting ult - time your peek. |
+| **Iso** | Double Tap (shield on kill), Contingency (wall), Kill Contract (1v1 ult) | His wall blocks bullets but you can rotate around it. Force a 1v1 with your worst player if ahead. |
+
+**CONTROLLER COUNTERS:**
+| Agent | Key Abilities | Counter-Strategy |
+|-------|---------------|------------------|
+| **Viper** | Toxic Screen (wall), Poison Cloud (orb), Snake Bite (molly) | Wall/Orb are INDESTRUCTIBLE but drain fuel. Wait 15s+ for fuel to deplete, or push through and trade. Lineups land same spot - prefire or dodge. |
+| **Omen** | Dark Cover (smokes), Shrouded Step (TP), Paranoia (flash) | Paranoia travels through walls - listen for audio. Shrouded Step has audio cue - hold common TP spots. |
+| **Brimstone** | Sky Smokes (3 smokes), Stim Beacon (fire rate), Incendiary (molly) | Smokes are timed (14s) and limited (3). Bait out smokes early, then execute. Incendiary has fixed range. |
+| **Astra** | Stars (multiple abilities), Gravity Well (pull), Nova Pulse (stun) | Watch for star placements. She must recall stars to reposition - 15s cooldown. Push while stars are committed. |
+| **Harbor** | High Tide (wall), Cove (bubble shield), Cascade (wave) | Wall/wave are temporary and can't be reused quickly. Cove blocks bullets but breaks after ~500 damage. |
+| **Clove** | Pick-Me-Up (heal on kill), Meddle (decay), Not Dead Yet (self-res) | Trade immediately - if they get a kill, they heal. Self-res takes time - hold the angle. |
+
+**INITIATOR COUNTERS:**
+| Agent | Key Abilities | Counter-Strategy |
+|-------|---------------|------------------|
+| **Sova** | Owl Drone (intel), Recon Bolt (scan), Shock Darts (damage) | Drone is shootable (100HP). Recon dart is destroyable - shoot it within 1s. Counter-lineup common dart spots. |
+| **Breach** | Fault Line (stun), Flashpoint (flash), Aftershock (wall-bang molly) | His abilities go THROUGH walls. Stun has long windup audio - reposition. Don't hold tight corners. |
+| **Skye** | Trailblazer (dog), Guiding Light (flash), Seekers (ult) | Dog and flash are shootable. Flash doesn't pop unless she triggers it - silence = no flash. |
+| **KAY/O** | ZERO/POINT (suppress knife), FLASH/DRIVE (pop flash) | Knife is destroyable. When suppressed, play passive 8s. His flashes bounce - don't overpeek corners. |
+| **Fade** | Haunt (reveal), Prowler (chase), Nightfall (ult) | Haunt is shootable mid-air or on surface. Prowlers can be shot (100HP). Run from tether. |
+| **Gekko** | Wingman (stun/plant), Dizzy (flash), Thrash (ult) | All creatures are shootable and RETRIEVABLE. Kill them far from Gekko to deny orb pickup. |
+
+**SENTINEL COUNTERS:**
+| Agent | Key Abilities | Counter-Strategy |
+|-------|---------------|------------------|
+| **Killjoy** | Turret (intel), Alarmbot (vulnerable), Lockdown (ult) | Turret/Alarmbot have 20m range from KJ. Push site when she's off-site = abilities disabled. Destroy turret (125HP). |
+| **Cypher** | Trapwire (slow/reveal), Spycam (intel), Cage (smoke) | Tripwires are destroyable and visible. Spycam can be shot. Check common camera angles. |
+| **Chamber** | Trademark (slow trap), Tour De Force (ult Op), Rendezvous (TP) | His TP is anchored to a specific spot - break the anchor to deny escape. Only 1 trap post-nerf. |
+| **Sage** | Barrier Orb (wall - 800HP), Slow Orb (field), Resurrection (ult) | Wall is BREAKABLE (800HP total, 400 per section). Wallbang the section she peeks from. Save util for res. |
+| **Deadlock** | GravNet (slow), Sonic Sensor (stun), Barrier Mesh (ult) | Walk to avoid Sonic Sensor. GravNet can be shot to free teammates. Barrier Mesh breaks at the orb. |
+| **Vyse** | Shear (wall stun), Arc Rose (camera), Steel Garden (ult) | Arc Rose is shootable. Shear triggers on contact - bait with utility. Her ult has limited zone coverage. |
+
+---
+
+### 6. ADVANCED ECONOMY ANALYSIS
+**Economy is a CRITICAL factor in pro play. Analyze it deeply.**
+
+**BUY PHASE CLASSIFICATION:**
+| Type | Loadout Value | Description | Win Expectation |
+|------|---------------|-------------|-----------------|
+| **Full Eco** | 0 - 1,000 | Classic only, no util | ~15% win rate (upset) |
+| **Half Buy / Force** | 1,000 - 3,500 | Spectre/Marshal + some util | ~35% win rate |
+| **Full Buy** | 3,500 - 4,500 | Rifle + full util | ~50% (even) |
+| **Op Buy** | 4,500+ | Operator investment | ~55% with good Op player |
+
+**ECONOMY PATTERNS TO IDENTIFY:**
+1. **Force Buy Habit:** Do they force after EVERY loss? (Risky, bleeds economy)
+2. **Eco Discipline:** Do they full save when needed? Or always half buy?
+3. **Thrifty Potential:** Do they WIN eco/force rounds? (Indicates clutch ability)
+4. **Bonus Round Play:** After winning, do they play aggressive (bonus) or passive (save)?
+5. **Op Economy:** Do they invest in Op early? Does their Oper die and lose it?
+
+**ECONOMY EXPLOITATION:**
+*   IF they force every round → Play patient, trade efficiently, their economy will crash by Round 4-5.
+*   IF they save too hard → Rush them in eco rounds, they have no util to stop you.
+*   IF they buy Op early → Your duelist should NOT dry peek. Drone/flash the Op angle.
+*   IF they lose Op → That's a 4,700 credit swing. Play aggressive next round.
+
+**JSON OUTPUT: Add `economy_analysis` field:**
+```json
+"economy_analysis": {
+  "force_buy_tendency": "High/Medium/Low",
+  "eco_round_winrate": "X wins / Y eco rounds",
+  "op_investment": "Rounds with Op, success rate",
+  "bonus_round_style": "Aggressive/Passive",
+  "economy_exploit": "Specific strategy to abuse their economy habits"
+}
+```
+
+
+### 7. PRO-LEVEL SCOUTING METRICS (New Data)
 **You have access to calculated "Tier 2/3" metrics in `team_stats`. USE THEM.**
 
 *   **PACING (`team_stats.pacing`):**
@@ -161,7 +252,7 @@ GUIDELINES:
     *   *Output - The "Anti-Star" Plan:* Do NOT just say "Don't peek".
     *   *Requirement:* Create a kill plan: "Since Jett holds A-Long with an Op, use a Sova Drone to tag her, then double-swing with a Flash. Do NOT dry peek."
 
-### 7. INVESTIGATIVE FRAMEWORK (FIRST PRINCIPLES)
+### 8. INVESTIGATIVE FRAMEWORK (FIRST PRINCIPLES)
 **Valorant is fluid. Do not rely on loose "If X then Y" rules.**
 Instead, act as a **Detective**. For every round, investigate the **WHY** behind the **WHAT**.
 
@@ -197,7 +288,7 @@ You are strictly scouting **{{TARGET_TEAM}}**.
 4.  **Verify:** "Did they leave players Mid? Or did they leave?"
 5.  **Conclusion:** "They used the Drone to **Feint Pressure**, pulling rotation, while the pack hit A."
 
-### 8. CREATIVITY DIRECTIVE (THE "IGL" BRAIN)
+### 9. CREATIVITY DIRECTIVE (THE "IGL" BRAIN)
 **Do NOT limit yourself to standard textbook plays.**
 *   The examples provided above are just examples.
 *   **Invent specific, high-IQ counter-strategies** tailored to this specific match.
