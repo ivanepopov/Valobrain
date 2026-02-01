@@ -984,12 +984,12 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                 </GlassBox>
               </motion.div>
 
-              {/* 5. Economy Intel - 1 Column */}
+              {/* 5. Economy Intel - 2 Columns */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.45 }}
-                className="lg:col-span-1"
+                className="lg:col-span-2"
               >
                 <GlassBox className="h-full">
                   <div className="flex items-center gap-3 mb-4">
@@ -997,35 +997,38 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                     <h2 className="text-2xl font-bold text-white">Economy Intel</h2>
                   </div>
                   {(reportData.economyIntel.forceBuyTendency || reportData.economyIntel.economyExploit) ? (
-                    <div className="space-y-3">
-                      {reportData.economyIntel.forceBuyTendency && (
-                        <div className="flex items-start gap-2">
-                          <span className="text-blue-300 text-sm font-semibold min-w-[120px]">Force Buy:</span>
-                          <span className="text-blue-100 text-sm">{reportData.economyIntel.forceBuyTendency}</span>
-                        </div>
-                      )}
-                      {reportData.economyIntel.ecoRoundWinRate && (
-                        <div className="flex items-start gap-2">
-                          <span className="text-blue-300 text-sm font-semibold min-w-[120px]">Eco Win Rate:</span>
-                          <span className="text-blue-100 text-sm">{reportData.economyIntel.ecoRoundWinRate}</span>
-                        </div>
-                      )}
-                      {reportData.economyIntel.operatorInvestment && (
-                        <div className="flex items-start gap-2">
-                          <span className="text-blue-300 text-sm font-semibold min-w-[120px]">Op Investment:</span>
-                          <span className="text-blue-100 text-sm">{reportData.economyIntel.operatorInvestment}</span>
-                        </div>
-                      )}
-                      {reportData.economyIntel.bonusRoundStyle && (
-                        <div className="flex items-start gap-2">
-                          <span className="text-blue-300 text-sm font-semibold min-w-[120px]">Bonus Style:</span>
-                          <span className="text-blue-100 text-sm">{reportData.economyIntel.bonusRoundStyle}</span>
-                        </div>
-                      )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        {reportData.economyIntel.forceBuyTendency && (
+                          <div className="flex items-start gap-2">
+                            <span className="text-blue-300 text-sm font-semibold min-w-[120px]">Force Buy:</span>
+                            <span className="text-blue-100 text-sm">{reportData.economyIntel.forceBuyTendency}</span>
+                          </div>
+                        )}
+                        {reportData.economyIntel.ecoRoundWinRate && (
+                          <div className="flex items-start gap-2">
+                            <span className="text-blue-300 text-sm font-semibold min-w-[120px]">Eco Win Rate:</span>
+                            <span className="text-blue-100 text-sm">{reportData.economyIntel.ecoRoundWinRate}</span>
+                          </div>
+                        )}
+                        {reportData.economyIntel.operatorInvestment && (
+                          <div className="flex items-start gap-2">
+                            <span className="text-blue-300 text-sm font-semibold min-w-[120px]">Op Investment:</span>
+                            <span className="text-blue-100 text-sm">{reportData.economyIntel.operatorInvestment}</span>
+                          </div>
+                        )}
+                        {reportData.economyIntel.bonusRoundStyle && (
+                          <div className="flex items-start gap-2">
+                            <span className="text-blue-300 text-sm font-semibold min-w-[120px]">Bonus Style:</span>
+                            <span className="text-blue-100 text-sm">{reportData.economyIntel.bonusRoundStyle}</span>
+                          </div>
+                        )}
+                      </div>
+                      
                       {reportData.economyIntel.economyExploit && (
-                        <div className="mt-4 p-3 rounded-lg bg-green-400/10 border border-green-400/20">
-                          <span className="text-green-400 text-sm font-semibold block mb-1">💡 Exploit Strategy:</span>
-                          <p className="text-blue-100 text-sm">{reportData.economyIntel.economyExploit}</p>
+                        <div className="p-4 rounded-lg bg-green-400/10 border border-green-400/20 flex flex-col justify-center">
+                          <span className="text-green-400 text-sm font-semibold block mb-2">💡 Exploit Strategy:</span>
+                          <p className="text-blue-100 text-sm italic">"{reportData.economyIntel.economyExploit}"</p>
                         </div>
                       )}
                     </div>
@@ -1035,12 +1038,12 @@ export function AIInsightTab({ teamName, seriesData, seriesIds, reportState, set
                 </GlassBox>
               </motion.div>
 
-              {/* 6. Player Intel - 2 Columns */}
+              {/* 6. Player Intel - Full Width */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.5 }}
-                className="lg:col-span-2"
+                className="lg:col-span-3"
               >
                 <GlassBox className="h-full">
                   <div className="flex items-center gap-3 mb-4">
